@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Section } from "@/components/ui/Section";
+import { SectionHead } from "@/components/ui/SectionHead";
 import { Button } from "@/components/ui/Button";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { staggerContainer, fadeUp, viewportOnce } from "@/lib/motion";
@@ -30,10 +31,7 @@ export function ProductGridSection({
   return (
     <Section scheme={scheme}>
       <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
-        <div className="max-w-lg">
-          <h2>{title}</h2>
-          <p className="mt-3 text-body/70">{subtitle}</p>
-        </div>
+        <SectionHead title={title} subtitle={subtitle} />
         {ctaLabel && ctaHref ? (
           <Button href={ctaHref} variant="outline">
             {ctaLabel}

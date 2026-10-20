@@ -14,7 +14,7 @@
   --font-heading: "Tenor Sans", ui-sans-serif, system-ui, sans-serif;
   --font-body: "Work Sans", ui-sans-serif, system-ui, sans-serif;
 
-  /* Colors */
+  /* Colors — canonical values live in src/config/tokens.ts (single source of truth). Keep this block in sync with tokens.ts. */
   --color-paper: #ffffff;
   --color-paper-soft: #f8f8f8;
   --color-ink: #000000;
@@ -25,6 +25,13 @@
 
   --color-accent: #ffc400; /* gold link/accent */
   --color-accent-deep: #5c0000; /* maroon hover accent */
+
+  /* Warm-neutral & wood-inspired tones (editorial, subtle) */
+  --color-warm: #f5f1ea;
+  --color-warm-soft: #eae4d8;
+  --color-wood-light: #d8c3a5;
+  --color-wood: #a67c52;
+  --color-wood-deep: #5c4632;
 
   --color-btn-bg: #000000;
   --color-btn-text: #ffffff;
@@ -47,7 +54,7 @@
   --radius-input: 0px;
   --radius-pill: 100px;
 
-  /* Breakpoints (mirrors the reference theme's real breakpoints) */
+  /* Breakpoints (mirrors src/config/tokens.ts) */
   --breakpoint-xs: 23.4375rem; /* 375px small phones */
   --breakpoint-sm: 30rem; /* 480px */
   --breakpoint-ms: 35.9375rem; /* 575px */

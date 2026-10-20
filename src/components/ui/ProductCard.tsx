@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/Badge";
 import { PriceTag } from "@/components/ui/PriceTag";
 import { StarRating } from "@/components/ui/StarRating";
 import { getProductBadge } from "@/lib/productBadge";
+import { getCategory } from "@/data/categories";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useQuickView } from "@/hooks/useQuickView";
 import { cn } from "@/lib/cn";
@@ -70,7 +71,7 @@ export function ProductCard({ product }: { product: Product }) {
         </div>
 
         <div className="mt-4 space-y-1">
-          <p className="text-xs uppercase tracking-wide text-body/60">{product.subcategory ?? product.category}</p>
+          <p className="text-xs uppercase tracking-wide text-body/60">{getCategory(product.category)?.title ?? product.category}</p>
           <h3 className="text-base font-body font-medium tracking-normal text-ink">{product.title}</h3>
           {product.rating ? (
             <div className="flex items-center gap-1.5">
