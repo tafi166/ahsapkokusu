@@ -150,3 +150,27 @@ npm run build     # tsc -b && vite build
 npm run test       # vitest run — routing/render/interaction smoke tests
 npm run lint       # oxlint
 ```
+
+## API server (`server/`) — in progress
+
+A NestJS + Prisma + PostgreSQL REST API lives in `server/` with its own
+`package.json`. The storefront does **not** use it yet; it still reads the
+catalog from `src/data`. So far the server serves the catalog read-only
+(`GET /api/health`, `/api/categories[/:slug]`, `/api/products[/:slug]`,
+filters `category`, `featured`, `bestSeller`, `newProduct`).
+
+```bash
+cd server
+cp .env.example .env   # then set a local password in all three places
+npm install
+npm run db:local       # PostgreSQL on :5433 via embedded-postgres (no Docker); keep running
+npm run db:migrate     # apply migrations to the dev database
+npm run db:test:migrate
+npm run db:seed        # insert the demo catalog (isSample = true); never overwrites existing rows
+npm run dev            # http://localhost:3000/api
+npm run typecheck && npm test
+```
+
+The seed reads the same `src/data` files the storefront uses, and the
+integration tests check that every product and category comes back from the
+API unchanged.

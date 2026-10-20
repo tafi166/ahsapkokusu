@@ -11,6 +11,8 @@ export default defineConfig({
     },
   },
   test: {
+    // Storefront tests only — server/ has its own vitest config.
+    include: ["src/**/*.test.{ts,tsx}"],
     environment: "jsdom",
     globals: true,
     setupFiles: "./src/tests/setup.ts",

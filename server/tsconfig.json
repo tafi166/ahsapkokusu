@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["ES2023"],
+    "module": "commonjs",
+    "moduleResolution": "node10",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noUnusedLocals": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "noEmit": true,
+    "types": ["node"],
+    "baseUrl": ".",
+    // Storefront types and catalog data are shared with the server (type-only imports
+    // in src/; the seed reads the catalog data at runtime).
+    "paths": { "@/*": ["../src/*"] }
+  },
+  "include": ["src", "test", "prisma", "vitest.config.mts", "prisma.config.ts"]
+}

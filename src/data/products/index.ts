@@ -1,9 +1,5 @@
 import type { Product } from "@/types";
-import { wallArtProducts } from "@/data/products/wallArt";
-import { multilayerProducts } from "@/data/products/multilayer";
-import { furnitureProducts } from "@/data/products/furniture";
-import { clockProducts } from "@/data/products/clocks";
-import { decorProducts } from "@/data/products/decor";
+import { defaultProducts } from "@/data/products/defaults";
 import { applyOverride, loadOverrides } from "@/lib/adminStore";
 
 /**
@@ -20,13 +16,6 @@ import { applyOverride, loadOverrides } from "@/lib/adminStore";
  * Also overridable wholesale (add/edit/delete products) from the admin
  * panel (`/admin` → Ürünler) — see `lib/adminStore.ts`.
  */
-const defaultProducts: Product[] = [
-  ...wallArtProducts,
-  ...multilayerProducts,
-  ...furnitureProducts,
-  ...clockProducts,
-  ...decorProducts,
-];
 
 export const allProducts: Product[] = applyOverride(defaultProducts, loadOverrides().products);
 
