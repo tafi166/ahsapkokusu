@@ -81,3 +81,59 @@ model Product {
 
   @@index([categorySlug, sortOrder])
 }
+
+// ---------------------------------------------------------------------------
+// Admin users and sessions
+// ---------------------------------------------------------------------------
+
+enum Role {
+  /// Everything an editor can do, plus managing users.
+  ADMIN
+  /// Edits catalog and content, reads quote requests.
+  EDITOR
+}
+
+model User {
+  id                String    @id @default(uuid()) @db.Uuid
+  /// Stored lower-cased; unique case-insensitively.
+  email             String    @unique
+  name              String
+  passwordHash      String
+  role              Role
+  isActive          Boolean   @default(true)
+  passwordChangedAt DateTime  @default(now()) @db.Timestamptz(3)
+  sessions          Session[]
+  createdAt         DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime  @updatedAt @db.Timestamptz(3)
+}
+
+model Session {
+  id         String   @id @default(uuid()) @db.Uuid
+  /// SHA-256 of the cookie token — the token itself is never stored.
+  tokenHash  String   @unique
+  /// Sent back by the client in X-CSRF-Token on state-changing requests. Useless without the cookie.
+  csrfToken  String
+  userId     String   @db.Uuid
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  /// Idle timeout counts from here.
+  lastSeenAt DateTime @default(now()) @db.Timestamptz(3)
+  /// Absolute timeout.
+  expiresAt  DateTime @db.Timestamptz(3)
+
+  @@index([userId])
+}
+
+model AuditLog {
+  id          String   @id @default(uuid()) @db.Uuid
+  at          DateTime @default(now()) @db.Timestamptz(3)
+  /// Null for anonymous events (e.g. a failed login).
+  actorUserId String?  @db.Uuid
+  action      String
+  entityType  String
+  entityId    String?
+  details     Json     @default("{}")
+
+  @@index([at])
+  @@index([entityType, entityId])
+}

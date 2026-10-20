@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import type { INestApplication } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
+import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { createAppModule } from './app.module';
 import type { AppConfig } from './config';
@@ -16,6 +17,7 @@ export async function createApp(config: AppConfig, opts: { logger?: false } = {}
   app.set('trust proxy', 'loopback');
   app.useBodyParser('json', { limit: '100kb' });
   app.use(helmet());
+  app.use(cookieParser());
   app.setGlobalPrefix('api');
   app.enableShutdownHooks();
   return app;

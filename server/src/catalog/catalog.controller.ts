@@ -1,3 +1,4 @@
+import { Public } from '../common/decorators';
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { z } from 'zod';
 import { parseOrThrow } from '../common/zod';
@@ -16,6 +17,7 @@ const productQuery = z
 
 const slugParam = z.string().min(1).max(200);
 
+@Public()
 @Controller()
 export class CatalogController {
   constructor(private readonly catalog: CatalogService) {}

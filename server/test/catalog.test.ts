@@ -25,6 +25,10 @@ afterAll(async () => {
 const api = () => request(app.getHttpServer());
 
 describe('catalog API', () => {
+  it('is public — no session needed', async () => {
+    await api().get('/api/products').expect(200);
+  });
+
   it('reports health', async () => {
     await api().get('/api/health').expect(200, { status: 'ok' });
   });
