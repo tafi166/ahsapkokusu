@@ -137,3 +137,27 @@ model AuditLog {
   @@index([at])
   @@index([entityType, entityId])
 }
+
+// ---------------------------------------------------------------------------
+// Editable site content and uploaded media
+// ---------------------------------------------------------------------------
+
+/// One row per editable block (brand, homeContent, testimonials, ...). A missing
+/// row means the storefront's built-in default applies.
+model SiteContent {
+  key         String   @id
+  value       Json
+  updatedById String?  @db.Uuid
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+}
+
+/// Uploaded images. Files live under UPLOAD_DIR/media named by id; served by /api/media/:file.
+model Media {
+  id          String   @id @default(uuid()) @db.Uuid
+  contentType String
+  extension   String
+  sizeBytes   Int
+  sha256      String
+  uploadedById String? @db.Uuid
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+}

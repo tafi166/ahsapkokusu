@@ -15,7 +15,8 @@
     "start": "node dist/main.js",
     "typecheck": "prisma generate && tsc --noEmit",
     "test": "prisma generate && vitest run",
-    "admin:create": "tsx scripts/create-admin.ts"
+    "admin:create": "tsx scripts/create-admin.ts",
+    "content:shapes": "tsx scripts/sync-content-shapes.ts"
   },
   "dependencies": {
     "@nestjs/common": "11.2.7",

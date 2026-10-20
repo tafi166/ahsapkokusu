@@ -1,3 +1,4 @@
+import { isAbsolute } from 'node:path';
 import { z } from 'zod';
 
 const bool = z.enum(['true', 'false']).transform((v) => v === 'true');
@@ -22,6 +23,9 @@ const schema = z.object({
   SESSION_ABSOLUTE_HOURS: z.coerce.number().int().min(1).max(24 * 30).default(12),
   /** Login and password-change attempts per client IP per minute. */
   AUTH_RATE_LIMIT_PER_MIN: z.coerce.number().int().min(1).default(10),
+  /** Uploaded files (images, CNC drawings). Outside any web root; absolute in production. */
+  UPLOAD_DIR: z.string().min(1).default('storage'),
+  MEDIA_MAX_BYTES: z.coerce.number().int().min(1024).max(50 * 1024 * 1024).default(5 * 1024 * 1024),
 });
 
 export type AppConfig = z.infer<typeof schema>;
@@ -34,6 +38,10 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   }
   if (parsed.data.NODE_ENV === 'production' && !parsed.data.COOKIE_SECURE) {
     throw new Error('COOKIE_SECURE must be true in production');
+  }
+  if (parsed.data.NODE_ENV === 'production' && !isAbsolute(parsed.data.UPLOAD_DIR)) {
+    // A relative path moves with the working directory and can end up inside a release folder.
+    throw new Error('UPLOAD_DIR must be an absolute path in production');
   }
   return parsed.data;
 }

@@ -9,7 +9,11 @@ import { CatalogController } from './catalog/catalog.controller';
 import { CatalogService } from './catalog/catalog.service';
 import { AUTH_RATE_LIMITED } from './common/decorators';
 import { APP_CONFIG, type AppConfig } from './config';
+import { ContentAdminController, SiteController } from './content/content.controller';
+import { ContentService } from './content/content.service';
 import { HealthController } from './health/health.controller';
+import { MediaController } from './media/media.controller';
+import { MediaService } from './media/media.service';
 import { PrismaLifecycle, prismaProvider } from './prisma/prisma';
 import { UsersController } from './users/users.controller';
 import { UsersService } from './users/users.service';
@@ -27,7 +31,15 @@ export function createAppModule(config: AppConfig) {
         },
       ]),
     ],
-    controllers: [HealthController, CatalogController, AuthController, UsersController],
+    controllers: [
+      HealthController,
+      CatalogController,
+      SiteController,
+      AuthController,
+      UsersController,
+      ContentAdminController,
+      MediaController,
+    ],
     providers: [
       { provide: APP_CONFIG, useValue: config },
       prismaProvider,
@@ -35,6 +47,8 @@ export function createAppModule(config: AppConfig) {
       AuditService,
       AuthService,
       CatalogService,
+      ContentService,
+      MediaService,
       UsersService,
       // Rate limiting runs first so rejected credentials still count toward the limit.
       { provide: APP_GUARD, useClass: ThrottlerGuard },

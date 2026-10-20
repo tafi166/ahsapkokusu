@@ -180,6 +180,16 @@ idle and 12-hour absolute limit. State-changing requests need an allowed
 `Origin` and the session's `X-CSRF-Token`. Passwords are argon2id hashes.
 Roles: `ADMIN` (also manages users via `/api/users`) and `EDITOR`.
 
+Editable content: `GET /api/site` returns the catalog plus every edited block
+in one request. Editors write through `/api/admin/content/:key`,
+`/api/admin/products` (full list), `/api/admin/categories` and
+`/api/admin/media` (raw JPEG/PNG/WebP, checked by its first bytes, stored under
+`UPLOAD_DIR` with a random name, served from `/api/media/:file`). Links must be
+site paths or https URLs and images must be uploaded files or colour swatches,
+so stored content can't carry script. After changing a field in
+`src/config/brandDefaults.ts` or `contentDefaults.ts`, run
+`npm run content:shapes` (a test fails until you do).
+
 The seed reads the same `src/data` files the storefront uses, and the
 integration tests check that every product and category comes back from the
 API unchanged.

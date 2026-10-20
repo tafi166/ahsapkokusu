@@ -1,0 +1,99 @@
+{
+  "brand": {
+    "name": "",
+    "shortName": "",
+    "tagline": "",
+    "description": "",
+    "contact": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    },
+    "social": {
+      "instagram": "",
+      "pinterest": "",
+      "facebook": "",
+      "tiktok": ""
+    },
+    "legalName": "",
+    "copyrightYear": 0
+  },
+  "homeContent": {
+    "hero": {
+      "eyebrow": "",
+      "title": "",
+      "subtitle": "",
+      "primaryCtaLabel": "",
+      "primaryCtaHref": "",
+      "secondaryCtaLabel": "",
+      "secondaryCtaHref": "",
+      "trustBadge": "",
+      "images": []
+    },
+    "categoryShowcase": {
+      "title": "",
+      "subtitle": ""
+    },
+    "featuredProducts": {
+      "title": "",
+      "subtitle": "",
+      "ctaLabel": "",
+      "ctaHref": ""
+    },
+    "bestSellers": {
+      "title": "",
+      "subtitle": ""
+    },
+    "newArrivals": {
+      "title": "",
+      "subtitle": ""
+    },
+    "partnerLogos": {
+      "title": ""
+    },
+    "trustSignals": {
+      "title": ""
+    },
+    "testimonials": {
+      "title": "",
+      "subtitle": ""
+    },
+    "parametricStory": {
+      "eyebrow": "",
+      "title": "",
+      "body": "",
+      "ctaLabel": "",
+      "ctaHref": ""
+    },
+    "blog": {
+      "title": "",
+      "subtitle": "",
+      "ctaLabel": "",
+      "ctaHref": ""
+    },
+    "materialCraft": {
+      "eyebrow": "",
+      "title": "",
+      "body": ""
+    },
+    "customDesign": {
+      "eyebrow": "",
+      "title": "",
+      "body": "",
+      "ctaLabel": "",
+      "ctaHref": ""
+    },
+    "finalCta": {
+      "title": "",
+      "ctaLabel": "",
+      "ctaHref": ""
+    },
+    "newsletter": {
+      "title": "",
+      "subtitle": "",
+      "placeholder": "",
+      "ctaLabel": "",
+      "successMessage": ""
+    }
+  }
+}
