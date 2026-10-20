@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+/**
+ * Design tokens
+ * -----------------------------------------------------------------------
+ * Values below were reverse-engineered from the reference site's live
+ * Shopify theme stylesheets (colors, radii, container widths, fonts,
+ * breakpoints, scroll-reveal easing). See ../config/theme.ts for the
+ * JS-side mirror of these tokens (used by Framer Motion variants etc.)
+ * and ../config/brand.ts for the swappable brand layer.
+ */
+@theme {
+  /* Fonts */
+  --font-heading: "Tenor Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Work Sans", ui-sans-serif, system-ui, sans-serif;
+
+  /* Colors */
+  --color-paper: #ffffff;
+  --color-paper-soft: #f8f8f8;
+  --color-ink: #000000;
+  --color-body: #282828;
+  --color-line: #f1f1f1;
+  --color-divider: #cccccc;
+  --color-mist: #f1f1f1;
+
+  --color-accent: #ffc400; /* gold link/accent */
+  --color-accent-deep: #5c0000; /* maroon hover accent */
+
+  --color-btn-bg: #000000;
+  --color-btn-text: #ffffff;
+  --color-btn-bg-hover: #dfdfdf;
+  --color-btn-text-hover: #000000;
+
+  --color-footer-bg: #000000;
+  --color-footer-ink: #ffffff;
+  --color-footer-link: #cfd0d4;
+  --color-footer-link-hover: #cccccc;
+  --color-footer-border: #0e0f15;
+
+  --color-success: #126e00;
+  --color-danger: #ec7979;
+  --color-badge-custom: #6ea1f5;
+
+  /* Radii */
+  --radius-box: 0px;
+  --radius-card: 10px;
+  --radius-input: 0px;
+  --radius-pill: 100px;
+
+  /* Breakpoints (mirrors the reference theme's real breakpoints) */
+  --breakpoint-xs: 23.4375rem; /* 375px small phones */
+  --breakpoint-sm: 30rem; /* 480px */
+  --breakpoint-ms: 35.9375rem; /* 575px */
+  --breakpoint-md: 48rem; /* 768px */
+  --breakpoint-lg: 62rem; /* 992px */
+  --breakpoint-xl: 74.9375rem; /* 1199px */
+  --breakpoint-2xl: 85.375rem; /* 1366px */
+  --breakpoint-3xl: 90rem; /* 1440px */
+  --breakpoint-4xl: 106.25rem; /* 1700px */
+
+  /* Reveal-on-scroll easing extracted from the theme's animation stylesheet */
+  --ease-reveal: cubic-bezier(0.455, 0.03, 0.515, 0.955);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-line);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-body);
+    font-family: var(--font-body);
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: 0px;
+    color: var(--color-ink);
+  }
+
+  h1 { font-size: clamp(2.5rem, 1.9rem + 2.4vw, 5.5rem); }
+  h2 { font-size: clamp(1.75rem, 1.4rem + 1.4vw, 3.125rem); }
+  h3 { font-size: clamp(1.375rem, 1.2rem + 0.7vw, 1.875rem); }
+  h4 { font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.5rem); }
+  h5 { font-size: 1.125rem; }
+  h6 { font-size: 1rem; }
+
+  a {
+    color: inherit;
+  }
+
+  img, video {
+    display: block;
+    max-width: 100%;
+  }
+
+  /* Respect reduced-motion preference across the whole app */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  .container-lg { max-width: 1760px; }
+  .container-md { max-width: 1400px; }
+  .container-sm { max-width: 1280px; }
+
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { scrollbar-width: none; }
+}

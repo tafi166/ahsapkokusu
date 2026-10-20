@@ -1,0 +1,25 @@
+import { Section } from "@/components/ui/Section";
+import { PlaceholderMedia } from "@/lib/placeholder";
+import { blogPosts } from "@/data/blog";
+
+export function BlogIndexPage() {
+  return (
+    <Section>
+      <h1 className="mb-10">Blog</h1>
+      <ul className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3">
+        {blogPosts.map((post) => (
+          <li key={post.id}>
+            <PlaceholderMedia swatch={post.swatch} ratio="landscape" className="rounded-card" />
+            <p className="mt-4 text-xs uppercase tracking-wide text-body/50">
+              {new Date(post.date).toLocaleDateString("tr-TR", { month: "long", day: "numeric", year: "numeric" })}
+              {" · "}
+              {post.readMinutes} dk okuma
+            </p>
+            <h2 className="mt-1 text-lg">{post.title}</h2>
+            <p className="mt-2 text-sm text-body/70">{post.excerpt}</p>
+          </li>
+        ))}
+      </ul>
+    </Section>
+  );
+}

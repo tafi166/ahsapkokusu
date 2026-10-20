@@ -1,0 +1,83 @@
+import { Link } from "react-router-dom";
+import { brand } from "@/config/brand";
+import { footerColumns } from "@/config/navigation";
+import { Container } from "@/components/ui/Container";
+
+const paymentMethods = [
+  "Visa",
+  "Mastercard",
+  "Amex",
+  "Apple Pay",
+  "Google Pay",
+  "Shop Pay",
+  "Klarna",
+];
+
+// lucide-react no longer ships trademarked brand marks — plain text
+// abbreviations avoid reproducing a logo we don't have rights to.
+const socialLinks = [
+  { label: "Instagram", short: "IG", href: brand.social.instagram },
+  { label: "Facebook", short: "FB", href: brand.social.facebook },
+];
+
+export function Footer() {
+  return (
+    <footer className="bg-footer-bg text-footer-ink">
+      <Container size="lg" className="py-14 md:py-20">
+        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.2fr_1fr_1fr_1fr]">
+          <div>
+            <Link to="/" className="font-heading text-2xl">
+              {brand.name}
+            </Link>
+            <p className="mt-4 max-w-xs text-sm text-footer-link">{brand.description}</p>
+            <div className="mt-5 flex gap-3">
+              {socialLinks.map((social) => (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  aria-label={social.label}
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-footer-border text-[11px] tracking-wide transition-colors hover:border-footer-ink"
+                >
+                  {social.short}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {footerColumns.map((column) => (
+            <nav key={column.title} aria-label={column.title}>
+              <h3 className="mb-4 text-sm font-medium uppercase tracking-wide text-footer-ink">
+                {column.title}
+              </h3>
+              <ul className="space-y-2.5">
+                {column.links.map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      to={link.href}
+                      className="text-sm text-footer-link transition-colors hover:text-footer-link-hover"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          ))}
+        </div>
+
+        <div className="mt-12 flex flex-col items-center gap-4 border-t border-footer-border pt-8 text-xs text-footer-link md:flex-row md:justify-between">
+          <p>
+            © {brand.copyrightYear} {brand.legalName}. Tüm hakları saklıdır.
+          </p>
+          <ul className="flex flex-wrap items-center justify-center gap-3" aria-label="Kabul edilen ödeme yöntemleri">
+            {paymentMethods.map((method) => (
+              <li key={method} className="rounded-input border border-footer-border px-2 py-1">
+                {method}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </Container>
+    </footer>
+  );
+}
