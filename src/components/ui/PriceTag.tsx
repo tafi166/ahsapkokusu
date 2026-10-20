@@ -1,11 +1,6 @@
 import type { Product } from "@/types";
 import { cn } from "@/lib/cn";
-
-const currencySymbol: Record<Product["currency"], string> = { TRY: "₺", USD: "$" };
-
-function formatPrice(value: number, currency: Product["currency"]): string {
-  return `${currencySymbol[currency]}${value.toLocaleString("tr-TR")}`;
-}
+import { formatPrice } from "@/lib/price";
 
 /** Renders price, a made-to-order/sold-out state, and any compare-at strike-through. */
 export function PriceTag({ product, className }: { product: Product; className?: string }) {

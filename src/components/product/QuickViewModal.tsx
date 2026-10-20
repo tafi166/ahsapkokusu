@@ -55,19 +55,31 @@ export function QuickViewModal() {
               <p className="mt-4 text-sm text-body/70">{product.shortDescription ?? product.description}</p>
 
               <div className="mt-6 flex flex-col gap-3">
-                <Button
-                  size="lg"
-                  disabled={product.availability === "sold-out"}
-                  onClick={() => {
-                    addItem(product, 1);
-                    close();
-                  }}
-                >
-                  {product.availability === "sold-out" ? "Tükendi" : "Sepete Ekle"}
-                </Button>
-                <Link to={`/urun/${product.slug}`} onClick={close} className="text-center text-sm underline">
-                  Tüm seçenekler için ürün sayfasına git
-                </Link>
+                {product.variants && product.availability !== "sold-out" ? (
+                  // Configurable products are configured on the product page — the cart rejects a line without its options.
+                  <Link
+                    to={`/urun/${product.slug}`}
+                    onClick={close}
+                    className="inline-flex items-center justify-center rounded-pill border border-btn-bg bg-btn-bg px-8 py-4 font-medium text-btn-text transition-colors hover:bg-btn-bg-hover hover:text-btn-text-hover"
+                  >
+                    Seçenekleri Belirle
+                  </Link>
+                ) : (
+                  <>
+                    <Button
+                      size="lg"
+                      disabled={product.availability === "sold-out"}
+                      onClick={() => {
+                        if (addItem(product, 1).ok) close();
+                      }}
+                    >
+                      {product.availability === "sold-out" ? "Tükendi" : "Sepete Ekle"}
+                    </Button>
+                    <Link to={`/urun/${product.slug}`} onClick={close} className="text-center text-sm underline">
+                      Ürün sayfasına git
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>

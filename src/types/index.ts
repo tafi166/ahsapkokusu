@@ -119,6 +119,38 @@ export interface ProductVariantOptions {
   layerCounts?: number[];
   frames?: string[];
   heightRange?: [number, number];
+  /**
+   * Explicit, business-defined surcharges for specific options. No seed
+   * product defines any — without a rule the price is the base price.
+   */
+  priceAdjustments?: VariantPriceAdjustment[];
+}
+
+/** The option values that identify a configuration (no UI state). */
+export interface ConfiguredOptions {
+  size?: string;
+  width?: string;
+  layerCount?: number;
+  color?: string;
+  finish?: string;
+  frame?: string;
+  height?: number;
+}
+
+/** What the variant selector reports: the chosen options plus whether every required group is set. */
+export interface VariantSelection extends ConfiguredOptions {
+  isComplete: boolean;
+}
+
+/** Discrete option axes a surcharge can attach to (height has no pricing rule yet). */
+export type PricedAxis = "size" | "width" | "layerCount" | "color" | "finish" | "frame";
+
+/** A surcharge added to the base price when `axis` has exactly `value` selected. */
+export interface VariantPriceAdjustment {
+  axis: PricedAxis;
+  value: string | number;
+  /** In the product's own currency. */
+  amount: number;
 }
 
 export interface Product {

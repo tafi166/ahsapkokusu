@@ -1,8 +1,9 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Minus, Plus, X } from "lucide-react";
-import { useCart } from "@/hooks/useCart";
+import { isLegacyLine, useCart } from "@/hooks/useCart";
 import { ProductMedia } from "@/lib/placeholder";
 import { Button } from "@/components/ui/Button";
+import { calculatePrice, describeOptions, formatPrice } from "@/lib/price";
 
 export function CartDrawer() {
   const { isOpen, closeCart, lines, setQuantity, removeItem, subtotal } = useCart();
@@ -45,45 +46,60 @@ export function CartDrawer() {
                 <p className="py-12 text-center text-sm text-body/60">Sepetiniz boş.</p>
               ) : (
                 <ul className="space-y-5">
-                  {lines.map(({ product, quantity }) => (
-                    <li key={product.id} className="flex gap-4">
-                      <ProductMedia src={product.thumbnail} className="h-20 w-20 shrink-0 rounded-card" />
-                      <div className="flex flex-1 flex-col justify-between">
-                        <div className="flex items-start justify-between gap-2">
-                          <p className="text-sm font-medium">{product.title}</p>
-                          <button
-                            onClick={() => removeItem(product.id)}
-                            aria-label={`${product.title} ürününü kaldır`}
-                            className="text-body/50 hover:text-danger"
-                          >
-                            <X size={16} />
-                          </button>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2 rounded-full border border-line px-2 py-1">
+                  {lines.map(({ product, quantity, selection }) => {
+                    const price = calculatePrice(product, selection);
+                    const optionText = describeOptions(selection);
+                    const legacy = isLegacyLine({ product, quantity, selection });
+                    return (
+                      <li key={`${product.id}:${optionText.join("|")}`} className="flex gap-4">
+                        <ProductMedia src={product.thumbnail} className="h-20 w-20 shrink-0 rounded-card" />
+                        <div className="flex flex-1 flex-col justify-between">
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <p className="text-sm font-medium">{product.title}</p>
+                              {optionText.length > 0 ? (
+                                <p className="mt-0.5 text-xs text-body/60">{optionText.join(" · ")}</p>
+                              ) : null}
+                              {legacy ? (
+                                <p className="mt-0.5 text-xs text-body/60">
+                                  Seçenekler kaydedilmemiş — ürün sayfasından yeniden seçin.
+                                </p>
+                              ) : null}
+                            </div>
                             <button
-                              onClick={() => setQuantity(product.id, quantity - 1)}
-                              aria-label="Adedi azalt"
-                              className="p-1"
+                              onClick={() => removeItem(product.id, selection)}
+                              aria-label={`${product.title} ürününü kaldır`}
+                              className="text-body/50 hover:text-danger"
                             >
-                              <Minus size={12} />
-                            </button>
-                            <span className="w-4 text-center text-sm">{quantity}</span>
-                            <button
-                              onClick={() => setQuantity(product.id, quantity + 1)}
-                              aria-label="Adedi artır"
-                              className="p-1"
-                            >
-                              <Plus size={12} />
+                              <X size={16} />
                             </button>
                           </div>
-                          <span className="text-sm font-medium">
-                            ₺{(product.price * quantity).toLocaleString("tr-TR")}
-                          </span>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 rounded-full border border-line px-2 py-1">
+                              <button
+                                onClick={() => setQuantity(product.id, quantity - 1, selection)}
+                                aria-label="Adedi azalt"
+                                className="p-1"
+                              >
+                                <Minus size={12} />
+                              </button>
+                              <span className="w-4 text-center text-sm">{quantity}</span>
+                              <button
+                                onClick={() => setQuantity(product.id, quantity + 1, selection)}
+                                aria-label="Adedi artır"
+                                className="p-1"
+                              >
+                                <Plus size={12} />
+                              </button>
+                            </div>
+                            <span className="text-sm font-medium">
+                              {formatPrice(price.unitPrice * quantity, price.currency)}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    </li>
-                  ))}
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </div>

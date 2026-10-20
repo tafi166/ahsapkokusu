@@ -1,17 +1,6 @@
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/cn";
-import type { ProductVariantOptions } from "@/types";
-
-export interface VariantSelection {
-  size?: string;
-  width?: string;
-  layerCount?: number;
-  color?: string;
-  finish?: string;
-  frame?: string;
-  height?: number;
-  isComplete: boolean;
-}
+import type { ProductVariantOptions, VariantSelection } from "@/types";
 
 const swatchColor: Record<string, string> = {
   Doğal: "#c9a876",

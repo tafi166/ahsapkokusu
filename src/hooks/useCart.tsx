@@ -1,19 +1,28 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import type { Product } from "@/types";
+import type { ConfiguredOptions, Product } from "@/types";
+import { calculatePrice, pickOptions, sameConfiguration, validateSelection } from "@/lib/price";
 
 export interface CartLine {
   product: Product;
   quantity: number;
+  /**
+   * Chosen configuration, normalized to the axes the product offers.
+   * Undefined for non-configurable products — and for lines saved before
+   * configurations were stored (see `isLegacyLine`).
+   */
+  selection?: ConfiguredOptions;
 }
+
+export type AddItemResult = { ok: true } | { ok: false; errors: string[] };
 
 interface CartContextValue {
   lines: CartLine[];
   isOpen: boolean;
   openCart: () => void;
   closeCart: () => void;
-  addItem: (product: Product, quantity?: number) => void;
-  removeItem: (productId: string) => void;
-  setQuantity: (productId: string, quantity: number) => void;
+  addItem: (product: Product, quantity?: number, selection?: ConfiguredOptions) => AddItemResult;
+  removeItem: (productId: string, selection?: ConfiguredOptions) => void;
+  setQuantity: (productId: string, quantity: number, selection?: ConfiguredOptions) => void;
   itemCount: number;
   subtotal: number;
 }
@@ -21,17 +30,56 @@ interface CartContextValue {
 const CartContext = createContext<CartContextValue | null>(null);
 const STORAGE_KEY = "panelio.cart.v1";
 
+/** A configurable product stored without its configuration (written before options were persisted). */
+export function isLegacyLine(line: CartLine): boolean {
+  return Boolean(line.product.variants) && !line.selection;
+}
+
+function isPositiveInt(n: unknown): n is number {
+  return typeof n === "number" && Number.isInteger(n) && n > 0;
+}
+
+/**
+ * Reads the stored cart defensively: malformed entries are dropped, and
+ * stored selections are reduced to known option fields. Lines saved by the
+ * pre-configuration cart (`{ product, quantity }`) load unchanged.
+ */
+export function loadStoredCart(raw: string | null): CartLine[] {
+  if (!raw) return [];
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(parsed)) return [];
+
+  const lines: CartLine[] = [];
+  for (const entry of parsed) {
+    if (!entry || typeof entry !== "object") continue;
+    const { product, quantity, selection } = entry as Partial<CartLine>;
+    if (!product || typeof product.id !== "string" || typeof product.price !== "number") continue;
+    if (!isPositiveInt(quantity)) continue;
+    const options = pickOptions(selection as Record<string, unknown> | undefined);
+    lines.push(options ? { product, quantity, selection: options } : { product, quantity });
+  }
+  return lines;
+}
+
 /**
  * Client-only mock cart (no real backend/checkout). Persists to
  * localStorage so a refresh doesn't lose the demo state. Swap the
  * body of each mutator for real cart-API calls when a backend exists —
  * consumers (CartDrawer, ProductCard, ProductPage) don't need to change.
+ *
+ * Line identity is product id + configuration (`sameConfiguration`): the
+ * same product in two configurations is two lines, the same configuration
+ * again increments the existing line.
  */
 export function CartProvider({ children }: { children: ReactNode }) {
   const [lines, setLines] = useState<CartLine[]>(() => {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? (JSON.parse(raw) as CartLine[]) : [];
+      return loadStoredCart(localStorage.getItem(STORAGE_KEY));
     } catch {
       return [];
     }
@@ -46,31 +94,37 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [lines]);
 
-  const addItem: CartContextValue["addItem"] = (product, quantity = 1) => {
+  const matches = (l: CartLine, productId: string, selection?: ConfiguredOptions) =>
+    l.product.id === productId && sameConfiguration(l.selection, selection);
+
+  const addItem: CartContextValue["addItem"] = (product, quantity = 1, selection) => {
+    if (!isPositiveInt(quantity)) return { ok: false, errors: ["Geçersiz adet."] };
+    const { options, errors } = validateSelection(product, selection);
+    if (errors.length > 0) return { ok: false, errors };
+
     setLines((prev) => {
-      const existing = prev.find((l) => l.product.id === product.id);
-      if (existing) {
-        return prev.map((l) =>
-          l.product.id === product.id ? { ...l, quantity: l.quantity + quantity } : l,
-        );
+      const idx = prev.findIndex((l) => matches(l, product.id, options));
+      if (idx >= 0) {
+        return prev.map((l, i) => (i === idx ? { ...l, quantity: l.quantity + quantity } : l));
       }
-      return [...prev, { product, quantity }];
+      return [...prev, options ? { product, quantity, selection: options } : { product, quantity }];
     });
     setIsOpen(true);
+    return { ok: true };
   };
 
-  const removeItem: CartContextValue["removeItem"] = (productId) => {
-    setLines((prev) => prev.filter((l) => l.product.id !== productId));
+  const removeItem: CartContextValue["removeItem"] = (productId, selection) => {
+    setLines((prev) => prev.filter((l) => !matches(l, productId, selection)));
   };
 
-  const setQuantity: CartContextValue["setQuantity"] = (productId, quantity) => {
-    if (quantity <= 0) return removeItem(productId);
-    setLines((prev) => prev.map((l) => (l.product.id === productId ? { ...l, quantity } : l)));
+  const setQuantity: CartContextValue["setQuantity"] = (productId, quantity, selection) => {
+    if (quantity <= 0) return removeItem(productId, selection);
+    setLines((prev) => prev.map((l) => (matches(l, productId, selection) ? { ...l, quantity } : l)));
   };
 
   const value = useMemo<CartContextValue>(() => {
     const itemCount = lines.reduce((sum, l) => sum + l.quantity, 0);
-    const subtotal = lines.reduce((sum, l) => sum + l.quantity * l.product.price, 0);
+    const subtotal = lines.reduce((sum, l) => sum + l.quantity * calculatePrice(l.product, l.selection).unitPrice, 0);
     return {
       lines,
       isOpen,

@@ -9,7 +9,9 @@ import { StarRating } from "@/components/ui/StarRating";
 import { AccordionSection } from "@/components/ui/AccordionSection";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { Gallery } from "@/components/product/Gallery";
-import { VariantSelectors, type VariantSelection } from "@/components/product/VariantSelectors";
+import { VariantSelectors } from "@/components/product/VariantSelectors";
+import { PriceBreakdown } from "@/components/product/PriceBreakdown";
+import type { VariantSelection } from "@/types";
 import { getProductBySlug, allProducts } from "@/data/products";
 import { getCategory } from "@/data/categories";
 import { productFaq } from "@/data/faq";
@@ -42,6 +44,7 @@ export function ProductPage() {
   const [justAdded, setJustAdded] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [selection, setSelection] = useState<VariantSelection>({ isComplete: !product?.variants });
+  const [addErrors, setAddErrors] = useState<string[]>([]);
 
   const handleSelectionChange = useCallback((next: VariantSelection) => setSelection(next), []);
 
@@ -150,6 +153,9 @@ export function ProductPage() {
               <VariantSelectors variants={product.variants} onChange={handleSelectionChange} />
             </div>
           ) : null}
+          {product.variants && !isSoldOut ? (
+            <PriceBreakdown product={product} selection={selection} quantity={quantity} />
+          ) : null}
 
           <div className="mt-8 flex items-center gap-4">
             {!isDigital ? (
@@ -167,7 +173,12 @@ export function ProductPage() {
               size="lg"
               disabled={!canAddToCart}
               onClick={() => {
-                addItem(product, quantity);
+                const result = addItem(product, quantity, selection);
+                if (!result.ok) {
+                  setAddErrors(result.errors);
+                  return;
+                }
+                setAddErrors([]);
                 setJustAdded(true);
                 setTimeout(() => setJustAdded(false), 1800);
               }}
@@ -177,6 +188,13 @@ export function ProductPage() {
           </div>
           {!canAddToCart && !isSoldOut ? (
             <p className="mt-2 text-xs text-body/50">Sepete eklemeden önce tüm seçenekleri belirleyin.</p>
+          ) : null}
+          {addErrors.length > 0 ? (
+            <ul role="alert" className="mt-2 space-y-0.5 text-xs text-danger">
+              {addErrors.map((e) => (
+                <li key={e}>{e}</li>
+              ))}
+            </ul>
           ) : null}
 
           <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-line pt-6">
