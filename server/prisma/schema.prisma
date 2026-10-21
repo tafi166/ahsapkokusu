@@ -161,3 +161,40 @@ model Media {
   uploadedById String? @db.Uuid
   createdAt   DateTime @default(now()) @db.Timestamptz(3)
 }
+
+// ---------------------------------------------------------------------------
+// CNC quote requests
+// ---------------------------------------------------------------------------
+
+enum QuoteStatus {
+  NEW
+  REVIEWING
+  QUOTED
+  CLOSED
+}
+
+/// A customer's request to have their own SVG cut. The file is stored privately
+/// under UPLOAD_DIR/quotes/<fileId>.svg and only staff can download it.
+model QuoteRequest {
+  id           String      @id @default(uuid()) @db.Uuid
+  /// Shown to the customer; random, not guessable from other requests.
+  reference    String      @unique
+  status       QuoteStatus @default(NEW)
+  widthCm      Decimal     @db.Decimal(7, 1)
+  heightCm     Decimal     @db.Decimal(7, 1)
+  material     String
+  quantity     Int
+  contactName  String
+  contactEmail String
+  contactPhone String?
+  notes        String?
+  /// Original name, for display only — never used as a path.
+  fileName     String
+  fileId       String      @unique @db.Uuid
+  fileSize     Int
+  fileSha256   String
+  createdAt    DateTime    @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime    @updatedAt @db.Timestamptz(3)
+
+  @@index([status, createdAt])
+}

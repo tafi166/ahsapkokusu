@@ -6,6 +6,7 @@ import type { Role } from '../generated/prisma/client';
 export const IS_PUBLIC = Symbol('IS_PUBLIC');
 export const ROLES = Symbol('ROLES');
 export const AUTH_RATE_LIMITED = Symbol('AUTH_RATE_LIMITED');
+export const PUBLIC_FORM_RATE_LIMITED = Symbol('PUBLIC_FORM_RATE_LIMITED');
 
 /** No session required (state-changing public routes still get the Origin check). */
 export const Public = () => SetMetadata(IS_PUBLIC, true);
@@ -15,6 +16,9 @@ export const Roles = (...roles: Role[]) => SetMetadata(ROLES, roles);
 
 /** Counts toward the stricter per-IP limit for credential endpoints. */
 export const AuthRateLimited = () => SetMetadata(AUTH_RATE_LIMITED, true);
+
+/** Counts toward the per-IP limit for anonymous form submissions. */
+export const PublicFormRateLimited = () => SetMetadata(PUBLIC_FORM_RATE_LIMITED, true);
 
 export const CurrentAuth = createParamDecorator((_data: unknown, ctx: ExecutionContext): AuthContext => {
   const auth = ctx.switchToHttp().getRequest<Request>().auth;

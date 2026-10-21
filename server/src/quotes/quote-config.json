@@ -1,0 +1,15 @@
+{
+  "limitsConfirmed": false,
+  "maxFileBytes": 5242880,
+  "minSizeCm": 5,
+  "maxSizeCm": 300,
+  "minQuantity": 1,
+  "maxQuantity": 100,
+  "materials": [
+    "MDF",
+    "Kontrplak",
+    "Masif Ahşap",
+    "Masif Meşe",
+    "MDF Lam"
+  ]
+}

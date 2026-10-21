@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
@@ -8,6 +8,7 @@ import { WishlistProvider } from "@/hooks/useWishlist";
 import { CompareProvider } from "@/hooks/useCompare";
 import { QuickViewProvider } from "@/hooks/useQuickView";
 import { api, PROTOTYPE_NOTICE } from "@/lib/api";
+import type { ContactDetails, QuoteDetails } from "@/lib/cncQuote";
 
 function renderAt(path: string) {
   return render(
@@ -124,29 +125,77 @@ describe("CNC quote submission (prototype)", () => {
     await user.click(screen.getByRole("button", { name: "İleri" }));
   }
 
-  it("submits, shows a DEMO reference with the prototype notice, and can start over", async () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  function mockQuoteEndpoint(response: () => Response | Promise<Response>) {
+    const sent: FormData[] = [];
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+      expect(input).toBe("/api/quotes");
+      expect(init?.method).toBe("POST");
+      sent.push(init?.body as FormData);
+      return response();
+    });
+    return sent;
+  }
+
+  it("sends the file and fields to the server and shows its reference", async () => {
+    const sent = mockQuoteEndpoint(() => Response.json({ reference: "Q-ABCD2345" }, { status: 201 }));
     const user = userEvent.setup();
     renderAt("/ozel-tasarim?sekme=dosya");
     await fillToReview(user);
 
     await user.click(screen.getByRole("button", { name: /teklif talebini gönder/i }));
-    expect(await screen.findByRole("heading", { level: 2, name: /teklif talebiniz hazırlandı/i })).toHaveFocus();
-    expect(screen.getByRole("status")).toHaveTextContent(PROTOTYPE_NOTICE);
-    expect(screen.getByText(/^DEMO-[0-9A-Z]{8}$/)).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { level: 2, name: /teklif talebiniz alındı/i })).toHaveFocus();
+    expect(screen.getByRole("status")).toHaveTextContent(/kaydedildi.*ada@example\.com/);
+    expect(screen.getByRole("status")).not.toHaveTextContent(/prototip/i);
+    expect(screen.getByText("Q-ABCD2345")).toBeInTheDocument();
     expect(screen.getByText("30 × 15 cm · MDF · 1 adet")).toBeInTheDocument();
+
+    expect(sent).toHaveLength(1);
+    const form = sent[0]!;
+    expect((form.get("file") as File).name).toBe("logo.svg");
+    expect(Object.fromEntries([...form.entries()].filter(([k]) => k !== "file"))).toEqual({
+      widthCm: "30",
+      heightCm: "15",
+      material: "MDF",
+      quantity: "1",
+      name: "Ada Lovelace",
+      email: "ada@example.com",
+      phone: "",
+      notes: "",
+    });
 
     await user.click(screen.getByRole("button", { name: /yeni talep oluştur/i }));
     expect(screen.getByRole("heading", { level: 2, name: "Dosya" })).toBeInTheDocument();
     expect(screen.queryByText("logo.svg")).not.toBeInTheDocument();
   }, 20000);
 
-  it("the mock API re-validates the request instead of trusting the form", async () => {
-    const result = await api.submitCncQuote({
-      file: { name: "logo.svg", size: 100 },
-      details: { widthCm: "1000", heightCm: "10", material: "MDF", quantity: "1" },
-      contact: { name: "Ada", email: "ada@example.com", phone: "", notes: "" },
-    });
+  it("shows the server's reason when it rejects the request, and stays on the review", async () => {
+    mockQuoteEndpoint(() => Response.json({ message: "İzin verilmeyen öğe: <image>." }, { status: 400 }));
+    const user = userEvent.setup();
+    renderAt("/ozel-tasarim?sekme=dosya");
+    await fillToReview(user);
+    await user.click(screen.getByRole("button", { name: /teklif talebini gönder/i }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("İzin verilmeyen öğe: <image>.");
+    expect(screen.getByRole("heading", { level: 2, name: "Gözden Geçir" })).toBeInTheDocument();
+  }, 20000);
+
+  it("says plainly that nothing was sent when the server is unreachable", async () => {
+    mockQuoteEndpoint(() => Promise.reject(new TypeError("Failed to fetch")));
+    const user = userEvent.setup();
+    renderAt("/ozel-tasarim?sekme=dosya");
+    await fillToReview(user);
+    await user.click(screen.getByRole("button", { name: /teklif talebini gönder/i }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(/talebiniz gönderilmedi/);
+  }, 20000);
+
+  it("never sends an invalid request", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    const details: QuoteDetails = { widthCm: "1000", heightCm: "10", material: "MDF", quantity: "1" };
+    const contact: ContactDetails = { name: "Ada", email: "ada@example.com", phone: "", notes: "" };
+    const result = await api.submitCncQuote({ file: svgFile(GOOD_SVG), details, contact });
     expect(result.ok).toBe(false);
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 
   it("the idea form no longer claims the request was received", async () => {

@@ -15,11 +15,11 @@ import { partnerLogos, trustSignals } from '../../src/data/trustSignals';
 import { seedCatalog } from '../prisma/seed-catalog';
 import { categoryListSchema, contentSchemas, productListSchema } from '../src/content/schemas';
 import type { PrismaClient } from '../src/prisma/prisma';
-import { contentShapes } from './content-shapes';
+import { contentShapes } from './storefront-shared';
 import { createUser, login, ORIGIN, resetAuth, resetDatabase, startApp, testPrisma } from './helpers';
 
 describe('content schemas', () => {
-  it('content-shapes.json matches the storefront defaults (run `npm run content:shapes` if not)', () => {
+  it('content-shapes.json matches the storefront defaults (run `npm run sync:storefront` if not)', () => {
     const file = path.join(__dirname, '..', 'src', 'content', 'content-shapes.json');
     expect(JSON.parse(readFileSync(file, 'utf8'))).toEqual(contentShapes());
   });

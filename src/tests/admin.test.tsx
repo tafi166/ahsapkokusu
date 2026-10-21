@@ -61,7 +61,7 @@ describe("admin sign-in", () => {
     const user = userEvent.setup();
     const nav = await signIn(user);
     expect(screen.getByText("Ada · Yönetici")).toBeInTheDocument();
-    for (const label of ["Ana Sayfa İçerikleri", "Kategoriler", "Ürünler", "Listeler", "Yedekle & Sıfırla"]) {
+    for (const label of ["Ana Sayfa İçerikleri", "Kategoriler", "Ürünler", "Listeler", "Teklif Talepleri", "Yedekle & Sıfırla"]) {
       await user.click(within(nav).getByText(label));
       expect(await screen.findByRole("heading", { level: 2, name: label })).toBeInTheDocument();
     }
@@ -169,5 +169,49 @@ describe("moving browser-only edits to the server", () => {
     expect(await screen.findByRole("status")).toHaveTextContent(/sunucuya kaydedildi/i);
     expect(localStorage.getItem(LEGACY_STORAGE_KEY)).toBeNull();
     expect(screen.queryByRole("button", { name: "Sunucuya Aktar" })).not.toBeInTheDocument();
+  });
+});
+
+describe("quote requests tab", () => {
+  const quote = {
+    id: "8f0c2f1e-0000-4000-8000-000000000001",
+    reference: "Q-ABCD2345",
+    status: "NEW",
+    widthCm: 30,
+    heightCm: 15.5,
+    material: "MDF",
+    quantity: 2,
+    contactName: "Bob",
+    contactEmail: "bob@example.com",
+    contactPhone: null,
+    notes: "Kenarlar zımparalansın.",
+    fileName: "logo.svg",
+    fileSize: 2048,
+    createdAt: "2026-10-20T10:00:00.000Z",
+  };
+
+  it("lists requests with a staff download link and changes their status", async () => {
+    api.state.quotes.push({ ...quote });
+    const user = userEvent.setup();
+    const nav = await signIn(user);
+    await user.click(within(nav).getByText("Teklif Talepleri"));
+
+    expect(await screen.findByText("Q-ABCD2345")).toBeInTheDocument();
+    expect(screen.getByText(/30 × 15,5 cm · MDF · 2 adet/)).toBeInTheDocument();
+    expect(screen.getByText("Kenarlar zımparalansın.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "İndir" })).toHaveAttribute("href", `/api/admin/quotes/${quote.id}/file`);
+
+    await user.selectOptions(screen.getByLabelText("Q-ABCD2345 durumu"), "QUOTED");
+    expect(api.state.quotes[0]!.status).toBe("QUOTED");
+    const patch = api.requests.find((r) => r.method === "PATCH")!;
+    expect(patch.headers["X-CSRF-Token"]).toBe("csrf-token");
+    expect(screen.getByLabelText("Q-ABCD2345 durumu")).toHaveValue("QUOTED");
+  });
+
+  it("says so when there are none", async () => {
+    const user = userEvent.setup();
+    const nav = await signIn(user);
+    await user.click(within(nav).getByText("Teklif Talepleri"));
+    expect(await screen.findByText("Henüz teklif talebi yok.")).toBeInTheDocument();
   });
 });

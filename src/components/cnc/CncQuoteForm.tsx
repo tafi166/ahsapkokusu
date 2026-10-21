@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from "react";
 import { Button } from "@/components/ui/Button";
 import { cncQuoteConfig } from "@/config/cncQuote";
-import { api, PROTOTYPE_NOTICE } from "@/lib/api";
+import { api } from "@/lib/api";
 import {
   checkFileMeta,
   formatBytes,
@@ -62,6 +62,8 @@ function fieldProps(id: string, error?: string) {
 }
 
 interface UploadedFile {
+  /** Held in memory until the request is sent; never stored. */
+  blob: File;
   name: string;
   size: number;
   info: SvgInfo;
@@ -71,8 +73,8 @@ interface UploadedFile {
 
 /**
  * Step-by-step CNC quote request: SVG file → size/material/quantity →
- * contact → review. The file's text is read once for validation and then
- * discarded; nothing is stored.
+ * contact → review. The file is validated here, kept in memory and sent with
+ * the request; the server checks it again before storing it.
  */
 export function CncQuoteForm() {
   const [step, setStep] = useState(0);
@@ -136,7 +138,7 @@ export function CncQuoteForm() {
       const previewUrl = typeof URL.createObjectURL === "function" ? URL.createObjectURL(picked) : undefined;
       if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
       previewUrlRef.current = previewUrl;
-      setFile({ name: picked.name, size: picked.size, info: inspection.info, previewUrl });
+      setFile({ blob: picked, name: picked.name, size: picked.size, info: inspection.info, previewUrl });
     } catch {
       setFileError("Dosya okunamadı.");
     } finally {
@@ -164,7 +166,7 @@ export function CncQuoteForm() {
     if (!file) return;
     setSubmitting(true);
     setSubmitError(null);
-    const result = await api.submitCncQuote({ file: { name: file.name, size: file.size }, details, contact });
+    const result = await api.submitCncQuote({ file: file.blob, details, contact });
     setSubmitting(false);
     if (result.ok) setReference(result.reference);
     else setSubmitError(result.message);
@@ -196,11 +198,11 @@ export function CncQuoteForm() {
     return (
       <div className="space-y-4">
         <h2 ref={confirmationRef} tabIndex={-1} className="text-xl outline-none">
-          Teklif talebiniz hazırlandı
+          Teklif talebiniz alındı
         </h2>
         <p role="status" className="rounded-input border border-divider bg-paper-soft px-4 py-3 text-sm">
-          <span className="font-medium">{PROTOTYPE_NOTICE}</span> Gerçek gönderim, sunucu altyapısı kurulduğunda
-          etkinleşecek.
+          Talebiniz ve dosyanız kaydedildi. Ekibimiz dosyanızı inceleyip <strong>{contact.email}</strong> adresine
+          teklifle dönecek. Referans numaranızı saklayın.
         </p>
         <dl className="space-y-1 text-sm">
           <div className="flex gap-2">

@@ -80,6 +80,25 @@ export function dataUrlToBlob(dataUrl: string): Blob {
 
 type ContentKey = Exclude<keyof AdminOverrides, "products" | "categories">;
 
+export type QuoteStatus = "NEW" | "REVIEWING" | "QUOTED" | "CLOSED";
+
+export interface QuoteRequest {
+  id: string;
+  reference: string;
+  status: QuoteStatus;
+  widthCm: number;
+  heightCm: number;
+  material: string;
+  quantity: number;
+  contactName: string;
+  contactEmail: string;
+  contactPhone: string | null;
+  notes: string | null;
+  fileName: string;
+  fileSize: number;
+  createdAt: string;
+}
+
 export const adminApi = {
   /** The signed-in user, or null when there is no live session. */
   async me(): Promise<AdminUser | null> {
@@ -121,6 +140,19 @@ export const adminApi = {
 
   saveCategories(categories: Category[]): Promise<void> {
     return request("PUT", "/api/admin/categories", { categories });
+  },
+
+  listQuotes(): Promise<QuoteRequest[]> {
+    return request("GET", "/api/admin/quotes");
+  },
+
+  setQuoteStatus(id: string, status: QuoteStatus): Promise<QuoteRequest> {
+    return request("PATCH", `/api/admin/quotes/${encodeURIComponent(id)}`, { status });
+  },
+
+  /** Staff-only download; a plain link works because the session cookie goes along. */
+  quoteFileUrl(id: string): string {
+    return `/api/admin/quotes/${encodeURIComponent(id)}/file`;
   },
 
   /** Uploads a resized photo and returns its permanent URL. */

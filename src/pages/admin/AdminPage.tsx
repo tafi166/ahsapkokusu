@@ -10,6 +10,7 @@ import { CategoriesTab } from "@/pages/admin/tabs/CategoriesTab";
 import { ProductsTab } from "@/pages/admin/tabs/ProductsTab";
 import { ListsTab } from "@/pages/admin/tabs/ListsTab";
 import { BackupTab } from "@/pages/admin/tabs/BackupTab";
+import { QuotesTab } from "@/pages/admin/tabs/QuotesTab";
 
 const TABS = [
   { id: "brand", label: "Marka & İletişim" },
@@ -17,6 +18,7 @@ const TABS = [
   { id: "categories", label: "Kategoriler" },
   { id: "products", label: "Ürünler" },
   { id: "lists", label: "Listeler" },
+  { id: "quotes", label: "Teklif Talepleri" },
   { id: "backup", label: "Yedekle & Sıfırla" },
 ] as const;
 
@@ -88,6 +90,7 @@ export function AdminPage() {
           {tab === "categories" ? <CategoriesTab /> : null}
           {tab === "products" ? <ProductsTab /> : null}
           {tab === "lists" ? <ListsTab /> : null}
+          {tab === "quotes" ? <QuotesTab /> : null}
           {tab === "backup" ? <BackupTab /> : null}
         </main>
       </div>

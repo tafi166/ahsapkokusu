@@ -16,7 +16,7 @@
     "typecheck": "prisma generate && tsc --noEmit",
     "test": "prisma generate && vitest run",
     "admin:create": "tsx scripts/create-admin.ts",
-    "content:shapes": "tsx scripts/sync-content-shapes.ts"
+    "sync:storefront": "tsx scripts/sync-storefront.ts"
   },
   "dependencies": {
     "@nestjs/common": "11.2.7",
@@ -25,6 +25,7 @@
     "@nestjs/throttler": "6.7.1",
     "@prisma/adapter-pg": "7.10.0",
     "@prisma/client": "7.10.0",
+    "@xmldom/xmldom": "0.9.12",
     "argon2": "0.45.1",
     "cookie-parser": "1.4.7",
     "dotenv": "17.4.2",

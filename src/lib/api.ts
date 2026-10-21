@@ -12,25 +12,17 @@ import { allProducts } from "@/data/products";
 import { validateContact, validateDetails, type ContactDetails, type QuoteDetails } from "@/lib/cncQuote";
 import type { Product } from "@/types";
 
-/** Shown wherever a mock form "succeeds" — nothing is sent or stored until the Phase 3 backend exists. */
+/** Shown by the forms that are still mocks (contact, free-text design request) — nothing is sent or stored. */
 export const PROTOTYPE_NOTICE = "Bu bir prototiptir — form doğrulandı ancak hiçbir yere gönderilmedi ve saklanmadı.";
 
 export interface CncQuotePayload {
-  /** File name and size only — the file itself is never sent by the prototype. */
-  file: { name: string; size: number };
+  /** The chosen SVG — kept in memory by the form and sent only here. */
+  file: File;
   details: QuoteDetails;
   contact: ContactDetails;
 }
 
 export type CncQuoteResult = { ok: true; reference: string } | { ok: false; message: string };
-
-function demoReference(): string {
-  const random =
-    typeof crypto !== "undefined" && "randomUUID" in crypto
-      ? crypto.randomUUID().slice(0, 8)
-      : Math.random().toString(36).slice(2, 10);
-  return `DEMO-${random.toUpperCase()}`;
-}
 
 function delay<T>(value: T, ms = 500): Promise<T> {
   return new Promise((resolve) => setTimeout(() => resolve(value), ms));
@@ -61,16 +53,41 @@ export const api = {
     return delay({ ok: true, message: PROTOTYPE_NOTICE });
   },
 
-  /** Re-validates like the real server will; returns a DEMO reference. Nothing leaves the browser. */
+  /**
+   * Sends a quote request to the API server (multipart: the SVG plus the form
+   * fields). Fields are checked here first so an obviously incomplete request
+   * never leaves the browser; the server validates everything again.
+   */
   async submitCncQuote(payload: CncQuotePayload): Promise<CncQuoteResult> {
     const invalid =
-      !payload.file.name ||
-      Object.keys(validateDetails(payload.details)).length > 0 ||
-      Object.keys(validateContact(payload.contact)).length > 0;
-    if (invalid) {
-      return delay({ ok: false, message: "Talep eksik veya geçersiz — lütfen adımları kontrol edin." }, 300);
+      Object.keys(validateDetails(payload.details)).length > 0 || Object.keys(validateContact(payload.contact)).length > 0;
+    if (invalid) return { ok: false, message: "Talep eksik veya geçersiz — lütfen adımları kontrol edin." };
+
+    const form = new FormData();
+    const { details, contact } = payload;
+    for (const [key, value] of Object.entries({ ...details, ...contact })) form.append(key, value);
+    form.append("file", payload.file, payload.file.name);
+
+    let res: Response;
+    try {
+      res = await fetch("/api/quotes", { method: "POST", body: form, credentials: "same-origin" });
+    } catch {
+      return { ok: false, message: "Sunucuya ulaşılamadı — talebiniz gönderilmedi. Lütfen biraz sonra tekrar deneyin." };
     }
-    return delay({ ok: true, reference: demoReference() });
+    if (res.ok) {
+      const data = (await res.json()) as { reference?: unknown };
+      if (typeof data.reference === "string") return { ok: true, reference: data.reference };
+      return { ok: false, message: "Sunucudan beklenmeyen bir yanıt geldi." };
+    }
+    if (res.status === 429) return { ok: false, message: "Çok fazla talep gönderildi. Bir dakika sonra tekrar deneyin." };
+    if (res.status === 413) return { ok: false, message: "Dosya çok büyük." };
+    try {
+      const data = (await res.json()) as { message?: unknown };
+      if (typeof data.message === "string" && res.status < 500) return { ok: false, message: data.message };
+    } catch {
+      // not JSON
+    }
+    return { ok: false, message: "Talep gönderilemedi. Lütfen biraz sonra tekrar deneyin." };
   },
 
   /** Searches title, category, subcategory, tags and description — mirrors a real full-text product search. */

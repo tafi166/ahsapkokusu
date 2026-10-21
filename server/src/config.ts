@@ -23,6 +23,8 @@ const schema = z.object({
   SESSION_ABSOLUTE_HOURS: z.coerce.number().int().min(1).max(24 * 30).default(12),
   /** Login and password-change attempts per client IP per minute. */
   AUTH_RATE_LIMIT_PER_MIN: z.coerce.number().int().min(1).default(10),
+  /** Anonymous form submissions (quote requests) per client IP per minute. */
+  PUBLIC_FORM_RATE_LIMIT_PER_MIN: z.coerce.number().int().min(1).default(5),
   /** Uploaded files (images, CNC drawings). Outside any web root; absolute in production. */
   UPLOAD_DIR: z.string().min(1).default('storage'),
   MEDIA_MAX_BYTES: z.coerce.number().int().min(1024).max(50 * 1024 * 1024).default(5 * 1024 * 1024),

@@ -16,7 +16,12 @@ export function installFakeApi(options: { password?: string; role?: "ADMIN" | "E
   const password = options.password ?? "dogru-sifre-123";
   const user = { id: "u1", email: "ada@example.com", name: "Ada", role: options.role ?? "ADMIN" };
   const csrf = "csrf-token";
-  const state = { signedIn: false, content: {} as Record<string, unknown>, uploads: 0 };
+  const state = {
+    signedIn: false,
+    content: {} as Record<string, unknown>,
+    uploads: 0,
+    quotes: [] as { id: string; status: string; [key: string]: unknown }[],
+  };
   const requests: FakeRequest[] = [];
 
   const json = (status: number, body?: unknown) =>
@@ -62,6 +67,14 @@ export function installFakeApi(options: { password?: string; role?: "ADMIN" | "E
     if (url === "/api/admin/categories" && method === "PUT") {
       state.content.categories = (body as { categories: unknown }).categories;
       return json(204);
+    }
+    if (url === "/api/admin/quotes" && method === "GET") return json(200, state.quotes);
+    const quote = /^\/api\/admin\/quotes\/([\w-]+)$/.exec(url);
+    if (quote && method === "PATCH") {
+      const found = state.quotes.find((q) => q.id === quote[1]);
+      if (!found) return json(404, { message: "Teklif talebi bulunamadı." });
+      found.status = (body as { status: string }).status;
+      return json(200, found);
     }
     if (url === "/api/admin/media" && method === "POST") {
       state.uploads += 1;

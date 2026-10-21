@@ -181,9 +181,20 @@ in one request. Editors write through `/api/admin/content/:key`,
 `/api/admin/media` (raw JPEG/PNG/WebP, checked by its first bytes, stored under
 `UPLOAD_DIR` with a random name, served from `/api/media/:file`). Links must be
 site paths or https URLs and images must be uploaded files or colour swatches,
-so stored content can't carry script. After changing a field in
-`src/config/brandDefaults.ts` or `contentDefaults.ts`, run
-`npm run content:shapes` (a test fails until you do).
+so stored content can't carry script.
+
+CNC quote requests: the storefront's "Dosya yükle (SVG)" form posts the file
+and fields to `POST /api/quotes` (public, Origin-checked, rate-limited). The
+server re-checks the SVG against an allowlist (plain SVG drawing elements plus
+drawing-program metadata; no script, HTML, foreign namespaces or external
+references), stores it privately as `UPLOAD_DIR/quotes/<uuid>.svg` and returns a
+reference. Staff see requests in the admin panel's "Teklif Talepleri" tab
+(`/api/admin/quotes`), download files as sandboxed attachments and set a status.
+No e-mail is sent yet. The limits in `src/config/cncQuote.ts` are still
+provisional.
+
+After changing `src/config/brandDefaults.ts`, `contentDefaults.ts` or `cncQuote.ts`, run
+`npm run sync:storefront` (a test fails until you do).
 
 The seed reads the same `src/data` files the storefront uses, and the
 integration tests check that every product and category comes back from the
