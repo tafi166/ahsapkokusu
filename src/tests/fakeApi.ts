@@ -21,6 +21,8 @@ export function installFakeApi(options: { password?: string; role?: "ADMIN" | "E
     content: {} as Record<string, unknown>,
     uploads: 0,
     quotes: [] as { id: string; status: string; [key: string]: unknown }[],
+    users: [] as { id: string; email: string; name: string; role: string; isActive: boolean; createdAt: string }[],
+    passwordResets: [] as { id: string; password: string }[],
   };
   const requests: FakeRequest[] = [];
 
@@ -67,6 +69,27 @@ export function installFakeApi(options: { password?: string; role?: "ADMIN" | "E
     if (url === "/api/admin/categories" && method === "PUT") {
       state.content.categories = (body as { categories: unknown }).categories;
       return json(204);
+    }
+    if (url.startsWith("/api/users") && user.role !== "ADMIN") return json(403, { message: "Bu işlem için yetkiniz yok." });
+    if (url === "/api/users" && method === "GET") return json(200, state.users);
+    if (url === "/api/users" && method === "POST") {
+      const input = body as { email: string; name: string; role: string };
+      if (state.users.some((u) => u.email === input.email)) return json(409, { message: "Bu e-posta ile bir kullanıcı zaten var." });
+      const created = { id: `u${state.users.length + 2}`, ...input, isActive: true, createdAt: "2026-10-21T00:00:00.000Z" };
+      state.users.push(created);
+      return json(201, created);
+    }
+    const userRoute = /^\/api\/users\/([\w-]+)(\/password)?$/.exec(url);
+    if (userRoute) {
+      const target = state.users.find((u) => u.id === userRoute[1]);
+      if (!target) return json(404, { message: "Kullanıcı bulunamadı." });
+      if (userRoute[2]) {
+        state.passwordResets.push({ id: target.id, password: (body as { password: string }).password });
+        return json(204);
+      }
+      if (target.id === user.id) return json(409, { message: "Kendi yönetici yetkinizi kaldıramaz veya hesabınızı kapatamazsınız." });
+      Object.assign(target, body);
+      return json(200, target);
     }
     if (url === "/api/admin/quotes" && method === "GET") return json(200, state.quotes);
     const quote = /^\/api\/admin\/quotes\/([\w-]+)$/.exec(url);

@@ -82,6 +82,11 @@ type ContentKey = Exclude<keyof AdminOverrides, "products" | "categories">;
 
 export type QuoteStatus = "NEW" | "REVIEWING" | "QUOTED" | "CLOSED";
 
+export interface StaffUser extends AdminUser {
+  isActive: boolean;
+  createdAt: string;
+}
+
 export interface QuoteRequest {
   id: string;
   reference: string;
@@ -140,6 +145,22 @@ export const adminApi = {
 
   saveCategories(categories: Category[]): Promise<void> {
     return request("PUT", "/api/admin/categories", { categories });
+  },
+
+  listUsers(): Promise<StaffUser[]> {
+    return request("GET", "/api/users");
+  },
+
+  createUser(input: { email: string; name: string; role: AdminUser["role"]; password: string }): Promise<StaffUser> {
+    return request("POST", "/api/users", input);
+  },
+
+  updateUser(id: string, patch: Partial<Pick<StaffUser, "name" | "role" | "isActive">>): Promise<StaffUser> {
+    return request("PATCH", `/api/users/${encodeURIComponent(id)}`, patch);
+  },
+
+  resetUserPassword(id: string, password: string): Promise<void> {
+    return request("POST", `/api/users/${encodeURIComponent(id)}/password`, { password });
   },
 
   listQuotes(): Promise<QuoteRequest[]> {

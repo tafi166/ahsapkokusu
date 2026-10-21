@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
@@ -61,7 +61,7 @@ describe("admin sign-in", () => {
     const user = userEvent.setup();
     const nav = await signIn(user);
     expect(screen.getByText("Ada · Yönetici")).toBeInTheDocument();
-    for (const label of ["Ana Sayfa İçerikleri", "Kategoriler", "Ürünler", "Listeler", "Teklif Talepleri", "Yedekle & Sıfırla"]) {
+    for (const label of ["Ana Sayfa İçerikleri", "Kategoriler", "Ürünler", "Listeler", "Teklif Talepleri", "Kullanıcılar", "Yedekle & Sıfırla"]) {
       await user.click(within(nav).getByText(label));
       expect(await screen.findByRole("heading", { level: 2, name: label })).toBeInTheDocument();
     }
@@ -213,5 +213,50 @@ describe("quote requests tab", () => {
     const nav = await signIn(user);
     await user.click(within(nav).getByText("Teklif Talepleri"));
     expect(await screen.findByText("Henüz teklif talebi yok.")).toBeInTheDocument();
+  });
+});
+
+describe("users tab", () => {
+  it("is not offered to editors", async () => {
+    api.restore();
+    api = installFakeApi({ role: "EDITOR" });
+    const user = userEvent.setup();
+    const nav = await signIn(user);
+    expect(within(nav).queryByText("Kullanıcılar")).not.toBeInTheDocument();
+    expect(screen.getByText("Ada · Editör")).toBeInTheDocument();
+  });
+
+  it("lets an admin add, disable and reset users, and shows the server's refusals", async () => {
+    api.state.users.push(
+      { id: "u1", email: api.user.email, name: "Ada", role: "ADMIN", isActive: true, createdAt: "2026-10-01T00:00:00.000Z" },
+      { id: "u9", email: "ed@example.com", name: "Ed", role: "EDITOR", isActive: true, createdAt: "2026-10-02T00:00:00.000Z" },
+    );
+    const user = userEvent.setup();
+    const nav = await signIn(user);
+    await user.click(within(nav).getByText("Kullanıcılar"));
+    expect(await screen.findByText("ed@example.com")).toBeInTheDocument();
+    expect(screen.getByText("(siz)")).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText("E-posta"), "yeni@example.com");
+    await user.type(screen.getByLabelText("Ad Soyad"), "Yeni Editör");
+    await user.type(screen.getByLabelText(/^Geçici Şifre/), "uzun-bir-gecici-sifre");
+    await user.click(screen.getByRole("button", { name: "Kullanıcı Ekle" }));
+    expect(await screen.findByRole("status")).toHaveTextContent("yeni@example.com eklendi.");
+    expect(screen.getByText("yeni@example.com")).toBeInTheDocument();
+    const createReq = api.requests.find((r) => r.url === "/api/users" && r.method === "POST")!;
+    expect(createReq.body).toEqual({ email: "yeni@example.com", name: "Yeni Editör", role: "EDITOR", password: "uzun-bir-gecici-sifre" });
+
+    const edRow = screen.getByText("ed@example.com").closest("li")!;
+    await user.click(within(edRow).getByRole("button", { name: "Devre Dışı Bırak" }));
+    expect(await within(edRow).findByText("Devre dışı")).toBeInTheDocument();
+
+    vi.spyOn(window, "prompt").mockReturnValue("sifirlanan-yeni-sifre");
+    await user.click(within(edRow).getByRole("button", { name: "Şifre Sıfırla" }));
+    expect(await screen.findByRole("status")).toHaveTextContent("ed@example.com şifresi değiştirildi");
+    expect(api.state.passwordResets).toEqual([{ id: "u9", password: "sifirlanan-yeni-sifre" }]);
+
+    const selfRow = screen.getByText("(siz)").closest("li")!;
+    await user.click(within(selfRow).getByRole("button", { name: "Devre Dışı Bırak" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Kendi yönetici yetkinizi kaldıramaz");
   });
 });

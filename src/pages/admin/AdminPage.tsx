@@ -11,6 +11,7 @@ import { ProductsTab } from "@/pages/admin/tabs/ProductsTab";
 import { ListsTab } from "@/pages/admin/tabs/ListsTab";
 import { BackupTab } from "@/pages/admin/tabs/BackupTab";
 import { QuotesTab } from "@/pages/admin/tabs/QuotesTab";
+import { UsersTab } from "@/pages/admin/tabs/UsersTab";
 
 const TABS = [
   { id: "brand", label: "Marka & İletişim" },
@@ -19,6 +20,7 @@ const TABS = [
   { id: "products", label: "Ürünler" },
   { id: "lists", label: "Listeler" },
   { id: "quotes", label: "Teklif Talepleri" },
+  { id: "users", label: "Kullanıcılar", adminOnly: true },
   { id: "backup", label: "Yedekle & Sıfırla" },
 ] as const;
 
@@ -69,7 +71,7 @@ export function AdminPage() {
 
       <div className="mx-auto flex max-w-[1400px] flex-col gap-6 px-4 py-6 md:flex-row md:px-6">
         <nav aria-label="Yönetim Paneli Bölümleri" className="flex shrink-0 flex-row gap-2 overflow-x-auto md:w-56 md:flex-col">
-          {TABS.map((t) => (
+          {TABS.filter((t) => !("adminOnly" in t) || session.user.role === "ADMIN").map((t) => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
@@ -91,6 +93,7 @@ export function AdminPage() {
           {tab === "products" ? <ProductsTab /> : null}
           {tab === "lists" ? <ListsTab /> : null}
           {tab === "quotes" ? <QuotesTab /> : null}
+          {tab === "users" && session.user.role === "ADMIN" ? <UsersTab currentUserId={session.user.id} /> : null}
           {tab === "backup" ? <BackupTab /> : null}
         </main>
       </div>
