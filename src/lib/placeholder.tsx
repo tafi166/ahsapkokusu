@@ -1,4 +1,5 @@
 import { cn } from "@/lib/cn";
+import { useI18n } from "@/i18n/I18nProvider";
 
 interface PlaceholderMediaProps {
   /** Base color used to derive the gradient/pattern — see data/*.ts `swatch` fields. */
@@ -25,10 +26,11 @@ const ratioClass: Record<NonNullable<PlaceholderMediaProps["ratio"]>, string> = 
  * without touching any layout code that renders this component.
  */
 export function PlaceholderMedia({ swatch, label, className, ratio = "square" }: PlaceholderMediaProps) {
+  const { t } = useI18n();
   return (
     <div
       role="img"
-      aria-label={label ?? "Placeholder image"}
+      aria-label={label ?? t.gallery.placeholder}
       className={cn(
         "relative overflow-hidden bg-mist",
         ratioClass[ratio],

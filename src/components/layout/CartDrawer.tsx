@@ -1,13 +1,15 @@
 import { AnimatePresence, motion } from "framer-motion";
+import { useI18n } from "@/i18n/I18nProvider";
 import { Minus, Plus, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { isLegacyLine, useCart } from "@/hooks/useCart";
 import { ProductMedia } from "@/lib/placeholder";
 import { Button } from "@/components/ui/Button";
-import { calculatePrice, describeOptions, formatPrice } from "@/lib/price";
+import { calculatePrice, describeOptions } from "@/lib/price";
 
 export function CartDrawer() {
   const { isOpen, closeCart, lines, setQuantity, removeItem, subtotal } = useCart();
+  const { t, money } = useI18n();
 
   return (
     <AnimatePresence>
@@ -24,7 +26,7 @@ export function CartDrawer() {
           <motion.aside
             role="dialog"
             aria-modal="true"
-            aria-label="Sepetiniz"
+            aria-label={t.cart.title}
             className="fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col bg-white shadow-2xl"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
@@ -35,7 +37,7 @@ export function CartDrawer() {
               <h2 className="text-lg">Sepetiniz</h2>
               <button
                 onClick={closeCart}
-                aria-label="Sepeti kapat"
+                aria-label={t.cart.close}
                 className="rounded-full p-1 transition-colors hover:bg-paper-soft"
               >
                 <X size={20} />
@@ -44,12 +46,12 @@ export function CartDrawer() {
 
             <div className="flex-1 overflow-y-auto px-6 py-4">
               {lines.length === 0 ? (
-                <p className="py-12 text-center text-sm text-body/60">Sepetiniz boş.</p>
+                <p className="py-12 text-center text-sm text-body/60">{t.cart.empty}</p>
               ) : (
                 <ul className="space-y-5">
                   {lines.map(({ product, quantity, selection }) => {
                     const price = calculatePrice(product, selection);
-                    const optionText = describeOptions(selection);
+                    const optionText = describeOptions(selection, t.options);
                     const legacy = isLegacyLine({ product, quantity, selection });
                     return (
                       <li key={`${product.id}:${optionText.join("|")}`} className="flex gap-4">
@@ -63,13 +65,13 @@ export function CartDrawer() {
                               ) : null}
                               {legacy ? (
                                 <p className="mt-0.5 text-xs text-body/60">
-                                  Seçenekler kaydedilmemiş — ürün sayfasından yeniden seçin.
+                                  {t.cart.legacyLine}
                                 </p>
                               ) : null}
                             </div>
                             <button
                               onClick={() => removeItem(product.id, selection)}
-                              aria-label={`${product.title} ürününü kaldır`}
+                              aria-label={t.cart.remove(product.title)}
                               className="text-body/50 hover:text-danger"
                             >
                               <X size={16} />
@@ -79,7 +81,7 @@ export function CartDrawer() {
                             <div className="flex items-center gap-2 rounded-full border border-line px-2 py-1">
                               <button
                                 onClick={() => setQuantity(product.id, quantity - 1, selection)}
-                                aria-label="Adedi azalt"
+                                aria-label={t.cart.decrease}
                                 className="p-1"
                               >
                                 <Minus size={12} />
@@ -87,14 +89,14 @@ export function CartDrawer() {
                               <span className="w-4 text-center text-sm">{quantity}</span>
                               <button
                                 onClick={() => setQuantity(product.id, quantity + 1, selection)}
-                                aria-label="Adedi artır"
+                                aria-label={t.cart.increase}
                                 className="p-1"
                               >
                                 <Plus size={12} />
                               </button>
                             </div>
                             <span className="text-sm font-medium">
-                              {formatPrice(price.unitPrice * quantity, price.currency)}
+                              {money(price.unitPrice * quantity, price.currency)}
                             </span>
                           </div>
                         </div>
@@ -107,8 +109,8 @@ export function CartDrawer() {
 
             <div className="border-t border-line px-6 py-5">
               <div className="mb-4 flex items-center justify-between text-sm">
-                <span className="text-body/60">Ara Toplam</span>
-                <span className="font-medium">₺{subtotal.toLocaleString("tr-TR")}</span>
+                <span className="text-body/60">{t.cart.subtotal}</span>
+                <span className="font-medium">{money(subtotal, lines[0]?.product.currency ?? "TRY")}</span>
               </div>
               {lines.length > 0 ? (
                 <Link
@@ -116,15 +118,15 @@ export function CartDrawer() {
                   onClick={closeCart}
                   className="flex w-full items-center justify-center rounded-pill border border-btn-bg bg-btn-bg px-8 py-4 font-medium text-btn-text transition-colors hover:bg-btn-bg-hover hover:text-btn-text-hover"
                 >
-                  Ödemeye Geç
+                  {t.cart.checkout}
                 </Link>
               ) : (
                 <Button variant="primary" size="lg" className="w-full" disabled>
-                  Ödemeye Geç
+                  {t.cart.checkout}
                 </Button>
               )}
               <p className="mt-3 text-center text-xs text-body/50">
-                Test aşaması — ödeme alınmaz, siparişler yalnızca test olarak kaydedilir.
+                {t.cart.testNotice}
               </p>
             </div>
           </motion.aside>

@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
+import { useI18n } from "@/i18n/I18nProvider";
 import { X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useQuickView } from "@/hooks/useQuickView";
@@ -13,6 +14,7 @@ import { Button } from "@/components/ui/Button";
 export function QuickViewModal() {
   const { product, close } = useQuickView();
   const { addItem } = useCart();
+  const { t } = useI18n();
   useScrollLock(Boolean(product));
 
   return (
@@ -36,7 +38,7 @@ export function QuickViewModal() {
             exit={{ opacity: 0, scale: 0.95, y: 12 }}
             transition={{ duration: 0.25, ease: [0.455, 0.03, 0.515, 0.955] }}
           >
-            <button onClick={close} aria-label="Kapat" className="absolute right-4 top-4 z-10 rounded-full bg-white/90 p-1.5 shadow-sm">
+            <button onClick={close} aria-label={t.product.close} className="absolute right-4 top-4 z-10 rounded-full bg-white/90 p-1.5 shadow-sm">
               <X size={18} />
             </button>
 
@@ -62,7 +64,7 @@ export function QuickViewModal() {
                     onClick={close}
                     className="inline-flex items-center justify-center rounded-pill border border-btn-bg bg-btn-bg px-8 py-4 font-medium text-btn-text transition-colors hover:bg-btn-bg-hover hover:text-btn-text-hover"
                   >
-                    Seçenekleri Belirle
+                    {t.product.chooseOptions}
                   </Link>
                 ) : (
                   <>
@@ -73,10 +75,10 @@ export function QuickViewModal() {
                         if (addItem(product, 1).ok) close();
                       }}
                     >
-                      {product.availability === "sold-out" ? "Tükendi" : "Sepete Ekle"}
+                      {product.availability === "sold-out" ? t.product.soldOut : t.product.addToCart}
                     </Button>
                     <Link to={`/urun/${product.slug}`} onClick={close} className="text-center text-sm underline">
-                      Ürün sayfasına git
+                      {t.product.goToProduct}
                     </Link>
                   </>
                 )}

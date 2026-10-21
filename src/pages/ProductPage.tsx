@@ -1,4 +1,6 @@
 import { useCallback, useState } from "react";
+import { useI18n } from "@/i18n/I18nProvider";
+import type { Dictionary } from "@/i18n/messages";
 import { useParams } from "react-router-dom";
 import { Minus, Plus, Link2, Mail, Heart, Scale } from "lucide-react";
 import { Section } from "@/components/ui/Section";
@@ -21,15 +23,16 @@ import { useCompare } from "@/hooks/useCompare";
 import { useSeo, productJsonLd, breadcrumbJsonLd } from "@/lib/seo";
 import { cn } from "@/lib/cn";
 
-function formatDimensions(product: NonNullable<ReturnType<typeof getProductBySlug>>): string | null {
+function formatDimensions(
+  product: NonNullable<ReturnType<typeof getProductBySlug>>,
+  labels: Dictionary["product"]["dims"],
+): string | null {
   const d = product.dimensions;
   if (!d) return null;
   const parts: string[] = [];
-  if (d.width) parts.push(`G: ${d.width}${d.unit}`);
-  if (d.height) parts.push(`Y: ${d.height}${d.unit}`);
-  if (d.depth) parts.push(`D: ${d.depth}${d.unit}`);
-  if (d.diameter) parts.push(`Çap: ${d.diameter}${d.unit}`);
-  if (d.thickness) parts.push(`Kalınlık: ${d.thickness}${d.unit}`);
+  for (const key of ["width", "height", "depth", "diameter", "thickness"] as const) {
+    if (d[key]) parts.push(`${labels[key]}: ${d[key]}${d.unit}`);
+  }
   return parts.length > 0 ? parts.join(" · ") : null;
 }
 
@@ -38,6 +41,7 @@ export function ProductPage() {
   const product = getProductBySlug(slug ?? "");
   const category = product ? getCategory(product.category) : undefined;
   const { addItem } = useCart();
+  const { t } = useI18n();
   const { isWishlisted, toggle: toggleWishlist } = useWishlist();
   const { isComparing, toggle: toggleCompare, isFull } = useCompare();
   const [quantity, setQuantity] = useState(1);
@@ -49,7 +53,7 @@ export function ProductPage() {
   const handleSelectionChange = useCallback((next: VariantSelection) => setSelection(next), []);
 
   useSeo({
-    title: product?.seoTitle ?? product?.title ?? "Ürün",
+    title: product?.seoTitle ?? product?.title ?? t.product.fallbackTitle,
     description: product?.seoDescription ?? product?.shortDescription ?? product?.description,
     ogType: product ? "product" : "website",
     jsonLd: product
@@ -57,7 +61,7 @@ export function ProductPage() {
           "@graph": [
             productJsonLd(product),
             breadcrumbJsonLd([
-              { label: "Ana Sayfa", href: "/" },
+              { label: t.product.home, href: "/" },
               ...(category ? [{ label: category.title, href: `/${category.slug}` }] : []),
               { label: product.title, href: `/urun/${product.slug}` },
             ]),
@@ -70,10 +74,10 @@ export function ProductPage() {
     return (
       <Section>
         <div className="text-center">
-          <h1>Ürün demo katalogda yok</h1>
-          <p className="mt-3 text-body/60">“{slug}” bu demo katalogda henüz tanımlı değil.</p>
+          <h1>{t.product.notFoundTitle}</h1>
+          <p className="mt-3 text-body/60">{t.product.notFoundBody(slug ?? "")}</p>
           <Button href="/parametrik-duvar-tablolari" className="mt-6">
-            Ürünlere göz at
+            {t.product.browse}
           </Button>
         </div>
       </Section>
@@ -85,7 +89,7 @@ export function ProductPage() {
   const canAddToCart = !isSoldOut && selection.isComplete;
   const wishlisted = isWishlisted(product.id);
   const comparing = isComparing(product.id);
-  const dimensionsText = formatDimensions(product);
+  const dimensionsText = formatDimensions(product, t.product.dims);
 
   const relatedProducts = allProducts
     .filter((p) => p.category === product.category && p.id !== product.id)
@@ -105,7 +109,7 @@ export function ProductPage() {
     <Section>
       <Breadcrumb
         items={[
-          { label: "Ana Sayfa", href: "/" },
+          { label: t.product.home, href: "/" },
           ...(category ? [{ label: category.title, href: `/${category.slug}` }] : []),
           { label: product.title },
         ]}
@@ -122,11 +126,11 @@ export function ProductPage() {
             <div className="mt-3 flex items-center gap-2">
               <StarRating rating={product.rating} />
               <span className="text-sm text-body/60">
-                {product.reviewCount} değerlendirme
+                {t.product.reviews(product.reviewCount ?? 0)}
               </span>
             </div>
           ) : (
-            <p className="mt-3 text-sm text-body/50">Henüz değerlendirme yok</p>
+            <p className="mt-3 text-sm text-body/50">{t.product.noReviews}</p>
           )}
 
           <PriceTag product={product} className="mt-4 text-xl" />
@@ -135,16 +139,16 @@ export function ProductPage() {
 
           {product.availability === "made-to-order" ? (
             <p className="mt-4 rounded-input bg-paper-soft px-4 py-3 text-sm text-body/70">
-              Sipariş üzerine üretim — çizim onayı 2–3 iş günü, üretim 2–3 hafta sürer.
+              {t.product.madeToOrderNote}
             </p>
           ) : null}
 
           {isDigital ? (
             <div className="mt-4 rounded-input bg-paper-soft px-4 py-3 text-sm text-body/70">
-              <p className="font-medium text-body">Dijital ürün — anında indirme</p>
-              {product.fileTypes ? <p className="mt-1">Dosya formatları: {product.fileTypes.join(", ")}</p> : null}
+              <p className="font-medium text-body">{t.product.digitalTitle}</p>
+              {product.fileTypes ? <p className="mt-1">{t.product.fileFormats}: {product.fileTypes.join(", ")}</p> : null}
               {product.softwareCompatibility ? (
-                <p className="mt-1">Uyumlu yazılımlar: {product.softwareCompatibility.join(", ")}</p>
+                <p className="mt-1">{t.product.software}: {product.softwareCompatibility.join(", ")}</p>
               ) : null}
             </div>
           ) : null}
@@ -161,11 +165,11 @@ export function ProductPage() {
           <div className="mt-8 flex items-center gap-4">
             {!isDigital ? (
               <div className="flex items-center gap-3 rounded-full border border-line px-3 py-2">
-                <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} aria-label="Adedi azalt" disabled={isSoldOut}>
+                <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} aria-label={t.cart.decrease} disabled={isSoldOut}>
                   <Minus size={14} />
                 </button>
                 <span className="w-6 text-center">{quantity}</span>
-                <button onClick={() => setQuantity((q) => q + 1)} aria-label="Adedi artır" disabled={isSoldOut}>
+                <button onClick={() => setQuantity((q) => q + 1)} aria-label={t.cart.increase} disabled={isSoldOut}>
                   <Plus size={14} />
                 </button>
               </div>
@@ -184,11 +188,11 @@ export function ProductPage() {
                 setTimeout(() => setJustAdded(false), 1800);
               }}
             >
-              {isSoldOut ? "Tükendi" : justAdded ? "Eklendi ✓" : isDigital ? "Satın Al" : "Sepete Ekle"}
+              {isSoldOut ? t.product.soldOut : justAdded ? t.product.added : isDigital ? t.product.buy : t.product.addToCart}
             </Button>
           </div>
           {!canAddToCart && !isSoldOut ? (
-            <p className="mt-2 text-xs text-body/50">Sepete eklemeden önce tüm seçenekleri belirleyin.</p>
+            <p className="mt-2 text-xs text-body/50">{t.product.selectAllOptions}</p>
           ) : null}
           {addErrors.length > 0 ? (
             <ul role="alert" className="mt-2 space-y-0.5 text-xs text-danger">
@@ -205,7 +209,7 @@ export function ProductPage() {
               className="flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-xs transition-colors hover:border-ink"
             >
               <Heart size={13} className={wishlisted ? "fill-accent-deep text-accent-deep" : ""} />
-              {wishlisted ? "Favorilerde" : "Favorilere Ekle"}
+              {wishlisted ? t.product.inWishlist : t.product.addToWishlistButton}
             </button>
             {product.productType === "furniture" ? (
               <button
@@ -217,49 +221,51 @@ export function ProductPage() {
                   !comparing && isFull && "cursor-not-allowed opacity-50",
                 )}
               >
-                <Scale size={13} /> {comparing ? "Karşılaştırmada" : "Karşılaştır"}
+                <Scale size={13} /> {comparing ? t.product.comparing : t.product.compare}
               </button>
             ) : null}
             <button
               onClick={copyLink}
-              aria-label="Ürün linkini kopyala"
+              aria-label={t.product.copyLinkLabel}
               className="flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-xs transition-colors hover:border-ink"
             >
-              <Link2 size={13} /> {linkCopied ? "Kopyalandı!" : "Linki Kopyala"}
+              <Link2 size={13} /> {linkCopied ? t.product.copied : t.product.copyLink}
             </button>
             <a
               href={`mailto:?subject=${encodeURIComponent(product.title)}`}
               className="flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-xs transition-colors hover:border-ink"
             >
-              <Mail size={13} /> E-posta
+              <Mail size={13} /> {t.product.email}
             </a>
           </div>
 
           <div className="mt-8">
-            <AccordionSection title="Açıklama" defaultOpen>
+            <AccordionSection title={t.product.description} defaultOpen>
               <p>{product.description}</p>
             </AccordionSection>
-            <AccordionSection title="Ürün Detayları">
+            <AccordionSection title={t.product.details}>
               <ul className="space-y-1">
-                {dimensionsText ? <li>Ölçüler: {dimensionsText}</li> : null}
-                {product.material ? <li>Malzeme: {product.material}</li> : null}
-                {product.materials ? <li>Malzeme seçenekleri: {product.materials.join(", ")}</li> : null}
-                {product.productionMethod ? <li>Üretim yöntemi: {product.productionMethod}</li> : null}
-                {product.difficulty ? <li>Zorluk seviyesi: {product.difficulty}</li> : null}
+                {dimensionsText ? <li>{t.product.dimensions}: {dimensionsText}</li> : null}
+                {product.material ? <li>{t.product.material}: {product.material}</li> : null}
+                {product.materials ? <li>{t.product.materialOptions}: {product.materials.join(", ")}</li> : null}
+                {product.productionMethod ? <li>{t.product.productionMethod}: {product.productionMethod}</li> : null}
+                {product.difficulty ? <li>{t.product.difficulty}: {product.difficulty}</li> : null}
                 {product.assemblyRequired !== undefined ? (
-                  <li>Montaj: {product.assemblyRequired ? `Gerekli${product.assemblyTime ? ` (${product.assemblyTime})` : ""}` : "Gerekmiyor"}</li>
+                  <li>
+                    {t.product.assembly}:{" "}
+                    {product.assemblyRequired
+                      ? `${t.product.assemblyRequired}${product.assemblyTime ? ` (${product.assemblyTime})` : ""}`
+                      : t.product.assemblyNotRequired}
+                  </li>
                 ) : null}
-                {product.includedFiles ? <li>Dahil dosyalar: {product.includedFiles.join(", ")}</li> : null}
+                {product.includedFiles ? <li>{t.product.includedFiles}: {product.includedFiles.join(", ")}</li> : null}
               </ul>
             </AccordionSection>
-            <AccordionSection title={isDigital ? "İndirme Bilgisi" : "Kargo & Teslimat"}>
+            <AccordionSection title={isDigital ? t.product.downloadInfo : t.product.shippingInfo}>
               {isDigital ? (
-                <p>Satın alma sonrası dosyalar hesabınıza anında tanımlanır; e-posta ile de bir kopya gönderilir.</p>
+                <p>{t.product.downloadText}</p>
               ) : (
-                <p>
-                  Uygun ürünlerde Türkiye geneli ücretsiz kargo. Sipariş üzerine üretilen ürünler onay sonrası
-                  2–3 hafta, stoktaki ürünler 3–5 iş günü içinde kargoya verilir.
-                </p>
+                <p>{t.product.shippingText}</p>
               )}
             </AccordionSection>
             {productFaq.map((item) => (
@@ -273,7 +279,7 @@ export function ProductPage() {
 
       {relatedProducts.length > 0 ? (
         <div className="mt-20 border-t border-line pt-14">
-          <h2 className="mb-8">Bunlar da İlginizi Çekebilir</h2>
+          <h2 className="mb-8">{t.product.related}</h2>
           <ul className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-4">
             {relatedProducts.map((p) => (
               <li key={p.id}>

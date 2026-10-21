@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useI18n } from "@/i18n/I18nProvider";
 import { Heart, Eye } from "lucide-react";
 import { ProductMedia } from "@/lib/placeholder";
 import { Badge } from "@/components/ui/Badge";
@@ -13,6 +14,7 @@ import type { Product } from "@/types";
 
 export function ProductCard({ product }: { product: Product }) {
   const { isWishlisted, toggle } = useWishlist();
+  const { t } = useI18n();
   const { open: openQuickView } = useQuickView();
   const soldOut = product.availability === "sold-out";
   const badge = getProductBadge(product);
@@ -21,7 +23,7 @@ export function ProductCard({ product }: { product: Product }) {
 
   return (
     <div className="group relative">
-      <Link to={`/urun/${product.slug}`} aria-label={`${product.title} ürününü görüntüle`} className="block">
+      <Link to={`/urun/${product.slug}`} aria-label={t.product.view(product.title)} className="block">
         <div className="relative overflow-hidden rounded-card">
           <ProductMedia
             src={product.thumbnail}
@@ -43,7 +45,7 @@ export function ProductCard({ product }: { product: Product }) {
           {badge && !soldOut ? <Badge kind={badge} /> : null}
           {soldOut ? (
             <span className="absolute left-3 top-3 rounded-full bg-white px-3 py-1 text-xs font-medium uppercase tracking-wide text-body">
-              Tükendi
+              {t.product.soldOut}
             </span>
           ) : null}
 
@@ -52,7 +54,7 @@ export function ProductCard({ product }: { product: Product }) {
               e.preventDefault();
               toggle(product.id);
             }}
-            aria-label={wishlisted ? "Favorilerden çıkar" : "Favorilere ekle"}
+            aria-label={wishlisted ? t.product.removeFromWishlist : t.product.addToWishlist}
             aria-pressed={wishlisted}
             className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-ink opacity-0 shadow-sm transition-opacity duration-200 group-hover:opacity-100 focus-visible:opacity-100"
           >
@@ -66,7 +68,7 @@ export function ProductCard({ product }: { product: Product }) {
             }}
             className="absolute inset-x-3 bottom-3 flex translate-y-2 items-center justify-center gap-1.5 rounded-full bg-white/95 py-2 text-xs font-medium opacity-0 shadow-sm transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100"
           >
-            <Eye size={13} /> Hızlı Bakış
+            <Eye size={13} /> {t.product.quickView}
           </button>
         </div>
 

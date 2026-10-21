@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useI18n } from "@/i18n/I18nProvider";
 import { cn } from "@/lib/cn";
 import type { ProductVariantOptions, VariantSelection } from "@/types";
 
@@ -57,6 +58,7 @@ export function VariantSelectors({
   variants: ProductVariantOptions;
   onChange: (selection: VariantSelection) => void;
 }) {
+  const { t } = useI18n();
   const [size, setSize] = useState<string | undefined>(variants.sizes?.[0]);
   const [width, setWidth] = useState<string | undefined>(variants.widths?.[0]);
   const [layerCount, setLayerCount] = useState<number | undefined>(variants.layerCounts?.[0]);
@@ -80,11 +82,11 @@ export function VariantSelectors({
 
   return (
     <div className="space-y-6">
-      {variants.sizes ? <ChipGroup label="Boyut" options={variants.sizes} value={size} onSelect={(v) => setSize(String(v))} /> : null}
-      {variants.widths ? <ChipGroup label="Genişlik" options={variants.widths} value={width} onSelect={(v) => setWidth(String(v))} /> : null}
+      {variants.sizes ? <ChipGroup label={t.options.size} options={variants.sizes} value={size} onSelect={(v) => setSize(String(v))} /> : null}
+      {variants.widths ? <ChipGroup label={t.options.width} options={variants.widths} value={width} onSelect={(v) => setWidth(String(v))} /> : null}
       {variants.layerCounts ? (
         <ChipGroup
-          label="Katman Sayısı"
+          label={t.options.layerCount}
           options={variants.layerCounts}
           value={layerCount}
           onSelect={(v) => setLayerCount(Number(v))}
@@ -93,7 +95,7 @@ export function VariantSelectors({
 
       {variants.colors ? (
         <fieldset>
-          <legend className="mb-2 text-sm font-medium">Renk{color ? `: ${color}` : ""}</legend>
+          <legend className="mb-2 text-sm font-medium">{t.options.color}{color ? `: ${color}` : ""}</legend>
           <div className="flex flex-wrap gap-3">
             {variants.colors.map((c) => (
               <button
@@ -115,14 +117,14 @@ export function VariantSelectors({
       ) : null}
 
       {variants.finishes ? (
-        <ChipGroup label="Yüzey İşlemi" options={variants.finishes} value={finish} onSelect={(v) => setFinish(String(v))} />
+        <ChipGroup label={t.options.finish} options={variants.finishes} value={finish} onSelect={(v) => setFinish(String(v))} />
       ) : null}
-      {variants.frames ? <ChipGroup label="Çerçeve" options={variants.frames} value={frame} onSelect={(v) => setFrame(String(v))} /> : null}
+      {variants.frames ? <ChipGroup label={t.options.frame} options={variants.frames} value={frame} onSelect={(v) => setFrame(String(v))} /> : null}
 
       {variants.heightRange ? (
         <fieldset>
           <legend className="mb-2 text-sm font-medium">
-            Yükseklik: {height} cm (aralık {variants.heightRange[0]}–{variants.heightRange[1]} cm)
+            {t.variants.heightLegend(height, variants.heightRange[0], variants.heightRange[1])}
           </legend>
           <input
             type="range"
@@ -131,7 +133,7 @@ export function VariantSelectors({
             value={height}
             onChange={(e) => setHeight(Number(e.target.value))}
             className="w-full accent-black"
-            aria-label="Yükseklik (cm)"
+            aria-label={t.variants.heightInput}
           />
         </fieldset>
       ) : null}

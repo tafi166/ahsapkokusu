@@ -9,11 +9,12 @@ import { CompareProvider } from "@/hooks/useCompare";
 import { QuickViewProvider } from "@/hooks/useQuickView";
 import { I18nProvider, type Locale } from "@/i18n/I18nProvider";
 import { formatMoney } from "@/i18n/money";
+import { allProducts } from "@/data/products";
 
-function renderApp(initialLocale?: Locale) {
+function renderApp(initialLocale?: Locale, path = "/") {
   return render(
     <I18nProvider initialLocale={initialLocale}>
-      <MemoryRouter initialEntries={["/"]}>
+      <MemoryRouter initialEntries={[path]}>
         <CartProvider>
           <WishlistProvider>
             <CompareProvider>
@@ -64,4 +65,24 @@ describe("language switcher", () => {
     renderApp();
     expect(screen.getByRole("navigation", { name: "Main menu" })).toBeInTheDocument();
   });
+});
+
+describe("product page and cart in English", () => {
+  beforeEach(() => localStorage.clear());
+
+  it("translates the interface, keeps catalog content, and formats prices in the product's own currency", async () => {
+    const product = allProducts.find((p) => p.id === "ml-2")!;
+    const user = userEvent.setup();
+    renderApp("en", `/urun/${product.slug}`);
+
+    expect(screen.getByRole("heading", { level: 1, name: product.title })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Price breakdown" })).toHaveTextContent("Base price₺1,980");
+    expect(screen.getByText(/don't change the price/)).toBeInTheDocument();
+    expect(screen.getByText("Layers: 3 · Colour: Doğal · Frame: Çerçevesiz")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Add to Cart" }));
+    const drawer = await screen.findByRole("dialog", { name: "Your cart" });
+    expect(drawer).toHaveTextContent("Subtotal₺1,980");
+    expect(screen.getByRole("link", { name: "Checkout" })).toBeInTheDocument();
+  }, 20000);
 });
