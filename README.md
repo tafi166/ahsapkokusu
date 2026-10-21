@@ -132,15 +132,23 @@ file formats for digital wall art) lives in `ProductPage.tsx`.
   `/sitemap.xml` and `/robots.txt` to `/api/sitemap.xml` and `/api/robots.txt`
   as the Vite dev proxy does. Meta tags are not in the raw HTML response;
   that needs SSR or prerendering.
-- **Languages:** the storefront interface is Turkish (default) or English
-  (switcher in the header, remembered per browser, sets `<html lang>`).
-  Interface text lives in `src/i18n/messages.ts`; the English dictionary
-  must match the Turkish one key for key (a type error otherwise). Catalog
-  and page content — product names and descriptions, categories, homepage
-  copy, FAQ, blog — is Turkish only, and so are messages coming from the
-  API server and the admin panel. URLs are the same in both languages, so
-  English pages aren't separately indexable. Prices are formatted for the
-  language but never converted between currencies.
+- **Languages:** Turkish at `/…`, English at `/en/…` with English
+  addresses (`/en/parametric-wall-art`, `/en/product/<english-slug>`); the
+  address decides the language, and the header switcher links to the same
+  page in the other language. Pages carry `hreflang` alternates and the
+  sitemap lists both addresses. Interface text lives in
+  `src/i18n/messages.ts` (the English dictionary must match the Turkish one
+  key for key). Content — catalog, homepage, FAQ, blog, option and material
+  names — is translated per block: the built-in draft is
+  `src/i18n/content/en.ts`, editors change it in the admin panel's
+  **İngilizce** tab, and anything left blank shows the Turkish text. Only
+  text is translated; prices, images, links and option values are shared.
+  Address mapping is in `src/i18n/paths.ts`: write internal links as Turkish
+  paths and pass them through `localePath`. Customer-facing API errors
+  follow the page language; the admin panel is Turkish only (and exists
+  only at `/admin`). Prices are formatted for the language but never
+  converted between currencies. After changing `en.ts` or the page
+  segments, run `npm --prefix server run sync:storefront`.
 - **Accessibility** is checked with axe-core (WCAG 2.1 A/AA) on the main
   pages in the test suite (`src/tests/a11y.test.tsx`). Colour contrast
   can't be computed in jsdom and still needs a check in a real browser.
