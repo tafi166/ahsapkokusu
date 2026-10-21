@@ -15,13 +15,38 @@ import { partnerLogos, trustSignals } from '../../src/data/trustSignals';
 import { seedCatalog } from '../prisma/seed-catalog';
 import { categoryListSchema, contentSchemas, productListSchema } from '../src/content/schemas';
 import type { PrismaClient } from '../src/prisma/prisma';
-import { contentShapes } from './storefront-shared';
+import { BUILT_IN_TRANSLATIONS, translationSchemas } from '../src/content/translations';
+import { contentShapes, translationsShared } from './storefront-shared';
 import { createUser, login, ORIGIN, resetAuth, resetDatabase, startApp, testPrisma } from './helpers';
 
 describe('content schemas', () => {
   it('content-shapes.json matches the storefront defaults (run `npm run sync:storefront` if not)', () => {
     const file = path.join(__dirname, '..', 'src', 'content', 'content-shapes.json');
     expect(JSON.parse(readFileSync(file, 'utf8'))).toEqual(contentShapes());
+  });
+
+  it('translations-shared.json matches the storefront (run `npm run sync:storefront` if not)', () => {
+    const file = path.join(__dirname, '..', 'src', 'content', 'translations-shared.json');
+    expect(JSON.parse(readFileSync(file, 'utf8'))).toEqual(translationsShared());
+  });
+
+  it('accept the built-in English translations', () => {
+    for (const [key, value] of Object.entries(BUILT_IN_TRANSLATIONS.en)) {
+      expect(translationSchemas[key as keyof typeof translationSchemas].safeParse(value).error, key).toBeUndefined();
+    }
+  });
+
+  it.each([
+    ['a link in homeContent', 'homeContent', { hero: { primaryCtaHref: '/x' } }],
+    ['hero images', 'homeContent', { hero: { images: [] } }],
+    ['a price on a product', 'products', { 'wa-1': { price: 1 } }],
+    ['an image on a product', 'products', { 'wa-1': { images: ['#000'] } }],
+    ['an address with spaces', 'products', { 'wa-1': { slug: 'Bad Slug' } }],
+    ['two products with one address', 'products', { 'wa-1': { slug: 'same' }, 'wa-2': { slug: 'same' } }],
+    ['a category at a page address', 'categories', { dekorlar: { slug: 'contact' } }],
+    ['a brand name', 'brand', { name: 'Other' }],
+  ] as const)('reject %s in translations', (_label, key, value) => {
+    expect(translationSchemas[key].safeParse(value).success).toBe(false);
   });
 
   it('accept every built-in default, so the seeded site is always valid', () => {
@@ -132,6 +157,46 @@ describe('content API', () => {
     await put('/api/admin/content/announcementMessages', { value: ['x'], extra: true }).expect(400);
     await put('/api/admin/content/testimonials', { value: [{ id: 't', authorInitial: 'A', rating: 6, quote: 'q', role: '' }] }).expect(400);
     expect(await prisma.siteContent.count()).toBe(0);
+  });
+
+  describe('translations', () => {
+    it('saves, serves and resets a translation block, with an audit entry', async () => {
+      const { put, del } = await editor();
+      const value = { 'wa-1': { slug: 'portrait', title: 'Portrait' } };
+      await put('/api/admin/translations/en/products', { value }).expect(204);
+      expect((await site()).translations).toEqual({ en: { products: value } });
+      expect(await prisma.auditLog.count({ where: { action: 'translation.updated', entityId: 'translation:en:products' } })).toBe(1);
+
+      await del('/api/admin/translations/en/products').expect(204);
+      expect(await site()).not.toHaveProperty('translations');
+      expect(await prisma.auditLog.count({ where: { action: 'translation.reset' } })).toBe(1);
+    });
+
+    it('requires a signed-in editor with a CSRF token', async () => {
+      const value = { value: ['Hello'] };
+      await request(app.getHttpServer()).put('/api/admin/translations/en/announcementMessages').set('Origin', ORIGIN).send(value).expect(401);
+      const { agent } = await editor();
+      await agent.put('/api/admin/translations/en/announcementMessages').set('Origin', ORIGIN).send(value).expect(403);
+    });
+
+    it('rejects unknown languages, blocks and fields, storing nothing', async () => {
+      const { put } = await editor();
+      await put('/api/admin/translations/de/products', { value: {} }).expect(400);
+      await put('/api/admin/translations/en/nope', { value: {} }).expect(400);
+      await put('/api/admin/translations/en/products', { value: { 'wa-1': { price: 1 } } }).expect(400);
+      await put('/api/admin/translations/en/homeContent', { value: { hero: { primaryCtaHref: 'javascript:alert(1)' } } }).expect(400);
+      expect(await prisma.siteContent.count()).toBe(0);
+    });
+
+    it('lists English addresses in the sitemap, using saved slugs', async () => {
+      const { put } = await editor();
+      const product = defaultProducts[0]!;
+      await put('/api/admin/translations/en/products', { value: { [product.id]: { slug: 'saved-english-slug' } } }).expect(204);
+      const res = await request(app.getHttpServer()).get('/api/sitemap.xml').expect(200);
+      expect(res.text).toContain('<loc>http://localhost:5173/en/product/saved-english-slug</loc>');
+      // Products without a saved English slug keep their Turkish one under /en.
+      expect(res.text).toContain(`<loc>http://localhost:5173/en/product/${defaultProducts[1]!.slug}</loc>`);
+    });
   });
 
   describe('product list', () => {

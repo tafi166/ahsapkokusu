@@ -4,10 +4,21 @@ import { AuditService } from '../audit/audit.service';
 import { categoryToRow, productToRow, rowToCategory, rowToProduct } from '../catalog/mapping';
 import { Prisma } from '../generated/prisma/client';
 import { PRISMA, type PrismaClient } from '../prisma/prisma';
+import type { ContentTranslations, TranslationKey } from '@/i18n/content/types';
 import { CONTENT_KEYS, contentSchemas, type ContentKey } from './schemas';
+import {
+  BUILT_IN_TRANSLATIONS,
+  parseTranslationRowKey,
+  translationRowKey,
+  translationSchemas,
+  type TranslationLocale,
+} from './translations';
 
 /** What the storefront loads at start-up: every edited block, keyed like its AdminOverrides. */
-export type SiteSnapshot = { categories: Category[]; products: Product[] } & Partial<Record<ContentKey, unknown>>;
+export type SiteSnapshot = { categories: Category[]; products: Product[] } & Partial<Record<ContentKey, unknown>> & {
+  /** Saved translation blocks only; the storefront fills the rest from its built-in draft. */
+  translations?: Partial<Record<TranslationLocale, ContentTranslations>>;
+};
 
 @Injectable()
 export class ContentService {
@@ -25,10 +36,51 @@ export class ContentService {
     const site: SiteSnapshot = { categories: categories.map(rowToCategory), products: products.map(rowToProduct) };
     for (const block of blocks) {
       // Re-validate on the way out too, so a bad row can never reach visitors.
+      const translation = parseTranslationRowKey(block.key);
+      if (translation) {
+        const [locale, key] = translation;
+        if (translationSchemas[key].safeParse(block.value).success) {
+          site.translations ??= {};
+          (site.translations[locale] ??= {})[key] = block.value as never;
+        }
+        continue;
+      }
       const key = block.key as ContentKey;
       if (CONTENT_KEYS.includes(key) && contentSchemas[key].safeParse(block.value).success) site[key] = block.value;
     }
     return site;
+  }
+
+  /** The translations in effect for `locale`: each saved block, else the built-in one. */
+  async translations(locale: TranslationLocale): Promise<ContentTranslations> {
+    const rows = await this.prisma.siteContent.findMany({ where: { key: { startsWith: translationRowKey(locale, '' as TranslationKey) } } });
+    const result: ContentTranslations = { ...BUILT_IN_TRANSLATIONS[locale] };
+    for (const row of rows) {
+      const parsed = parseTranslationRowKey(row.key);
+      if (parsed && translationSchemas[parsed[1]].safeParse(row.value).success) result[parsed[1]] = row.value as never;
+    }
+    return result;
+  }
+
+  async putTranslation(actorId: string, locale: TranslationLocale, key: TranslationKey, value: Prisma.InputJsonValue) {
+    const rowKey = translationRowKey(locale, key);
+    await this.prisma.$transaction(async (tx) => {
+      await tx.siteContent.upsert({
+        where: { key: rowKey },
+        create: { key: rowKey, value, updatedById: actorId },
+        update: { value, updatedById: actorId },
+      });
+      await this.audit.record({ actorUserId: actorId, action: 'translation.updated', entityType: 'SiteContent', entityId: rowKey }, tx);
+    });
+  }
+
+  /** Back to the built-in translation for this block. */
+  async resetTranslation(actorId: string, locale: TranslationLocale, key: TranslationKey) {
+    const rowKey = translationRowKey(locale, key);
+    await this.prisma.$transaction(async (tx) => {
+      await tx.siteContent.deleteMany({ where: { key: rowKey } });
+      await this.audit.record({ actorUserId: actorId, action: 'translation.reset', entityType: 'SiteContent', entityId: rowKey }, tx);
+    });
   }
 
   async putContent(actorId: string, key: ContentKey, value: Prisma.InputJsonValue) {

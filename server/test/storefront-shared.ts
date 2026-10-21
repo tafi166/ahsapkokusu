@@ -1,6 +1,8 @@
 import { defaultBrand } from '../../src/config/brandDefaults';
 import { cncQuoteConfig } from '../../src/config/cncQuote';
 import { defaultHomeContent } from '../../src/config/contentDefaults';
+import { enDefaults } from '../../src/i18n/content/en';
+import { INFO_PAGES, PAGE_SEGMENTS, RESERVED_EN_SEGMENTS } from '../../src/i18n/segments';
 
 /** Same structure as the value, with every leaf replaced by an empty value of its type. */
 function shapeOf(value: unknown): unknown {
@@ -23,4 +25,14 @@ export function contentShapes() {
 export function quoteConfig() {
   const { limitsConfirmed, maxFileBytes, minSizeCm, maxSizeCm, minQuantity, maxQuantity, materials } = cncQuoteConfig;
   return { limitsConfirmed, maxFileBytes, minSizeCm, maxSizeCm, minQuantity, maxQuantity, materials: [...materials] };
+}
+
+/** The built-in English content and the address segments of the fixed pages in each language. */
+export function translationsShared() {
+  return {
+    defaults: { en: enDefaults },
+    pageSegments: PAGE_SEGMENTS,
+    infoPages: INFO_PAGES,
+    reservedEnSegments: [...RESERVED_EN_SEGMENTS].sort(),
+  };
 }

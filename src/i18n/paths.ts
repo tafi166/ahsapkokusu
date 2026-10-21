@@ -2,7 +2,10 @@ import { categories } from "@/data/categories";
 import { allProducts } from "@/data/products";
 import { translationsFor } from "@/i18n/content";
 import { contentLocale, LOCALE_PREFIX, type Locale } from "@/i18n/locale";
+import { INFO_PAGES, PAGE_SEGMENTS } from "@/i18n/segments";
 import type { Category, Product } from "@/types";
+
+export { RESERVED_EN_SEGMENTS } from "@/i18n/segments";
 
 /**
  * Addresses in each language. Code and content write internal links as their
@@ -13,33 +16,6 @@ import type { Category, Product } from "@/types";
  * (`basename`). `fullPath` adds it for absolute addresses (canonical, hreflang,
  * the language switcher).
  */
-
-/** First path segment of the fixed pages, Turkish → English. */
-const PAGE_SEGMENTS: Record<string, string> = {
-  urun: "product",
-  "ozel-tasarim": "custom-design",
-  iletisim: "contact",
-  blog: "blog",
-  yorumlar: "reviews",
-  sss: "faq",
-  hesabim: "account",
-  odeme: "checkout",
-  favoriler: "favourites",
-  karsilastir: "compare",
-  sayfa: "page",
-};
-
-/** Info pages under `/sayfa/`, Turkish → English. */
-export const INFO_PAGES: Record<string, string> = {
-  hakkimizda: "about",
-  "kullanim-sartlari": "terms",
-  "iade-politikasi": "returns",
-  "kargo-politikasi": "shipping",
-  "gizlilik-politikasi": "privacy",
-};
-
-/** The English page segments, so a translated category slug can't shadow a page. */
-export const RESERVED_EN_SEGMENTS = new Set([...Object.values(PAGE_SEGMENTS), "en", "admin", "api"]);
 
 const invert = (map: Record<string, string>) => Object.fromEntries(Object.entries(map).map(([k, v]) => [v, k]));
 const PAGE_SEGMENTS_EN = invert(PAGE_SEGMENTS);

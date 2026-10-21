@@ -100,10 +100,25 @@ describe('sitemap and robots.txt', () => {
     expect(res.text).toContain(`<lastmod>${defaultProducts[0]!.updatedAt}</lastmod>`);
   });
 
+  it('lists every page at its English address too, with language alternates', async () => {
+    const res = await request(app.getHttpServer()).get('/api/sitemap.xml').expect(200);
+    const locs = [...res.text.matchAll(/<loc>(.*?)<\/loc>/g)].map((m) => m[1]);
+    expect(locs).toContain('http://localhost:5173/en');
+    expect(locs).toContain('http://localhost:5173/en/custom-design');
+    expect(locs).toContain('http://localhost:5173/en/parametric-wall-art');
+    expect(locs).toContain('http://localhost:5173/en/product/parametric-portrait-silhouette-series');
+    expect(locs.filter((l) => l?.includes('/en/product/'))).toHaveLength(defaultProducts.length);
+    expect(res.text).toContain(
+      '<xhtml:link rel="alternate" hreflang="en" href="http://localhost:5173/en/parametric-wall-art"/>',
+    );
+    expect(res.text).toContain('xmlns:xhtml="http://www.w3.org/1999/xhtml"');
+  });
+
   it('keeps crawlers out of the admin panel and checkout', async () => {
     const res = await request(app.getHttpServer()).get('/api/robots.txt').expect(200);
     expect(res.text).toContain('Disallow: /admin');
     expect(res.text).toContain('Disallow: /odeme');
+    expect(res.text).toContain('Disallow: /en/checkout');
     expect(res.text).toContain('Sitemap: http://localhost:5173/sitemap.xml');
   });
 });

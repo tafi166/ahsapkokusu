@@ -6,6 +6,7 @@ import { parseOrThrow } from '../common/zod';
 import type { Prisma } from '../generated/prisma/client';
 import { ContentService } from './content.service';
 import { categoryListSchema, contentKeySchema, contentSchemas, productListSchema } from './schemas';
+import { localeSchema, translationKeySchema, translationSchemas } from './translations';
 
 @Public()
 @Controller('site')
@@ -36,6 +37,26 @@ export class ContentAdminController {
   @HttpCode(204)
   async resetContent(@CurrentAuth() auth: AuthContext, @Param('key') rawKey: string) {
     await this.content.resetContent(auth.userId, parseOrThrow(contentKeySchema, rawKey));
+  }
+
+  @Put('translations/:locale/:key')
+  @HttpCode(204)
+  async putTranslation(
+    @CurrentAuth() auth: AuthContext,
+    @Param('locale') rawLocale: string,
+    @Param('key') rawKey: string,
+    @Body() body: unknown,
+  ) {
+    const locale = parseOrThrow(localeSchema, rawLocale);
+    const key = parseOrThrow(translationKeySchema, rawKey);
+    const { value } = parseOrThrow(z.object({ value: translationSchemas[key] }).strict(), body);
+    await this.content.putTranslation(auth.userId, locale, key, value as Prisma.InputJsonValue);
+  }
+
+  @Delete('translations/:locale/:key')
+  @HttpCode(204)
+  async resetTranslation(@CurrentAuth() auth: AuthContext, @Param('locale') rawLocale: string, @Param('key') rawKey: string) {
+    await this.content.resetTranslation(auth.userId, parseOrThrow(localeSchema, rawLocale), parseOrThrow(translationKeySchema, rawKey));
   }
 
   @Put('products')

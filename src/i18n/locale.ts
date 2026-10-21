@@ -22,6 +22,8 @@ export function setContentLocale(locale: Locale): void {
 }
 
 export function contentLocale(): Locale {
-  current ??= typeof window === "undefined" ? "tr" : localeFromPath(window.location.pathname);
+  // Read through globalThis: this module is also compiled for the API server (no DOM).
+  const pathname = (globalThis as { location?: { pathname: string } }).location?.pathname;
+  current ??= pathname ? localeFromPath(pathname) : "tr";
   return current;
 }
