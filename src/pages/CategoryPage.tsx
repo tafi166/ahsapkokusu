@@ -21,6 +21,7 @@ import { useSeo, breadcrumbJsonLd } from "@/lib/seo";
 import { PlaceholderMedia } from "@/lib/placeholder";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import type { Category, Product } from "@/types";
+import { useI18n } from "@/i18n/I18nProvider";
 
 const PAGE_SIZE = 8;
 
@@ -77,6 +78,7 @@ export function CategoryPage() {
 }
 
 function CategoryPageView({ categorySlug }: { categorySlug: string }) {
+  const { t } = useI18n();
   const [searchParams] = useSearchParams();
   const category = getCategory(categorySlug);
 
@@ -107,12 +109,12 @@ function CategoryPageView({ categorySlug }: { categorySlug: string }) {
     [baseProducts, filters, sort],
   );
 
-  const seoTitle = category?.seoTitle ?? category?.title ?? "Kategori";
+  const seoTitle = category?.seoTitle ?? category?.title ?? t.catalog.fallbackTitle;
   const seoDescription = category?.seoDescription ?? category?.description;
   useSeo({
     title: seoTitle,
     description: seoDescription,
-    jsonLd: category ? breadcrumbJsonLd([{ label: "Ana Sayfa", href: "/" }, { label: category.title, href: `/${category.slug}` }]) : undefined,
+    jsonLd: category ? breadcrumbJsonLd([{ label: t.product.home, href: "/" }, { label: category.title, href: `/${category.slug}` }]) : undefined,
   });
 
   if (!category) return <NotFoundPage />;
@@ -151,7 +153,7 @@ function CategoryPageView({ categorySlug }: { categorySlug: string }) {
       </div>
 
       <Section>
-        <Breadcrumb items={[{ label: "Ana Sayfa", href: "/" }, { label: category.title }]} />
+        <Breadcrumb items={[{ label: t.product.home, href: "/" }, { label: category.title }]} />
 
         <div className="mb-8 max-w-2xl">
           <p className="text-sm text-body/70">{category.description}</p>
@@ -175,9 +177,9 @@ function CategoryPageView({ categorySlug }: { categorySlug: string }) {
 
         {filtered.length === 0 ? (
           <div className="py-16 text-center">
-            <p className="text-body/60">Bu filtrelerle eşleşen ürün bulunamadı.</p>
+            <p className="text-body/60">{t.catalog.noMatch}</p>
             <Button variant="outline" className="mt-4" onClick={() => handleFiltersChange(emptyFilters)}>
-              Tüm filtreleri kaldır
+              {t.catalog.clearFilters}
             </Button>
           </div>
         ) : (
@@ -199,7 +201,7 @@ function CategoryPageView({ categorySlug }: { categorySlug: string }) {
             {visibleCount < filtered.length ? (
               <div className="mt-10 text-center">
                 <Button variant="outline" onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}>
-                  Daha Fazla Göster
+                  {t.catalog.showMore}
                 </Button>
               </div>
             ) : null}
@@ -208,7 +210,7 @@ function CategoryPageView({ categorySlug }: { categorySlug: string }) {
 
         {category.faq.length > 0 ? (
           <div className="mx-auto mt-20 max-w-2xl border-t border-line pt-14">
-            <h2 className="mb-6">Sıkça Sorulan Sorular</h2>
+            <h2 className="mb-6">{t.catalog.faq}</h2>
             {category.faq.map((item) => (
               <AccordionSection key={item.question} title={item.question}>
                 <p>{item.answer}</p>
@@ -218,7 +220,7 @@ function CategoryPageView({ categorySlug }: { categorySlug: string }) {
         ) : null}
 
         <div className="mt-16 border-t border-line pt-10">
-          <h2 className="mb-6 text-lg">İlgili Kategoriler</h2>
+          <h2 className="mb-6 text-lg">{t.catalog.related}</h2>
           <div className="flex flex-wrap gap-3">
             {relatedCategories.map((c) => (
               <Button key={c.slug} href={`/${c.slug}`} variant="outline" size="sm">

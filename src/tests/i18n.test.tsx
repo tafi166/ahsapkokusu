@@ -10,6 +10,7 @@ import { QuickViewProvider } from "@/hooks/useQuickView";
 import { I18nProvider, type Locale } from "@/i18n/I18nProvider";
 import { formatMoney } from "@/i18n/money";
 import { allProducts } from "@/data/products";
+import { categories } from "@/data/categories";
 
 function renderApp(initialLocale?: Locale, path = "/") {
   return render(
@@ -85,4 +86,29 @@ describe("product page and cart in English", () => {
     expect(drawer).toHaveTextContent("Subtotal₺1,980");
     expect(screen.getByRole("link", { name: "Checkout" })).toBeInTheDocument();
   }, 20000);
+});
+
+describe("catalog pages in English", () => {
+  beforeEach(() => localStorage.clear());
+
+  it("translates sorting, filters and counts; category names stay catalog content", async () => {
+    const category = categories[0]!;
+    const user = userEvent.setup();
+    renderApp("en", `/${category.slug}`);
+
+    expect(screen.getByRole("heading", { level: 1, name: category.title })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Price: Low to High" })).toBeInTheDocument();
+    expect(screen.getByText(/^\d+ products?$/)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /filter & sort/i }));
+    const dialog = await screen.findByRole("dialog", { name: "Filter products" });
+    expect(dialog).toHaveTextContent("Availability");
+    expect(screen.getByRole("checkbox", { name: "Under ₺500" })).toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: "₺500 – ₺2,000" })).toBeInTheDocument();
+  }, 20000);
+
+  it("translates the 404 page", () => {
+    renderApp("en", "/bu-sayfa-yok");
+    expect(screen.getByRole("heading", { level: 1, name: "Page Not Found" })).toBeInTheDocument();
+  });
 });

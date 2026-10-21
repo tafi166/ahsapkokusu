@@ -1,6 +1,6 @@
 export type Locale = "tr" | "en";
 
-const INTL_LOCALE: Record<Locale, string> = { tr: "tr-TR", en: "en-US" };
+export const INTL_LOCALE: Record<Locale, string> = { tr: "tr-TR", en: "en-US" };
 
 /**
  * Formats an amount in its own currency for the interface language. Never

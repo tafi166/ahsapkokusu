@@ -1,22 +1,19 @@
 import { Section } from "@/components/ui/Section";
 import { Button } from "@/components/ui/Button";
+import { useI18n } from "@/i18n/I18nProvider";
 
 export function AccountPage() {
+  const { t } = useI18n();
   return (
     <Section containerSize="sm">
       <div className="mx-auto max-w-md text-center">
-        <h1>Hesabım</h1>
-        <p className="mt-4 text-body/60">
-          Müşteri hesapları, sipariş geçmişi ve giriş bu demoda gerçek bir backend'e bağlı değil —
-          bu sayfa, header'daki hesap ikonunun kırık bir bağlantıya götürmemesi için var. Sepet ve
-          favoriler ise gerçekten çalışıyor (localStorage üzerinde). Gerçek kimlik doğrulamayı bir
-          backend hazır olduğunda buraya bağlayın.
-        </p>
+        <h1>{t.pages.accountTitle}</h1>
+        <p className="mt-4 text-body/60">{t.pages.accountBody}</p>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <Button href="/favoriler" variant="outline">
-            Favorilerim
+            {t.pages.wishlistTitle}
           </Button>
-          <Button href="/">Ana Sayfaya Dön</Button>
+          <Button href="/">{t.pages.backHome}</Button>
         </div>
       </div>
     </Section>

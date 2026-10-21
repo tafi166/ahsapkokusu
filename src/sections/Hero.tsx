@@ -8,6 +8,7 @@ import { ProductMedia } from "@/lib/placeholder";
 import { staggerContainer, fadeUp } from "@/lib/motion";
 import { useCarousel } from "@/hooks/useCarousel";
 import { cn } from "@/lib/cn";
+import { useI18n } from "@/i18n/I18nProvider";
 
 const { hero } = homeContent;
 
@@ -23,6 +24,7 @@ const slides = Array.isArray(hero.images) && hero.images.length > 0 ? hero.image
 const DRAG_THRESHOLD = 80;
 
 export function Hero() {
+  const { t } = useI18n();
   const prefersReducedMotion = useReducedMotion();
   const { index, goTo, next, prev } = useCarousel({ itemCount: slides.length });
   const [direction, setDirection] = useState<1 | -1>(1);
@@ -65,7 +67,7 @@ export function Hero() {
             <ProductMedia
               src={slides[index]}
               ratio="wide"
-              label="Parametrik duvar tablosu — hero görsel"
+              label={t.a11y.heroImage}
               className="pointer-events-none absolute inset-0 h-full w-full"
             />
           </motion.div>
@@ -108,26 +110,26 @@ export function Hero() {
         <>
           <button
             onClick={handlePrev}
-            aria-label="Önceki görsel"
+            aria-label={t.a11y.previousImage}
             className="absolute left-4 top-1/2 z-20 hidden -translate-y-1/2 rounded-full bg-white/15 p-2 text-white backdrop-blur-sm transition-colors hover:bg-white/25 md:block"
           >
             <ChevronLeft size={20} />
           </button>
           <button
             onClick={handleNext}
-            aria-label="Sonraki görsel"
+            aria-label={t.a11y.nextImage}
             className="absolute right-4 top-1/2 z-20 hidden -translate-y-1/2 rounded-full bg-white/15 p-2 text-white backdrop-blur-sm transition-colors hover:bg-white/25 md:block"
           >
             <ChevronRight size={20} />
           </button>
 
-          <div className="absolute right-5 top-1/2 z-20 flex -translate-y-1/2 flex-col gap-3" role="tablist" aria-label="Hero slaytları">
+          <div className="absolute right-5 top-1/2 z-20 flex -translate-y-1/2 flex-col gap-3" role="tablist" aria-label={t.a11y.heroSlides}>
             {slides.map((_, i) => (
               <button
                 key={i}
                 role="tab"
                 aria-selected={i === index}
-                aria-label={`Slayt ${i + 1}`}
+                aria-label={t.a11y.slide(i + 1)}
                 onClick={() => handleGoTo(i)}
                 className={cn(
                   "flex h-8 w-8 items-center justify-center rounded-full border text-xs transition-colors",

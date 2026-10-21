@@ -6,10 +6,12 @@ import { testimonials } from "@/data/testimonials";
 import { Section } from "@/components/ui/Section";
 import { StarRating } from "@/components/ui/StarRating";
 import { useCarousel } from "@/hooks/useCarousel";
+import { useI18n } from "@/i18n/I18nProvider";
 
 const { testimonials: copy } = homeContent;
 
 export function Testimonials() {
+  const { t } = useI18n();
   const prefersReducedMotion = useReducedMotion();
   const [isPaused, setIsPaused] = useState(false);
   const { index, goTo, next, prev } = useCarousel({
@@ -48,22 +50,22 @@ export function Testimonials() {
         </AnimatePresence>
 
         <div className="mt-8 flex items-center justify-center gap-6">
-          <button onClick={prev} aria-label="Previous testimonial" className="rounded-full border border-line p-2 hover:bg-white">
+          <button onClick={prev} aria-label={t.a11y.previousTestimonial} className="rounded-full border border-line p-2 hover:bg-white">
             <ChevronLeft size={16} />
           </button>
-          <div className="flex gap-2" role="tablist" aria-label="Testimonial slides">
-            {testimonials.map((t, i) => (
+          <div className="flex gap-2" role="tablist" aria-label={t.a11y.testimonialSlides}>
+            {testimonials.map((item, i) => (
               <button
-                key={t.id}
+                key={item.id}
                 role="tab"
                 aria-selected={i === index}
-                aria-label={`Show testimonial ${i + 1}`}
+                aria-label={t.a11y.showTestimonial(i + 1)}
                 onClick={() => goTo(i)}
                 className={`h-2 w-2 rounded-full transition-colors ${i === index ? "bg-ink" : "bg-line"}`}
               />
             ))}
           </div>
-          <button onClick={next} aria-label="Next testimonial" className="rounded-full border border-line p-2 hover:bg-white">
+          <button onClick={next} aria-label={t.a11y.nextTestimonial} className="rounded-full border border-line p-2 hover:bg-white">
             <ChevronRight size={16} />
           </button>
         </div>

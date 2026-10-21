@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
+import { useI18n } from "@/i18n/I18nProvider";
 
 type Status = "idle" | "loading" | "success" | "error";
 
@@ -11,6 +12,7 @@ export function NewsletterForm({ placeholder, ctaLabel, className, buttonVariant
   className?: string;
   buttonVariant?: "primary" | "secondary";
 }) {
+  const { t } = useI18n();
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState<string | null>(null);
@@ -28,7 +30,7 @@ export function NewsletterForm({ placeholder, ctaLabel, className, buttonVariant
     <form onSubmit={handleSubmit} className={cn("w-full", className)} noValidate>
       <div className="flex flex-col gap-3 sm:flex-row">
         <label htmlFor="newsletter-email" className="sr-only">
-          Email address
+          {t.a11y.newsletterEmail}
         </label>
         <input
           id="newsletter-email"

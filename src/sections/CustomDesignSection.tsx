@@ -3,15 +3,17 @@ import { Section } from "@/components/ui/Section";
 import { Button } from "@/components/ui/Button";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { PlaceholderMedia } from "@/lib/placeholder";
+import { useI18n } from "@/i18n/I18nProvider";
 
 const { customDesign } = homeContent;
 
 export function CustomDesignSection() {
+  const { t } = useI18n();
   return (
     <Section>
       <div className="grid items-center gap-10 md:grid-cols-2">
         <RevealOnScroll>
-          <PlaceholderMedia swatch="#8a6a4b" ratio="landscape" label="Özel tasarım örneği" className="rounded-card" />
+          <PlaceholderMedia swatch="#8a6a4b" ratio="landscape" label={t.a11y.customDesignImage} className="rounded-card" />
         </RevealOnScroll>
         <RevealOnScroll delay={0.1}>
           <p className="mb-3 text-sm uppercase tracking-[0.2em] text-body/60">{customDesign.eyebrow}</p>
