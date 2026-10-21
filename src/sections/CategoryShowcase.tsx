@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { homeContent } from "@/config/content";
 import { categories } from "@/data/categories";
 import { Section } from "@/components/ui/Section";
-import { PlaceholderMedia } from "@/lib/placeholder";
+import { ProductMedia } from "@/lib/placeholder";
 import { staggerContainer, fadeUp, viewportOnce } from "@/lib/motion";
 import { useI18n } from "@/i18n/I18nProvider";
 import { categoryPath } from "@/i18n/paths";
@@ -31,8 +31,9 @@ export function CategoryShowcase() {
           <motion.li key={category.slug} variants={fadeUp}>
             <Link to={categoryPath(category)} className="group block">
               <div className="overflow-hidden rounded-card">
-                <PlaceholderMedia
-                  swatch={category.heroSwatch}
+                <ProductMedia
+                  src={category.heroImage ?? category.heroSwatch}
+                  label={category.title}
                   ratio="landscape"
                   className="transition-transform duration-500 ease-out group-hover:scale-105"
                 />

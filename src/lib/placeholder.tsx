@@ -6,7 +6,8 @@ interface PlaceholderMediaProps {
   swatch: string;
   label?: string;
   className?: string;
-  ratio?: "square" | "portrait" | "landscape" | "wide";
+  /** `fill`: no aspect ratio of its own — fills a box sized by the caller (e.g. `absolute inset-0`). */
+  ratio?: "square" | "portrait" | "landscape" | "wide" | "fill";
 }
 
 const ratioClass: Record<NonNullable<PlaceholderMediaProps["ratio"]>, string> = {
@@ -14,6 +15,7 @@ const ratioClass: Record<NonNullable<PlaceholderMediaProps["ratio"]>, string> = 
   portrait: "aspect-[3/4]",
   landscape: "aspect-[4/3]",
   wide: "aspect-[16/9]",
+  fill: "",
 };
 
 /**
@@ -68,6 +70,8 @@ interface ProductMediaProps {
   label?: string;
   className?: string;
   ratio?: PlaceholderMediaProps["ratio"];
+  /** For images above the fold (banners), which shouldn't wait for lazy loading. */
+  eager?: boolean;
 }
 
 /**
@@ -82,13 +86,13 @@ interface ProductMediaProps {
  * `resizeImageFile` (`lib/imageResize.ts`) when accepting an upload —
  * that's what keeps the source resolution from being degraded.
  */
-export function ProductMedia({ src, label, className, ratio = "square" }: ProductMediaProps) {
+export function ProductMedia({ src, label, className, ratio = "square", eager = false }: ProductMediaProps) {
   if (!isRealImageSrc(src)) {
     return <PlaceholderMedia swatch={src} label={label} ratio={ratio} className={className} />;
   }
   return (
     <div className={cn("relative overflow-hidden bg-mist", ratioClass[ratio], className)}>
-      <img src={src} alt={label ?? ""} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+      <img src={src} alt={label ?? ""} className="absolute inset-0 h-full w-full object-cover" loading={eager ? "eager" : "lazy"} />
     </div>
   );
 }

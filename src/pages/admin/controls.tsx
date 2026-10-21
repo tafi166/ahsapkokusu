@@ -159,6 +159,7 @@ export function ImageGalleryField({
   maxDimension = 1600,
   firstLabel = "Kapak",
   description,
+  single = false,
 }: {
   images: string[];
   onChange: (next: string[]) => void;
@@ -167,6 +168,8 @@ export function ImageGalleryField({
   /** What the first image represents for this caller — "Kapak" (product cover) or e.g. "İlk Slayt". */
   firstLabel?: string;
   description?: string;
+  /** One photo only: a new upload replaces the current one. */
+  single?: boolean;
 }) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -186,7 +189,7 @@ export function ImageGalleryField({
       for (const dataUrl of dataUrls) urls.push(await adminApi.uploadImage(dataUrl));
       // Replace the placeholder swatch (if that's all there is so far) instead of appending after it.
       const isPlaceholderOnly = !images.some(isRealImageSrc);
-      onChange(isPlaceholderOnly ? urls : [...images, ...urls]);
+      onChange(single ? urls.slice(0, 1) : isPlaceholderOnly ? urls : [...images, ...urls]);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Görsel yüklenemedi.");
     } finally {
@@ -231,11 +234,13 @@ export function ImageGalleryField({
       )}
 
       <label className="inline-block">
-        <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-black/55">Fotoğraf Ekle (Bilgisayardan Seç)</span>
+        <span className="mb-1 block text-xs font-medium uppercase tracking-wide text-black/55">
+          {single && images.length > 0 ? "Fotoğrafı Değiştir" : "Fotoğraf Ekle"} (Bilgisayardan Seç)
+        </span>
         <input
           type="file"
           accept="image/*"
-          multiple
+          multiple={!single}
           disabled={uploading}
           onChange={(e) => {
             void handleFiles(e.target.files);

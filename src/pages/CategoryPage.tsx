@@ -18,7 +18,7 @@ import { categories } from "@/data/categories";
 import { getProductsByCategory } from "@/data/products";
 import { staggerContainer, fadeUp } from "@/lib/motion";
 import { useSeo, breadcrumbJsonLd } from "@/lib/seo";
-import { PlaceholderMedia } from "@/lib/placeholder";
+import { ProductMedia } from "@/lib/placeholder";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import type { Category, Product } from "@/types";
 import { useI18n } from "@/i18n/I18nProvider";
@@ -144,7 +144,9 @@ function CategoryPageView({ categorySlug }: { categorySlug: string }) {
   return (
     <>
       <div className="relative flex h-56 items-end overflow-hidden md:h-72">
-        <PlaceholderMedia swatch={category.heroSwatch} ratio="wide" className="absolute inset-0 h-full w-full" />
+        <div className="absolute inset-0">
+          <ProductMedia src={category.heroImage ?? category.heroSwatch} ratio="fill" eager className="h-full w-full" />
+        </div>
         <div className="absolute inset-0 bg-black/45" aria-hidden="true" />
         <div className="relative z-10 w-full pb-8">
           <div className="mx-auto w-full max-w-[1760px] px-4 md:px-8">
@@ -153,7 +155,7 @@ function CategoryPageView({ categorySlug }: { categorySlug: string }) {
         </div>
       </div>
 
-      <Section>
+      <Section pageTop>
         <Breadcrumb items={[{ label: t.product.home, href: "/" }, { label: category.title }]} />
 
         <div className="mb-8 max-w-2xl">

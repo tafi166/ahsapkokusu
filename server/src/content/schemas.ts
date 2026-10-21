@@ -136,6 +136,7 @@ export const categorySchema: z.ZodType<Category> = z
     shortDescription: text(500),
     description: text(5000),
     heroSwatch: swatch,
+    heroImage: imageSrcSchema.optional(),
     subcategories: z.array(z.object({ slug, title: requiredText(100) }).strict()).max(30),
     facets: z
       .object({

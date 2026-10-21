@@ -3,11 +3,11 @@ import { categories as currentCategories } from "@/data/categories";
 import { adminApi } from "@/lib/adminApi";
 import { runSave } from "@/pages/admin/saving";
 import type { Category } from "@/types";
-import { AdminButton, ColorInput, Field, SavedBanner, SectionCard, TextArea, TextInput } from "@/pages/admin/controls";
+import { AdminButton, ColorInput, Field, ImageGalleryField, SavedBanner, SectionCard, TextArea, TextInput } from "@/pages/admin/controls";
 
 /**
  * Category *text* is fully editable here (title, descriptions, SEO copy,
- * hero color, subcategory titles, FAQ). Adding/removing whole categories or
+ * banner photo and fallback colour, subcategory titles, FAQ). Adding/removing whole categories or
  * subcategory slugs is intentionally out of scope for this panel — those
  * slugs are baked into routes, nav, and every product's `category`/
  * `subcategory` field, so changing them safely needs a code change, not a
@@ -66,7 +66,26 @@ export function CategoriesTab() {
         <Field label="Açıklama" hint="Kategori sayfasının üstünde görünür.">
           <TextArea rows={3} value={active.description} onChange={(e) => updateActive({ description: e.target.value })} />
         </Field>
-        <ColorInput label="Hero Rengi" value={active.heroSwatch} onChange={(v) => updateActive({ heroSwatch: v })} />
+      </SectionCard>
+
+      <SectionCard
+        title="Kategori Görseli"
+        description="Kategori sayfasının başlık şeridinde ve ana sayfadaki kategori kartında görünür. Geniş (yatay) bir fotoğraf seçin; başlık şeridinde kenarları kırpılabilir."
+      >
+        <ImageGalleryField
+          single
+          ratio="landscape"
+          maxDimension={2400}
+          firstLabel="Görsel"
+          images={active.heroImage ? [active.heroImage] : []}
+          onChange={(next) => updateActive({ heroImage: next[0] })}
+        />
+        <ColorInput
+          label="Yedek Renk"
+          value={active.heroSwatch}
+          onChange={(v) => updateActive({ heroSwatch: v })}
+        />
+        <p className="text-xs text-black/45">Görsel yokken bu renkten oluşan bir geçiş gösterilir.</p>
       </SectionCard>
 
       <SectionCard title="SEO">

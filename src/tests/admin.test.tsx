@@ -14,6 +14,11 @@ import { TRANSLATION_KEYS } from "@/i18n/content/types";
 import { buildBlock, rowValues, TRANSLATION_BLOCKS } from "@/pages/admin/translationRows";
 import { installFakeApi } from "./fakeApi";
 
+// jsdom has no canvas to resize photos with; uploads just pass a fixed data URL through.
+vi.mock("@/lib/imageResize", () => ({
+  resizeImageFiles: async (files: File[]) => files.map(() => "data:image/jpeg;base64,AAAA"),
+}));
+
 function renderAdmin() {
   return render(
     <MemoryRouter initialEntries={["/admin"]}>
@@ -173,6 +178,24 @@ describe("moving browser-only edits to the server", () => {
     expect(localStorage.getItem(LEGACY_STORAGE_KEY)).toBeNull();
     expect(screen.queryByRole("button", { name: "Sunucuya Aktar" })).not.toBeInTheDocument();
   });
+});
+
+describe("categories tab", () => {
+  it("uploads a banner photo for a category and saves it", async () => {
+    const user = userEvent.setup();
+    const nav = await signIn(user);
+    await user.click(within(nav).getByText("Kategoriler"));
+    expect(await screen.findByText("Henüz fotoğraf eklenmedi.")).toBeInTheDocument();
+
+    await user.upload(screen.getByLabelText(/fotoğraf ekle/i), new File(["x"], "banner.jpg", { type: "image/jpeg" }));
+    expect(await screen.findByLabelText(/fotoğrafı değiştir/i)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Kaydet" }));
+
+    expect(await screen.findByRole("status")).toHaveTextContent("Kaydedildi");
+    const saved = api.state.content.categories as { heroImage?: string }[];
+    expect(saved[0]?.heroImage).toBe("/api/media/00000000-0000-4000-8000-000000000001.jpg");
+    expect(saved[1]?.heroImage).toBeUndefined();
+  }, 30000);
 });
 
 describe("English tab", () => {

@@ -84,6 +84,8 @@ export interface Category {
   shortDescription: string;
   description: string;
   heroSwatch: string;
+  /** Uploaded photo for the category banner and its homepage card; the swatch gradient shows without one. */
+  heroImage?: string;
   subcategories: Subcategory[];
   facets: CategoryFacetConfig;
   seoTitle: string;

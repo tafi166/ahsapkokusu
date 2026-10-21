@@ -254,6 +254,19 @@ describe('content API', () => {
       expect((await site()).categories).toEqual(list);
     });
 
+    it('saves an uploaded banner photo, and only an uploaded one', async () => {
+      const { put } = await editor();
+      const list = defaultCategories.map((c) => ({ ...c }));
+      list[0]!.heroImage = '/api/media/0b9c5c62-1c5f-4c1e-9f5e-6b1f3f6f6a10.jpg';
+      await put('/api/admin/categories', { categories: list }).expect(204);
+      expect((await site()).categories[0].heroImage).toBe(list[0]!.heroImage);
+
+      for (const bad of ['https://example.com/x.jpg', 'data:image/png;base64,AAAA', 'javascript:alert(1)']) {
+        list[0]!.heroImage = bad;
+        await put('/api/admin/categories', { categories: list }).expect(400);
+      }
+    });
+
     it('cannot add or remove categories', async () => {
       const { put } = await editor();
       await put('/api/admin/categories', { categories: defaultCategories.slice(1) }).expect(409);

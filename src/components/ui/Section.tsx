@@ -9,7 +9,7 @@ interface SectionProps {
   /** Background color scheme, named after the reference theme's section "schemes". */
   scheme?: "primary" | "secondary" | "tertiary";
   id?: string;
-  /** The page's first section, opening with a breadcrumb: little space under the header. */
+  /** A section opening with a breadcrumb right under the header or a banner: little space above it. */
   pageTop?: boolean;
 }
 
