@@ -15,7 +15,7 @@ export async function createApp(config: AppConfig, opts: { logger?: false } = {}
   });
   // The storefront reaches the API through a same-origin proxy (Vite in development,
   // the web server in production), so CORS stays disabled.
-  app.set('trust proxy', 'loopback');
+  app.set('trust proxy', config.TRUST_PROXY);
   // The admin panel saves the whole product list at once.
   app.useBodyParser('json', { limit: '2mb' });
   // Image uploads arrive as raw bytes; the media service checks the actual format.

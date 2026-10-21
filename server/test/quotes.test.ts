@@ -169,6 +169,20 @@ describe('quote API', () => {
     expect(await prisma.quoteRequest.count()).toBe(0);
   });
 
+  it('caps quote requests across all visitors per 24 hours', async () => {
+    const capped = await startApp({ UPLOAD_DIR: uploadDir, PUBLIC_FORM_RATE_LIMIT_PER_MIN: '1000', QUOTE_DAILY_LIMIT: '2' });
+    try {
+      await submit(capped).expect(201);
+      await submit(capped).expect(201);
+      await submit(capped).expect(429);
+      // Older requests no longer count.
+      await prisma.quoteRequest.updateMany({ data: { createdAt: new Date(Date.now() - 25 * 3_600_000) } });
+      await submit(capped).expect(201);
+    } finally {
+      await capped.close();
+    }
+  });
+
   it('rate-limits submissions per IP', async () => {
     const limited = await startApp({ UPLOAD_DIR: uploadDir, PUBLIC_FORM_RATE_LIMIT_PER_MIN: '2' });
     try {

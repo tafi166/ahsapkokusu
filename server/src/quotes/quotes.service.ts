@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -98,6 +98,14 @@ export class QuotesService {
     }
     const check = checkSvg(file.buffer);
     if (!check.ok) throw new BadRequestException({ message: check.error });
+
+    const since = new Date(Date.now() - 24 * 3_600_000);
+    if ((await this.prisma.quoteRequest.count({ where: { createdAt: { gte: since } } })) >= this.config.QUOTE_DAILY_LIMIT) {
+      throw new HttpException(
+        { message: 'Şu anda çok fazla teklif talebi var; lütfen daha sonra tekrar deneyin veya bize e-posta ile ulaşın.' },
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
 
     await mkdir(this.dir, { recursive: true });
     const fileId = randomUUID();

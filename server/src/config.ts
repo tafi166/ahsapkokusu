@@ -29,8 +29,19 @@ const schema = z.object({
   SESSION_ABSOLUTE_HOURS: z.coerce.number().int().min(1).max(24 * 30).default(12),
   /** Login and password-change attempts per client IP per minute. */
   AUTH_RATE_LIMIT_PER_MIN: z.coerce.number().int().min(1).default(10),
-  /** Anonymous form submissions (quote requests) per client IP per minute. */
+  /** Anonymous form submissions (quote requests, orders) per client IP per minute. */
   PUBLIC_FORM_RATE_LIMIT_PER_MIN: z.coerce.number().int().min(1).default(5),
+  /**
+   * Quote requests accepted across all visitors in any 24 hours. Each can store a
+   * file, so this bounds disk use even when many addresses are involved.
+   */
+  QUOTE_DAILY_LIMIT: z.coerce.number().int().min(1).default(200),
+  /**
+   * Which proxies may set X-Forwarded-For (Express "trust proxy"): "loopback" when
+   * the web server runs on this machine, its address/subnet otherwise. Rate limits
+   * are per client IP, so this must match the real setup.
+   */
+  TRUST_PROXY: z.string().min(1).default('loopback'),
   /** Uploaded files (images, CNC drawings). Outside any web root; absolute in production. */
   UPLOAD_DIR: z.string().min(1).default('storage'),
   MEDIA_MAX_BYTES: z.coerce.number().int().min(1024).max(50 * 1024 * 1024).default(5 * 1024 * 1024),

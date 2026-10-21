@@ -18,4 +18,9 @@ describe('loadConfig', () => {
     expect(() => loadConfig({ ...base, SITE_URL: 'https://shop.example', UPLOAD_DIR: 'storage' })).toThrow(/UPLOAD_DIR/);
     expect(loadConfig({ ...base, SITE_URL: 'https://shop.example/' }).SITE_URL).toBe('https://shop.example');
   });
+
+  it('defaults trust proxy to loopback and accepts an address', () => {
+    expect(loadConfig({ DATABASE_URL: 'postgresql://x' }).TRUST_PROXY).toBe('loopback');
+    expect(loadConfig({ DATABASE_URL: 'postgresql://x', TRUST_PROXY: '10.0.0.0/8' }).TRUST_PROXY).toBe('10.0.0.0/8');
+  });
 });

@@ -163,7 +163,9 @@ npm run test       # vitest run — routing/render/interaction smoke tests
 npm run lint       # oxlint
 ```
 
-## API server (`server/`) — in progress
+## API server (`server/`)
+
+Production setup: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 A NestJS + Prisma + PostgreSQL REST API lives in `server/` with its own
 `package.json`. The storefront loads its catalog and content from it at
