@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import { Section } from "@/components/ui/Section";
 import { Button } from "@/components/ui/Button";
 import { useI18n } from "@/i18n/I18nProvider";
+import { pageSegment, turkishPath } from "@/i18n/paths";
 
 function toTitleCase(slug: string): string {
   return slug
@@ -18,8 +19,17 @@ function toTitleCase(slug: string): string {
  */
 export function InfoPage() {
   const { slug = "" } = useParams<{ slug: string }>();
-  const title = toTitleCase(slug);
   const { t } = useI18n();
+  // Router paths are in the page language; the known pages are keyed by their Turkish slug.
+  const trSlug = turkishPath(`/${pageSegment("sayfa")}/${slug}`).split("/")[2] ?? slug;
+  const knownTitles: Record<string, string> = {
+    hakkimizda: t.nav.about,
+    "kullanim-sartlari": t.nav.terms,
+    "iade-politikasi": t.nav.returns,
+    "kargo-politikasi": t.nav.shipping,
+    "gizlilik-politikasi": t.nav.privacy,
+  };
+  const title = knownTitles[trSlug] ?? toTitleCase(slug);
 
   return (
     <Section containerSize="sm">

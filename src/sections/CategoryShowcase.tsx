@@ -7,6 +7,7 @@ import { Section } from "@/components/ui/Section";
 import { PlaceholderMedia } from "@/lib/placeholder";
 import { staggerContainer, fadeUp, viewportOnce } from "@/lib/motion";
 import { useI18n } from "@/i18n/I18nProvider";
+import { categoryPath } from "@/i18n/paths";
 
 const { categoryShowcase } = homeContent;
 
@@ -28,7 +29,7 @@ export function CategoryShowcase() {
       >
         {categories.map((category) => (
           <motion.li key={category.slug} variants={fadeUp}>
-            <Link to={`/${category.slug}`} className="group block">
+            <Link to={categoryPath(category)} className="group block">
               <div className="overflow-hidden rounded-card">
                 <PlaceholderMedia
                   swatch={category.heroSwatch}

@@ -9,6 +9,7 @@ import { staggerContainer, fadeUp } from "@/lib/motion";
 import { useCarousel } from "@/hooks/useCarousel";
 import { cn } from "@/lib/cn";
 import { useI18n } from "@/i18n/I18nProvider";
+import { localePath } from "@/i18n/paths";
 
 const { hero } = homeContent;
 
@@ -93,10 +94,10 @@ export function Hero() {
             {hero.subtitle}
           </motion.p>
           <motion.div variants={fadeUp} className="mt-8 flex flex-wrap items-center gap-4">
-            <Button href={hero.primaryCtaHref} variant="secondary" size="lg">
+            <Button href={localePath(hero.primaryCtaHref)} variant="secondary" size="lg">
               {hero.primaryCtaLabel}
             </Button>
-            <Button href={hero.secondaryCtaHref} variant="outline" size="lg" className="border-white text-white hover:bg-white/10">
+            <Button href={localePath(hero.secondaryCtaHref)} variant="outline" size="lg" className="border-white text-white hover:bg-white/10">
               {hero.secondaryCtaLabel}
             </Button>
           </motion.div>

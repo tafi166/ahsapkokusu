@@ -6,6 +6,7 @@ import { Section } from "@/components/ui/Section";
 import { Button } from "@/components/ui/Button";
 import { PlaceholderMedia } from "@/lib/placeholder";
 import { staggerContainer, fadeUp, viewportOnce } from "@/lib/motion";
+import { localePath } from "@/i18n/paths";
 
 const { blog: copy } = homeContent;
 
@@ -17,7 +18,7 @@ export function BlogPreview() {
           <h2>{copy.title}</h2>
           <p className="mt-3 text-body/70">{copy.subtitle}</p>
         </div>
-        <Button href={copy.ctaHref} variant="outline">
+        <Button href={localePath(copy.ctaHref)} variant="outline">
           {copy.ctaLabel}
         </Button>
       </div>
@@ -31,7 +32,7 @@ export function BlogPreview() {
       >
         {blogPosts.map((post) => (
           <motion.li key={post.id} variants={fadeUp}>
-            <Link to="/blog" className="group block">
+            <Link to={localePath("/blog")} className="group block">
               <PlaceholderMedia
                 swatch={post.swatch}
                 ratio="landscape"

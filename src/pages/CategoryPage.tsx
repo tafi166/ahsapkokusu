@@ -14,7 +14,7 @@ import {
   type CollectionFilters,
   type SortOption,
 } from "@/components/collection/FilterDrawer";
-import { getCategory, categories } from "@/data/categories";
+import { categories } from "@/data/categories";
 import { getProductsByCategory } from "@/data/products";
 import { staggerContainer, fadeUp } from "@/lib/motion";
 import { useSeo, breadcrumbJsonLd } from "@/lib/seo";
@@ -22,6 +22,7 @@ import { PlaceholderMedia } from "@/lib/placeholder";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import type { Category, Product } from "@/types";
 import { useI18n } from "@/i18n/I18nProvider";
+import { categoryBySegment, categoryPath } from "@/i18n/paths";
 
 const PAGE_SIZE = 8;
 
@@ -80,7 +81,7 @@ export function CategoryPage() {
 function CategoryPageView({ categorySlug }: { categorySlug: string }) {
   const { t } = useI18n();
   const [searchParams] = useSearchParams();
-  const category = getCategory(categorySlug);
+  const category = categoryBySegment(categorySlug);
 
   const [filters, setFilters] = useState<CollectionFilters>(() => {
     const alt = searchParams.get("alt");
@@ -114,7 +115,7 @@ function CategoryPageView({ categorySlug }: { categorySlug: string }) {
   useSeo({
     title: seoTitle,
     description: seoDescription,
-    jsonLd: category ? breadcrumbJsonLd([{ label: t.product.home, href: "/" }, { label: category.title, href: `/${category.slug}` }]) : undefined,
+    jsonLd: category ? breadcrumbJsonLd([{ label: t.product.home, href: "/" }, { label: category.title, href: categoryPath(category) }]) : undefined,
   });
 
   if (!category) return <NotFoundPage />;
@@ -223,7 +224,7 @@ function CategoryPageView({ categorySlug }: { categorySlug: string }) {
           <h2 className="mb-6 text-lg">{t.catalog.related}</h2>
           <div className="flex flex-wrap gap-3">
             {relatedCategories.map((c) => (
-              <Button key={c.slug} href={`/${c.slug}`} variant="outline" size="sm">
+              <Button key={c.slug} href={categoryPath(c)} variant="outline" size="sm">
                 {c.title}
               </Button>
             ))}

@@ -1,4 +1,5 @@
 import { applyOverride, loadOverrides } from "@/lib/adminStore";
+import { localizeBlogPosts } from "@/i18n/content";
 import type { BlogPost } from "@/types";
 
 /** Overridable from the admin panel (`/admin` → Listeler). */
@@ -32,4 +33,4 @@ const defaultBlogPosts: BlogPost[] = [
   },
 ];
 
-export const blogPosts: BlogPost[] = applyOverride(defaultBlogPosts, loadOverrides().blogPosts);
+export const blogPosts: BlogPost[] = localizeBlogPosts(applyOverride(defaultBlogPosts, loadOverrides().blogPosts));

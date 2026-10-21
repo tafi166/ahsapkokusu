@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { ConfiguredOptions, Product } from "@/types";
 import { calculatePrice, pickOptions, sameConfiguration, validateSelection } from "@/lib/price";
+import { allProducts } from "@/data/products";
 
 export interface CartLine {
   product: Product;
@@ -81,7 +82,10 @@ export function loadStoredCart(raw: string | null): CartLine[] {
 export function CartProvider({ children }: { children: ReactNode }) {
   const [lines, setLines] = useState<CartLine[]>(() => {
     try {
-      return loadStoredCart(localStorage.getItem(STORAGE_KEY));
+      // Show stored lines with the current catalog's copy of each product, so names and
+      // descriptions follow the page language and later edits.
+      const current = new Map(allProducts.map((p) => [p.id, p]));
+      return loadStoredCart(localStorage.getItem(STORAGE_KEY)).map((l) => ({ ...l, product: current.get(l.product.id) ?? l.product }));
     } catch {
       return [];
     }

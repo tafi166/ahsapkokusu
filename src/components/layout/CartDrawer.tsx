@@ -6,6 +6,7 @@ import { isLegacyLine, useCart } from "@/hooks/useCart";
 import { ProductMedia } from "@/lib/placeholder";
 import { Button } from "@/components/ui/Button";
 import { calculatePrice, describeOptions } from "@/lib/price";
+import { localePath } from "@/i18n/paths";
 
 export function CartDrawer() {
   const { isOpen, closeCart, lines, setQuantity, removeItem, subtotal } = useCart();
@@ -114,7 +115,7 @@ export function CartDrawer() {
               </div>
               {lines.length > 0 ? (
                 <Link
-                  to="/odeme"
+                  to={localePath("/odeme")}
                   onClick={closeCart}
                   className="flex w-full items-center justify-center rounded-pill border border-btn-bg bg-btn-bg px-8 py-4 font-medium text-btn-text transition-colors hover:bg-btn-bg-hover hover:text-btn-text-hover"
                 >

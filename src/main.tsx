@@ -1,8 +1,10 @@
 import "@/styles/globals.css";
 import { setServerOverrides } from "@/lib/adminStore";
 import { fetchSiteSnapshot } from "@/lib/siteData";
+import { localeFromPath, setContentLocale } from "@/i18n/locale";
 
 async function start() {
+  setContentLocale(localeFromPath(window.location.pathname));
   const site = await fetchSiteSnapshot();
   if (site) setServerOverrides(site);
   // Imported only now: the data modules read the overrides when they are first evaluated.

@@ -1,4 +1,5 @@
 import { applyOverride, loadOverrides } from "@/lib/adminStore";
+import { localizeProductFaq } from "@/i18n/content";
 import type { FaqItem } from "@/types";
 
 /**
@@ -27,4 +28,4 @@ const defaultProductFaq: FaqItem[] = [
   },
 ];
 
-export const productFaq: FaqItem[] = applyOverride(defaultProductFaq, loadOverrides().productFaq);
+export const productFaq: FaqItem[] = localizeProductFaq(applyOverride(defaultProductFaq, loadOverrides().productFaq));

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { ProductCard } from "@/components/ui/ProductCard";
 import { staggerContainer, fadeUp, viewportOnce } from "@/lib/motion";
 import type { Product } from "@/types";
+import { localePath } from "@/i18n/paths";
 
 /**
  * Reusable "N products in a grid" homepage section — backs Featured
@@ -33,7 +34,7 @@ export function ProductGridSection({
       <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
         <SectionHead title={title} subtitle={subtitle} />
         {ctaLabel && ctaHref ? (
-          <Button href={ctaHref} variant="outline">
+          <Button href={localePath(ctaHref)} variant="outline">
             {ctaLabel}
           </Button>
         ) : null}

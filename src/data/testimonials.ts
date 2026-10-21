@@ -1,4 +1,5 @@
 import { applyOverride, loadOverrides } from "@/lib/adminStore";
+import { localizeTestimonials } from "@/i18n/content";
 import type { Testimonial } from "@/types";
 
 /**
@@ -36,4 +37,4 @@ const defaultTestimonials: Testimonial[] = [
   },
 ];
 
-export const testimonials: Testimonial[] = applyOverride(defaultTestimonials, loadOverrides().testimonials);
+export const testimonials: Testimonial[] = localizeTestimonials(applyOverride(defaultTestimonials, loadOverrides().testimonials));

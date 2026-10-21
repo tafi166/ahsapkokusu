@@ -11,6 +11,7 @@
  */
 import { loadOverrides, mergeShallowNested } from "@/lib/adminStore";
 import { defaultBrand, type Brand } from "@/config/brandDefaults";
+import { localizeBrand } from "@/i18n/content";
 
 export type { Brand };
 
@@ -19,4 +20,4 @@ export type { Brand };
  * `lib/adminStore.ts`. Shallow-merged (not full-replace) so an override
  * saved before a field existed here can't erase that field.
  */
-export const brand: Brand = mergeShallowNested(defaultBrand, loadOverrides().brand);
+export const brand: Brand = localizeBrand(mergeShallowNested(defaultBrand, loadOverrides().brand));

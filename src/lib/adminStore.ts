@@ -1,6 +1,7 @@
 import type { Brand } from "@/config/brand";
 import type { HomeContent } from "@/config/content";
 import type { BlogPost, Category, FaqItem, Product, Testimonial, TrustSignal } from "@/types";
+import type { ContentTranslations } from "@/i18n/content/types";
 
 /**
  * Site content overrides.
@@ -34,6 +35,8 @@ export interface AdminOverrides {
   partnerLogos?: string[];
   blogPosts?: BlogPost[];
   productFaq?: FaqItem[];
+  /** Saved translations, per language and block; a missing block uses the built-in draft (`i18n/content`). */
+  translations?: { en?: ContentTranslations };
 }
 
 let serverOverrides: AdminOverrides = {};

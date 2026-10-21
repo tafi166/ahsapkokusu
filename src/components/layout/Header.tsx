@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Heart, Menu, Search, ShoppingBag, User } from "lucide-react";
 import { useState } from "react";
 import { brand } from "@/config/brand";
@@ -12,24 +12,27 @@ import { MobileMenu } from "@/components/layout/MobileMenu";
 import { SearchOverlay } from "@/components/layout/SearchOverlay";
 import { AnnouncementBar } from "@/components/layout/AnnouncementBar";
 import { useI18n, type Locale } from "@/i18n/I18nProvider";
+import { alternatePath, localePath } from "@/i18n/paths";
 
+/** Links to this page in each language — a full page load, since content is localized when the page loads. */
 function LanguageSwitcher() {
-  const { locale, setLocale, t } = useI18n();
+  const { locale, t } = useI18n();
+  const { pathname, search } = useLocation();
   return (
     <div role="group" aria-label={t.locale.label} className="hidden items-center text-xs sm:flex">
       {(["tr", "en"] as Locale[]).map((l, i) => (
         <span key={l} className="flex items-center">
           {i > 0 ? <span aria-hidden="true" className="px-0.5 text-body/30">|</span> : null}
-          <button
-            type="button"
+          <a
+            href={alternatePath(pathname + search, l, locale)}
+            hrefLang={l}
             lang={l}
-            aria-pressed={locale === l}
+            aria-current={locale === l ? "true" : undefined}
             aria-label={t.locale[l]}
-            onClick={() => setLocale(l)}
             className={cn("rounded px-1.5 py-1 uppercase", locale === l ? "font-semibold text-ink" : "text-body/50 hover:text-ink")}
           >
             {l}
-          </button>
+          </a>
         </span>
       ))}
     </div>
@@ -106,7 +109,7 @@ export function Header() {
                 <Search size={19} />
               </button>
               <Link
-                to="/favoriler"
+                to={localePath("/favoriler")}
                 aria-label={t.header.wishlist(wishlistCount)}
                 className="relative hidden rounded-full p-2 transition-colors hover:bg-paper-soft sm:inline-flex"
               >
@@ -118,7 +121,7 @@ export function Header() {
                 ) : null}
               </Link>
               <Link
-                to="/hesabim"
+                to={localePath("/hesabim")}
                 aria-label={t.header.account}
                 className="hidden rounded-full p-2 transition-colors hover:bg-paper-soft sm:inline-flex"
               >

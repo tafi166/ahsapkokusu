@@ -13,8 +13,8 @@ import { ProductCard } from "@/components/ui/ProductCard";
 import { Gallery } from "@/components/product/Gallery";
 import { VariantSelectors } from "@/components/product/VariantSelectors";
 import { PriceBreakdown } from "@/components/product/PriceBreakdown";
-import type { VariantSelection } from "@/types";
-import { getProductBySlug, allProducts } from "@/data/products";
+import type { Product, VariantSelection } from "@/types";
+import { allProducts } from "@/data/products";
 import { getCategory } from "@/data/categories";
 import { productFaq } from "@/data/faq";
 import { useCart } from "@/hooks/useCart";
@@ -22,9 +22,10 @@ import { useWishlist } from "@/hooks/useWishlist";
 import { useCompare } from "@/hooks/useCompare";
 import { useSeo, productJsonLd, breadcrumbJsonLd } from "@/lib/seo";
 import { cn } from "@/lib/cn";
+import { categoryPath, localePath, productBySegment, productPath } from "@/i18n/paths";
 
 function formatDimensions(
-  product: NonNullable<ReturnType<typeof getProductBySlug>>,
+  product: Product,
   labels: Dictionary["product"]["dims"],
 ): string | null {
   const d = product.dimensions;
@@ -38,7 +39,7 @@ function formatDimensions(
 
 export function ProductPage() {
   const { slug } = useParams<{ slug: string }>();
-  const product = getProductBySlug(slug ?? "");
+  const product = productBySegment(slug ?? "");
   const category = product ? getCategory(product.category) : undefined;
   const { addItem } = useCart();
   const { t } = useI18n();
@@ -62,8 +63,8 @@ export function ProductPage() {
             productJsonLd(product),
             breadcrumbJsonLd([
               { label: t.product.home, href: "/" },
-              ...(category ? [{ label: category.title, href: `/${category.slug}` }] : []),
-              { label: product.title, href: `/urun/${product.slug}` },
+              ...(category ? [{ label: category.title, href: categoryPath(category) }] : []),
+              { label: product.title, href: productPath(product) },
             ]),
           ],
         }
@@ -76,7 +77,7 @@ export function ProductPage() {
         <div className="text-center">
           <h1>{t.product.notFoundTitle}</h1>
           <p className="mt-3 text-body/60">{t.product.notFoundBody(slug ?? "")}</p>
-          <Button href="/parametrik-duvar-tablolari" className="mt-6">
+          <Button href={localePath("/parametrik-duvar-tablolari")} className="mt-6">
             {t.product.browse}
           </Button>
         </div>
@@ -110,7 +111,7 @@ export function ProductPage() {
       <Breadcrumb
         items={[
           { label: t.product.home, href: "/" },
-          ...(category ? [{ label: category.title, href: `/${category.slug}` }] : []),
+          ...(category ? [{ label: category.title, href: categoryPath(category) }] : []),
           { label: product.title },
         ]}
       />

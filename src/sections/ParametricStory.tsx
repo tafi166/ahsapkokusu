@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { PlaceholderMedia } from "@/lib/placeholder";
 import { useI18n } from "@/i18n/I18nProvider";
+import { localePath } from "@/i18n/paths";
 
 const { parametricStory } = homeContent;
 
@@ -19,7 +20,7 @@ export function ParametricStory() {
           <p className="mb-3 text-sm uppercase tracking-[0.2em] text-body/60">{parametricStory.eyebrow}</p>
           <h2>{parametricStory.title}</h2>
           <p className="mt-4 max-w-md text-body/80">{parametricStory.body}</p>
-          <Button href={parametricStory.ctaHref} className="mt-7">
+          <Button href={localePath(parametricStory.ctaHref)} className="mt-7">
             {parametricStory.ctaLabel}
           </Button>
         </RevealOnScroll>

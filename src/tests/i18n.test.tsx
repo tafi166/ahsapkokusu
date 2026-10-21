@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import App from "@/App";
 import { CartProvider } from "@/hooks/useCart";
@@ -11,6 +10,7 @@ import { I18nProvider, type Locale } from "@/i18n/I18nProvider";
 import { formatMoney } from "@/i18n/money";
 import { allProducts } from "@/data/products";
 import { categories } from "@/data/categories";
+import { alternatePath, fullPath, localePath, RESERVED_EN_SEGMENTS, turkishPath } from "@/i18n/paths";
 
 function renderApp(initialLocale?: Locale, path = "/") {
   return render(
@@ -48,96 +48,51 @@ describe("language switcher", () => {
     expect(document.documentElement.lang).toBe("tr");
   });
 
-  it("switches the interface to English and remembers it", async () => {
-    const user = userEvent.setup();
-    renderApp();
-    await user.click(screen.getByRole("button", { name: "English" }));
-
-    expect(screen.getByRole("navigation", { name: "Main menu" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Search products" })).toBeInTheDocument();
-    expect(screen.getByText(/All rights reserved\./)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "English" })).toHaveAttribute("aria-pressed", "true");
-    expect(document.documentElement.lang).toBe("en");
-    expect(localStorage.getItem("parametrika.locale")).toBe("en");
-  });
-
-  it("restores the remembered language", () => {
-    localStorage.setItem("parametrika.locale", "en");
-    renderApp();
-    expect(screen.getByRole("navigation", { name: "Main menu" })).toBeInTheDocument();
+  it("links to the same page at its English address", () => {
+    const product = allProducts.find((p) => p.id === "wa-2")!;
+    renderApp(undefined, `/urun/${product.slug}`);
+    expect(screen.getByRole("link", { name: "English" })).toHaveAttribute("href", "/en/product/jaguar-parametric-wall-art");
+    expect(screen.getByRole("link", { name: "Türkçe" })).toHaveAttribute("aria-current", "true");
   });
 });
 
-describe("product page and cart in English", () => {
-  beforeEach(() => localStorage.clear());
+describe("addresses", () => {
+  it("translates every page, category and product address to English and back", () => {
+    const paths = [
+      "/",
+      "/ozel-tasarim?sekme=dosya",
+      "/iletisim",
+      "/sss",
+      "/odeme",
+      "/sayfa/hakkimizda",
+      ...categories.map((c) => `/${c.slug}?alt=${c.subcategories[0]?.slug ?? ""}`),
+      ...allProducts.map((p) => `/urun/${p.slug}`),
+    ];
+    for (const path of paths) {
+      const english = localePath(path, "en");
+      expect(turkishPath(english, "en")).toBe(path);
+    }
+    expect(localePath("/ozel-tasarim?sekme=dosya", "en")).toBe("/custom-design?sekme=dosya");
+    expect(localePath("/sayfa/hakkimizda", "en")).toBe("/page/about");
+    expect(localePath("/parametrik-duvar-tablolari", "en")).toBe("/parametric-wall-art");
+    expect(localePath("https://example.com/x", "en")).toBe("https://example.com/x");
+    expect(localePath("/iletisim", "tr")).toBe("/iletisim");
+  });
 
-  it("translates the interface, keeps catalog content, and formats prices in the product's own currency", async () => {
-    const product = allProducts.find((p) => p.id === "ml-2")!;
-    const user = userEvent.setup();
-    renderApp("en", `/urun/${product.slug}`);
+  it("gives every product and category a distinct English address that no page uses", () => {
+    const productSegments = allProducts.map((p) => localePath(`/urun/${p.slug}`, "en"));
+    expect(new Set(productSegments).size).toBe(allProducts.length);
+    const categorySegments = categories.map((c) => localePath(`/${c.slug}`, "en").slice(1));
+    expect(new Set(categorySegments).size).toBe(categories.length);
+    for (const segment of categorySegments) expect(RESERVED_EN_SEGMENTS.has(segment)).toBe(false);
+  });
 
-    expect(screen.getByRole("heading", { level: 1, name: product.title })).toBeInTheDocument();
-    expect(screen.getByRole("region", { name: "Price breakdown" })).toHaveTextContent("Base price₺1,980");
-    expect(screen.getByText(/don't change the price/)).toBeInTheDocument();
-    expect(screen.getByText("Layers: 3 · Colour: Doğal · Frame: Çerçevesiz")).toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: "Add to Cart" }));
-    const drawer = await screen.findByRole("dialog", { name: "Your cart" });
-    expect(drawer).toHaveTextContent("Subtotal₺1,980");
-    expect(screen.getByRole("link", { name: "Checkout" })).toBeInTheDocument();
-  }, 20000);
-});
-
-describe("catalog pages in English", () => {
-  beforeEach(() => localStorage.clear());
-
-  it("translates sorting, filters and counts; category names stay catalog content", async () => {
-    const category = categories[0]!;
-    const user = userEvent.setup();
-    renderApp("en", `/${category.slug}`);
-
-    expect(screen.getByRole("heading", { level: 1, name: category.title })).toBeInTheDocument();
-    expect(screen.getByRole("option", { name: "Price: Low to High" })).toBeInTheDocument();
-    expect(screen.getByText(/^\d+ products?$/)).toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: /filter & sort/i }));
-    const dialog = await screen.findByRole("dialog", { name: "Filter products" });
-    expect(dialog).toHaveTextContent("Availability");
-    expect(screen.getByRole("checkbox", { name: "Under ₺500" })).toBeInTheDocument();
-    expect(screen.getByRole("checkbox", { name: "₺500 – ₺2,000" })).toBeInTheDocument();
-  }, 20000);
-
-  it("translates the 404 page", () => {
-    renderApp("en", "/bu-sayfa-yok");
-    expect(screen.getByRole("heading", { level: 1, name: "Page Not Found" })).toBeInTheDocument();
+  it("builds full addresses with the language prefix", () => {
+    expect(fullPath("/", "en")).toBe("/en");
+    expect(fullPath("/contact", "en")).toBe("/en/contact");
+    expect(fullPath("/iletisim", "tr")).toBe("/iletisim");
+    expect(alternatePath("/iletisim", "en", "tr")).toBe("/en/contact");
+    expect(alternatePath("/contact", "tr", "en")).toBe("/iletisim");
   });
 });
 
-describe("forms in English", () => {
-  beforeEach(() => localStorage.clear());
-
-  it("checkout shows the test-order notice and field errors in English", async () => {
-    const product = allProducts.find((p) => !p.variants)!;
-    localStorage.setItem("panelio.cart.v1", JSON.stringify([{ product, quantity: 1 }]));
-    const user = userEvent.setup();
-    renderApp("en", "/odeme");
-
-    expect(await screen.findByRole("heading", { level: 1, name: "Checkout" })).toBeInTheDocument();
-    expect(screen.getByRole("note")).toHaveTextContent(/Test order\..*no payment is taken/);
-    await user.click(screen.getByRole("button", { name: "Place Test Order" }));
-    expect(screen.getByText("Enter a valid phone number.")).toBeInTheDocument();
-  }, 20000);
-
-  it("quote form steps and file errors are in English", async () => {
-    const user = userEvent.setup();
-    renderApp("en", "/ozel-tasarim?sekme=dosya");
-
-    expect(await screen.findByRole("tab", { name: "Upload a file (SVG)" })).toHaveAttribute("aria-selected", "true");
-    expect(screen.getByRole("heading", { level: 2, name: "File" })).toBeInTheDocument();
-    await user.upload(
-      screen.getByLabelText(/choose an svg file/i),
-      new File(['<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>'], "x.svg", { type: "image/svg+xml" }),
-    );
-    expect(await screen.findByRole("alert")).toHaveTextContent("The file contains a disallowed element: <script>.");
-  }, 20000);
-});

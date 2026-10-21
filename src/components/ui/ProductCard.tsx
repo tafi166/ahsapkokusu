@@ -11,6 +11,7 @@ import { useWishlist } from "@/hooks/useWishlist";
 import { useQuickView } from "@/hooks/useQuickView";
 import { cn } from "@/lib/cn";
 import type { Product } from "@/types";
+import { productPath } from "@/i18n/paths";
 
 export function ProductCard({ product }: { product: Product }) {
   const { isWishlisted, toggle } = useWishlist();
@@ -23,7 +24,7 @@ export function ProductCard({ product }: { product: Product }) {
 
   return (
     <div className="group relative">
-      <Link to={`/urun/${product.slug}`} aria-label={t.product.view(product.title)} className="block">
+      <Link to={productPath(product)} aria-label={t.product.view(product.title)} className="block">
         <div className="relative overflow-hidden rounded-card">
           <ProductMedia
             src={product.thumbnail}

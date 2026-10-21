@@ -1,6 +1,7 @@
 import type { Product } from "@/types";
 import { defaultProducts } from "@/data/products/defaults";
 import { applyOverride, loadOverrides } from "@/lib/adminStore";
+import { localizeProducts } from "@/i18n/content";
 
 /**
  * Central product catalog. This is a representative seed (~28 items across
@@ -17,7 +18,7 @@ import { applyOverride, loadOverrides } from "@/lib/adminStore";
  * panel (`/admin` → Ürünler) — see `lib/adminStore.ts`.
  */
 
-export const allProducts: Product[] = applyOverride(defaultProducts, loadOverrides().products);
+export const allProducts: Product[] = localizeProducts(applyOverride(defaultProducts, loadOverrides().products));
 
 export function getProductBySlug(slug: string): Product | undefined {
   return allProducts.find((p) => p.slug === slug);

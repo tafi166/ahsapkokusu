@@ -1,6 +1,7 @@
 import { applyOverride, loadOverrides } from "@/lib/adminStore";
 import type { Category } from "@/types";
 import { defaultCategories } from "@/data/categoryDefaults";
+import { localizeCategories } from "@/i18n/content";
 
 /**
  * The 5 top-level categories. Each `slug` is also the SEO-friendly route
@@ -12,7 +13,7 @@ import { defaultCategories } from "@/data/categoryDefaults";
  * Overridable (text/FAQ/hero color only, not add/remove) from the admin
  * panel (`/admin` → Kategoriler) — see `lib/adminStore.ts`.
  */
-export const categories: Category[] = applyOverride(defaultCategories, loadOverrides().categories);
+export const categories: Category[] = localizeCategories(applyOverride(defaultCategories, loadOverrides().categories));
 
 export function getCategory(slug: string) {
   return categories.find((c) => c.slug === slug);

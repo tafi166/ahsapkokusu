@@ -1,4 +1,5 @@
 import { applyOverride, loadOverrides } from "@/lib/adminStore";
+import { localizeTrustSignals } from "@/i18n/content";
 import type { TrustSignal } from "@/types";
 
 /** Overridable from the admin panel (`/admin` → Listeler). */
@@ -29,7 +30,7 @@ const defaultTrustSignals: TrustSignal[] = [
   },
 ];
 
-export const trustSignals: TrustSignal[] = applyOverride(defaultTrustSignals, loadOverrides().trustSignals);
+export const trustSignals: TrustSignal[] = localizeTrustSignals(applyOverride(defaultTrustSignals, loadOverrides().trustSignals));
 
 /** Generic partner wordmarks for the homepage logo strip — plain text, not real brand marks. */
 const defaultPartnerLogos: string[] = [

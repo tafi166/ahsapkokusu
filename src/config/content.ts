@@ -7,15 +7,16 @@
  */
 import { applyOverride, loadOverrides, mergeShallowNested } from "@/lib/adminStore";
 import { defaultAnnouncementMessages, defaultHomeContent, type HomeContent } from "@/config/contentDefaults";
+import { contentTranslations, localizeHomeContent, localizeStrings } from "@/i18n/content";
 
 export type { HomeContent };
 
-export const announcementMessages: string[] = applyOverride(
-  defaultAnnouncementMessages,
-  loadOverrides().announcementMessages,
+export const announcementMessages: string[] = localizeStrings(
+  applyOverride(defaultAnnouncementMessages, loadOverrides().announcementMessages),
+  contentTranslations().announcementMessages,
 );
 
 // Shallow-merged per section (not full-replace) — see `mergeShallowNested`'s
 // doc comment: an override saved before a section gained a field (as
 // `hero` did with `images`) must not erase that field on later loads.
-export const homeContent: HomeContent = mergeShallowNested(defaultHomeContent, loadOverrides().homeContent);
+export const homeContent: HomeContent = localizeHomeContent(mergeShallowNested(defaultHomeContent, loadOverrides().homeContent));

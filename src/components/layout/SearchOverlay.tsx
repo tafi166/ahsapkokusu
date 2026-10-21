@@ -8,6 +8,7 @@ import { PriceTag } from "@/components/ui/PriceTag";
 import { getCategory } from "@/data/categories";
 import { useI18n } from "@/i18n/I18nProvider";
 import type { Product } from "@/types";
+import { productPath } from "@/i18n/paths";
 
 export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { t } = useI18n();
@@ -71,7 +72,7 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
                 <ul className="grid grid-cols-2 gap-4 md:grid-cols-3">
                   {results.map((product) => (
                     <li key={product.id}>
-                      <Link to={`/urun/${product.slug}`} onClick={onClose} className="group block">
+                      <Link to={productPath(product)} onClick={onClose} className="group block">
                         <ProductMedia src={product.thumbnail} className="rounded-card" />
                         <p className="mt-2 text-sm">{product.title}</p>
                         <p className="text-xs text-body/50">{getCategory(product.category)?.title}</p>

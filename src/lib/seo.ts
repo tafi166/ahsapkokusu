@@ -1,5 +1,7 @@
 import { useEffect } from "react";
 import { brand } from "@/config/brand";
+import { absoluteUrl, alternatePath, productPath } from "@/i18n/paths";
+import { contentLocale, LOCALE_PREFIX, type Locale } from "@/i18n/locale";
 
 /**
  * Lightweight client-side SEO helper for this Vite SPA.
@@ -76,6 +78,20 @@ export function useSeo({
         setHeadTag('meta[property="og:description"]', meta("property", "og:description"), "content", description),
       );
     }
+    // The same page in every language, for search engines; Turkish is the default.
+    const prefix = LOCALE_PREFIX[contentLocale()];
+    const routerPath = window.location.pathname.slice(prefix.length) || "/";
+    const alternates: [string, Locale][] = [["tr", "tr"], ["en", "en"], ["x-default", "tr"]];
+    for (const [hreflang, locale] of alternates) {
+      restore.push(
+        setHeadTag(
+          `link[rel="alternate"][hreflang="${hreflang}"]`,
+          () => Object.assign(document.createElement("link"), { rel: "alternate", hreflang }),
+          "href",
+          `${window.location.origin}${alternatePath(routerPath, locale)}`,
+        ),
+      );
+    }
     if (noindex) restore.push(setHeadTag('meta[name="robots"]', meta("name", "robots"), "content", "noindex, nofollow"));
 
     let script: HTMLScriptElement | null = null;
@@ -117,7 +133,7 @@ export function productJsonLd(product: {
       price: product.price,
       priceCurrency: product.currency,
       availability: schemaAvailability,
-      url: `${window.location.origin}/urun/${product.slug}`,
+      url: absoluteUrl(productPath(product)),
     },
     ...(product.rating
       ? {
@@ -131,6 +147,7 @@ export function productJsonLd(product: {
   };
 }
 
+/** `href`s are router paths (as passed to links). */
 export function breadcrumbJsonLd(items: { label: string; href: string }[]) {
   return {
     "@context": "https://schema.org",
@@ -139,7 +156,7 @@ export function breadcrumbJsonLd(items: { label: string; href: string }[]) {
       "@type": "ListItem",
       position: i + 1,
       name: item.label,
-      item: `${window.location.origin}${item.href}`,
+      item: absoluteUrl(item.href),
     })),
   };
 }

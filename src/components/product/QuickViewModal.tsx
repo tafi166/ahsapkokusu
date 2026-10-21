@@ -9,6 +9,7 @@ import { ProductMedia } from "@/lib/placeholder";
 import { StarRating } from "@/components/ui/StarRating";
 import { PriceTag } from "@/components/ui/PriceTag";
 import { Button } from "@/components/ui/Button";
+import { productPath } from "@/i18n/paths";
 
 /** Centered modal (distinct from the side drawers) so a product can be previewed without leaving the grid. */
 export function QuickViewModal() {
@@ -60,7 +61,7 @@ export function QuickViewModal() {
                 {product.variants && product.availability !== "sold-out" ? (
                   // Configurable products are configured on the product page — the cart rejects a line without its options.
                   <Link
-                    to={`/urun/${product.slug}`}
+                    to={productPath(product)}
                     onClick={close}
                     className="inline-flex items-center justify-center rounded-pill border border-btn-bg bg-btn-bg px-8 py-4 font-medium text-btn-text transition-colors hover:bg-btn-bg-hover hover:text-btn-text-hover"
                   >
@@ -77,7 +78,7 @@ export function QuickViewModal() {
                     >
                       {product.availability === "sold-out" ? t.product.soldOut : t.product.addToCart}
                     </Button>
-                    <Link to={`/urun/${product.slug}`} onClick={close} className="text-center text-sm underline">
+                    <Link to={productPath(product)} onClick={close} className="text-center text-sm underline">
                       {t.product.goToProduct}
                     </Link>
                   </>

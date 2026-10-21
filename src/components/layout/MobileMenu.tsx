@@ -1,14 +1,17 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, X } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { primaryNav } from "@/config/navigation";
 import { brand } from "@/config/brand";
 import { useScrollLock } from "@/hooks/useScrollLock";
 import { useI18n } from "@/i18n/I18nProvider";
+import { alternatePath, localePath } from "@/i18n/paths";
 
 export function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { t, locale, setLocale } = useI18n();
+  const { t, locale } = useI18n();
+  const { pathname, search } = useLocation();
+  const otherLocale = locale === "tr" ? "en" : "tr";
   const [expanded, setExpanded] = useState<string | null>(null);
   useScrollLock(open);
 
@@ -92,20 +95,20 @@ export function MobileMenu({ open, onClose }: { open: boolean; onClose: () => vo
             </ul>
 
             <div className="flex items-center gap-4 border-t border-line px-6 py-5">
-              <Link to="/favoriler" onClick={onClose} className="text-sm text-body/70">
+              <Link to={localePath("/favoriler")} onClick={onClose} className="text-sm text-body/70">
                 {t.header.favourites}
               </Link>
-              <Link to="/hesabim" onClick={onClose} className="text-sm text-body/70">
+              <Link to={localePath("/hesabim")} onClick={onClose} className="text-sm text-body/70">
                 {t.header.account}
               </Link>
-              <button
-                type="button"
-                onClick={() => setLocale(locale === "tr" ? "en" : "tr")}
+              <a
+                href={alternatePath(pathname + search, otherLocale, locale)}
+                hrefLang={otherLocale}
+                lang={otherLocale}
                 className="ml-auto text-sm text-body/70 underline"
-                lang={locale === "tr" ? "en" : "tr"}
               >
-                {locale === "tr" ? t.locale.en : t.locale.tr}
-              </button>
+                {t.locale[otherLocale]}
+              </a>
             </div>
           </motion.nav>
         </>

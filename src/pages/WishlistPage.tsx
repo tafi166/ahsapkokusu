@@ -4,6 +4,7 @@ import { ProductCard } from "@/components/ui/ProductCard";
 import { useWishlist } from "@/hooks/useWishlist";
 import { allProducts } from "@/data/products";
 import { useI18n } from "@/i18n/I18nProvider";
+import { localePath } from "@/i18n/paths";
 
 export function WishlistPage() {
   const { ids } = useWishlist();
@@ -18,7 +19,7 @@ export function WishlistPage() {
       {products.length === 0 ? (
         <div className="py-16 text-center">
           <p className="text-body/60">{t.pages.wishlistEmpty}</p>
-          <Button href="/parametrik-duvar-tablolari" className="mt-4">
+          <Button href={localePath("/parametrik-duvar-tablolari")} className="mt-4">
             {t.product.browse}
           </Button>
         </div>

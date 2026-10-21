@@ -6,6 +6,7 @@ import { ProductMedia } from "@/lib/placeholder";
 import { useCompare } from "@/hooks/useCompare";
 import { allProducts } from "@/data/products";
 import { useI18n } from "@/i18n/I18nProvider";
+import { localePath } from "@/i18n/paths";
 
 type Product = (typeof allProducts)[number];
 
@@ -57,7 +58,7 @@ export function ComparePage() {
       {products.length === 0 ? (
         <div className="py-16 text-center">
           <p className="text-body/60">{t.compare.empty}</p>
-          <Button href="/parametrik-mobilyalar" className="mt-4">
+          <Button href={localePath("/parametrik-mobilyalar")} className="mt-4">
             {t.compare.browse}
           </Button>
         </div>

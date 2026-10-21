@@ -9,6 +9,7 @@ import { ProductMedia } from "@/lib/placeholder";
 import { calculatePrice, describeOptions } from "@/lib/price";
 import { useSeo } from "@/lib/seo";
 import { useI18n } from "@/i18n/I18nProvider";
+import { localePath, productPath } from "@/i18n/paths";
 
 const EMPTY_FORM: CheckoutForm = { name: "", email: "", phone: "", line: "", district: "", city: "", postalCode: "", notes: "" };
 
@@ -115,7 +116,7 @@ export function CheckoutPage() {
         <div className="mx-auto max-w-xl text-center">
           <h1>{t.checkout.emptyTitle}</h1>
           <p className="mt-3 text-body/60">{t.checkout.emptyBody}</p>
-          <Button href="/parametrik-duvar-tablolari" className="mt-6">
+          <Button href={localePath("/parametrik-duvar-tablolari")} className="mt-6">
             {t.product.browse}
           </Button>
         </div>
@@ -183,7 +184,7 @@ export function CheckoutPage() {
               {legacyLines.map((l, i) => (
                 <span key={l.product.id}>
                   {i > 0 ? ", " : ""}
-                  <Link to={`/urun/${l.product.slug}`} className="underline">
+                  <Link to={productPath(l.product)} className="underline">
                     {l.product.title}
                   </Link>
                 </span>

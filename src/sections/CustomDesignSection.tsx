@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { PlaceholderMedia } from "@/lib/placeholder";
 import { useI18n } from "@/i18n/I18nProvider";
+import { localePath } from "@/i18n/paths";
 
 const { customDesign } = homeContent;
 
@@ -19,7 +20,7 @@ export function CustomDesignSection() {
           <p className="mb-3 text-sm uppercase tracking-[0.2em] text-body/60">{customDesign.eyebrow}</p>
           <h2>{customDesign.title}</h2>
           <p className="mt-4 max-w-md text-body/80">{customDesign.body}</p>
-          <Button href={customDesign.ctaHref} className="mt-7">
+          <Button href={localePath(customDesign.ctaHref)} className="mt-7">
             {customDesign.ctaLabel}
           </Button>
         </RevealOnScroll>
