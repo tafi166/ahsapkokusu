@@ -10,8 +10,8 @@ import { QuickViewProvider } from "@/hooks/useQuickView";
 import { api, PROTOTYPE_NOTICE } from "@/lib/api";
 import type { ContactDetails, QuoteDetails } from "@/lib/cncQuote";
 
-function renderAt(path: string) {
-  return render(
+async function renderAt(path: string) {
+  const result = render(
     <MemoryRouter initialEntries={[path]}>
       <CartProvider>
         <WishlistProvider>
@@ -24,6 +24,9 @@ function renderAt(path: string) {
       </CartProvider>
     </MemoryRouter>,
   );
+  // The custom design page is lazy-loaded; wait for it before querying.
+  await screen.findByRole("tablist");
+  return result;
 }
 
 const svgFile = (body: string, name = "logo.svg") => new File([body], name, { type: "image/svg+xml" });
@@ -35,7 +38,7 @@ describe("custom design page tabs", () => {
 
   it("shows the idea form by default and the SVG quote form on the file tab", async () => {
     const user = userEvent.setup();
-    renderAt("/ozel-tasarim");
+    await renderAt("/ozel-tasarim");
     expect(screen.getByRole("tab", { name: "Fikir anlat" })).toHaveAttribute("aria-selected", "true");
     expect(screen.getByLabelText("Tasarım Talebiniz")).toBeInTheDocument();
 
@@ -45,8 +48,8 @@ describe("custom design page tabs", () => {
     expect(screen.queryByLabelText("Tasarım Talebiniz")).not.toBeInTheDocument();
   });
 
-  it("opens the file tab directly from ?sekme=dosya", () => {
-    renderAt("/ozel-tasarim?sekme=dosya");
+  it("opens the file tab directly from ?sekme=dosya", async () => {
+    await renderAt("/ozel-tasarim?sekme=dosya");
     expect(screen.getByRole("tab", { name: /dosya yükle/i })).toHaveAttribute("aria-selected", "true");
   });
 });
@@ -54,7 +57,7 @@ describe("custom design page tabs", () => {
 describe("CNC quote form", () => {
   it("rejects an SVG with a script and does not let the shopper continue", async () => {
     const user = userEvent.setup();
-    renderAt("/ozel-tasarim?sekme=dosya");
+    await renderAt("/ozel-tasarim?sekme=dosya");
 
     await user.upload(
       screen.getByLabelText(/svg dosyası seç/i),
@@ -68,14 +71,14 @@ describe("CNC quote form", () => {
 
   it("asks for a file before moving on", async () => {
     const user = userEvent.setup();
-    renderAt("/ozel-tasarim?sekme=dosya");
+    await renderAt("/ozel-tasarim?sekme=dosya");
     await user.click(screen.getByRole("button", { name: "İleri" }));
     expect(screen.getByRole("alert")).toHaveTextContent(/svg dosyası seçin/i);
   });
 
   it("walks through every step to the review, and can jump back to edit", async () => {
     const user = userEvent.setup();
-    renderAt("/ozel-tasarim?sekme=dosya");
+    await renderAt("/ozel-tasarim?sekme=dosya");
 
     await user.upload(screen.getByLabelText(/svg dosyası seç/i), svgFile(GOOD_SVG));
     expect(await screen.findByText("Dosyadaki ölçü: 30 × 15 cm")).toBeInTheDocument();
@@ -141,7 +144,7 @@ describe("CNC quote submission (prototype)", () => {
   it("sends the file and fields to the server and shows its reference", async () => {
     const sent = mockQuoteEndpoint(() => Response.json({ reference: "Q-ABCD2345" }, { status: 201 }));
     const user = userEvent.setup();
-    renderAt("/ozel-tasarim?sekme=dosya");
+    await renderAt("/ozel-tasarim?sekme=dosya");
     await fillToReview(user);
 
     await user.click(screen.getByRole("button", { name: /teklif talebini gönder/i }));
@@ -173,7 +176,7 @@ describe("CNC quote submission (prototype)", () => {
   it("shows the server's reason when it rejects the request, and stays on the review", async () => {
     mockQuoteEndpoint(() => Response.json({ message: "İzin verilmeyen öğe: <image>." }, { status: 400 }));
     const user = userEvent.setup();
-    renderAt("/ozel-tasarim?sekme=dosya");
+    await renderAt("/ozel-tasarim?sekme=dosya");
     await fillToReview(user);
     await user.click(screen.getByRole("button", { name: /teklif talebini gönder/i }));
     expect(await screen.findByRole("alert")).toHaveTextContent("İzin verilmeyen öğe: <image>.");
@@ -183,7 +186,7 @@ describe("CNC quote submission (prototype)", () => {
   it("says plainly that nothing was sent when the server is unreachable", async () => {
     mockQuoteEndpoint(() => Promise.reject(new TypeError("Failed to fetch")));
     const user = userEvent.setup();
-    renderAt("/ozel-tasarim?sekme=dosya");
+    await renderAt("/ozel-tasarim?sekme=dosya");
     await fillToReview(user);
     await user.click(screen.getByRole("button", { name: /teklif talebini gönder/i }));
     expect(await screen.findByRole("alert")).toHaveTextContent(/talebiniz gönderilmedi/);
@@ -200,7 +203,7 @@ describe("CNC quote submission (prototype)", () => {
 
   it("the idea form no longer claims the request was received", async () => {
     const user = userEvent.setup();
-    renderAt("/ozel-tasarim");
+    await renderAt("/ozel-tasarim");
     await user.type(screen.getByLabelText("Ad Soyad"), "Ada Lovelace");
     await user.type(screen.getByLabelText("E-posta"), "ada@example.com");
     await user.type(screen.getByLabelText("Tasarım Talebiniz"), "Logo panosu");

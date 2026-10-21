@@ -17,8 +17,14 @@ export function Layout() {
 
   return (
     <div className="flex min-h-screen flex-col">
+      <a
+        href="#icerik"
+        className="sr-only z-[60] rounded-pill bg-ink px-4 py-2 text-sm text-white focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
+      >
+        İçeriğe geç
+      </a>
       <Header />
-      <main className="flex-1">
+      <main id="icerik" tabIndex={-1} className="flex-1 outline-none">
         <Outlet />
       </main>
       <Footer />

@@ -7,6 +7,12 @@ const schema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   DATABASE_URL: z.string().min(1),
   PORT: z.coerce.number().int().min(1).max(65535).default(3000),
+  /** Public origin of the storefront, for absolute URLs in the sitemap and robots.txt. */
+  SITE_URL: z
+    .string()
+    .url()
+    .default('http://localhost:5173')
+    .transform((u) => u.replace(/\/+$/, '')),
   /** Origins allowed to send state-changing requests (checked against Origin/Referer). */
   ALLOWED_ORIGINS: z
     .string()
@@ -40,6 +46,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   }
   if (parsed.data.NODE_ENV === 'production' && !parsed.data.COOKIE_SECURE) {
     throw new Error('COOKIE_SECURE must be true in production');
+  }
+  if (parsed.data.NODE_ENV === 'production' && !parsed.data.SITE_URL.startsWith('https://')) {
+    throw new Error('SITE_URL must be an https URL in production');
   }
   if (parsed.data.NODE_ENV === 'production' && !isAbsolute(parsed.data.UPLOAD_DIR)) {
     // A relative path moves with the working directory and can end up inside a release folder.

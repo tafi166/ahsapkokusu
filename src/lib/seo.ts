@@ -12,14 +12,43 @@ import { brand } from "@/config/brand";
  * If this project migrates to a meta-framework later, this hook is the
  * one place to swap for real SSR `<head>` management.
  */
+/** Upserts a `<meta>`/`<link>` element and returns a function restoring what was there before. */
+function setHeadTag(selector: string, create: () => HTMLElement, attr: string, value: string): () => void {
+  let el = document.head.querySelector<HTMLElement>(selector);
+  const existed = Boolean(el);
+  const previous = el?.getAttribute(attr) ?? null;
+  if (!el) {
+    el = create();
+    document.head.appendChild(el);
+  }
+  el.setAttribute(attr, value);
+  return () => {
+    if (!existed) el?.remove();
+    else if (previous !== null) el?.setAttribute(attr, previous);
+  };
+}
+
+function meta(key: "name" | "property", name: string) {
+  return () => {
+    const el = document.createElement("meta");
+    el.setAttribute(key, name);
+    return el;
+  };
+}
+
 export function useSeo({
   title,
   description,
   jsonLd,
+  ogType = "website",
+  noindex = false,
 }: {
   title: string;
   description?: string;
   jsonLd?: Record<string, unknown>;
+  ogType?: "website" | "product";
+  /** Keep the page out of search results (admin, checkout, ...). */
+  noindex?: boolean;
 }) {
   // Callers rebuild `jsonLd` as a fresh object every render; key off its
   // serialized form so the effect only re-runs when the content actually
@@ -28,18 +57,26 @@ export function useSeo({
 
   useEffect(() => {
     const previousTitle = document.title;
-    document.title = `${title} | ${brand.name}`;
+    const fullTitle = `${title} | ${brand.name}`;
+    document.title = fullTitle;
+    // Canonical URL: this page without query string or hash.
+    const url = `${window.location.origin}${window.location.pathname}`;
 
-    let meta = document.querySelector<HTMLMetaElement>('meta[name="description"]');
-    const previousDescription = meta?.getAttribute("content") ?? null;
+    const restore: (() => void)[] = [
+      setHeadTag('link[rel="canonical"]', () => Object.assign(document.createElement("link"), { rel: "canonical" }), "href", url),
+      setHeadTag('meta[property="og:title"]', meta("property", "og:title"), "content", fullTitle),
+      setHeadTag('meta[property="og:type"]', meta("property", "og:type"), "content", ogType),
+      setHeadTag('meta[property="og:url"]', meta("property", "og:url"), "content", url),
+      setHeadTag('meta[property="og:site_name"]', meta("property", "og:site_name"), "content", brand.name),
+      setHeadTag('meta[name="twitter:card"]', meta("name", "twitter:card"), "content", "summary"),
+    ];
     if (description) {
-      if (!meta) {
-        meta = document.createElement("meta");
-        meta.name = "description";
-        document.head.appendChild(meta);
-      }
-      meta.setAttribute("content", description);
+      restore.push(
+        setHeadTag('meta[name="description"]', meta("name", "description"), "content", description),
+        setHeadTag('meta[property="og:description"]', meta("property", "og:description"), "content", description),
+      );
     }
+    if (noindex) restore.push(setHeadTag('meta[name="robots"]', meta("name", "robots"), "content", "noindex, nofollow"));
 
     let script: HTMLScriptElement | null = null;
     if (jsonLdKey) {
@@ -51,10 +88,10 @@ export function useSeo({
 
     return () => {
       document.title = previousTitle;
-      if (meta && previousDescription !== null) meta.setAttribute("content", previousDescription);
-      if (script) document.head.removeChild(script);
+      restore.forEach((undo) => undo());
+      script?.remove();
     };
-  }, [title, description, jsonLdKey]);
+  }, [title, description, jsonLdKey, ogType, noindex]);
 }
 
 export function productJsonLd(product: {

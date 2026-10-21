@@ -86,3 +86,24 @@ describe('catalog API', () => {
     expect(await prisma.product.count()).toBe(defaultProducts.length);
   });
 });
+
+describe('sitemap and robots.txt', () => {
+  it('lists the storefront pages, categories and products with absolute URLs', async () => {
+    const res = await request(app.getHttpServer()).get('/api/sitemap.xml').expect(200);
+    expect(res.headers['content-type']).toContain('application/xml');
+    const locs = [...res.text.matchAll(/<loc>(.*?)<\/loc>/g)].map((m) => m[1]);
+    expect(locs).toContain('http://localhost:5173/');
+    expect(locs).toContain(`http://localhost:5173/${defaultCategories[0]!.slug}`);
+    expect(locs).toContain(`http://localhost:5173/urun/${defaultProducts[0]!.slug}`);
+    expect(locs.filter((l) => l?.includes('/urun/'))).toHaveLength(defaultProducts.length);
+    expect(locs.some((l) => l?.includes('/admin') || l?.includes('/odeme') || l?.includes('/sayfa/'))).toBe(false);
+    expect(res.text).toContain(`<lastmod>${defaultProducts[0]!.updatedAt}</lastmod>`);
+  });
+
+  it('keeps crawlers out of the admin panel and checkout', async () => {
+    const res = await request(app.getHttpServer()).get('/api/robots.txt').expect(200);
+    expect(res.text).toContain('Disallow: /admin');
+    expect(res.text).toContain('Disallow: /odeme');
+    expect(res.text).toContain('Sitemap: http://localhost:5173/sitemap.xml');
+  });
+});

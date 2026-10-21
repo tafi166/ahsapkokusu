@@ -51,6 +51,7 @@ export function ProductPage() {
   useSeo({
     title: product?.seoTitle ?? product?.title ?? "Ürün",
     description: product?.seoDescription ?? product?.shortDescription ?? product?.description,
+    ogType: product ? "product" : "website",
     jsonLd: product
       ? {
           "@graph": [

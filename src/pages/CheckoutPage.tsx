@@ -26,7 +26,7 @@ function TestOrderNotice() {
  * provider is involved.
  */
 export function CheckoutPage() {
-  useSeo({ title: "Ödeme", description: "Siparişinizi tamamlayın." });
+  useSeo({ title: "Ödeme", description: "Siparişinizi tamamlayın.", noindex: true });
   const { lines, clear } = useCart();
   const [form, setForm] = useState<CheckoutForm>(EMPTY_FORM);
   const [showErrors, setShowErrors] = useState(false);

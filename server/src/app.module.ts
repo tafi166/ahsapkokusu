@@ -18,6 +18,7 @@ import { OrdersController } from './orders/orders.controller';
 import { OrdersService } from './orders/orders.service';
 import { PrismaLifecycle, prismaProvider } from './prisma/prisma';
 import { QuotesController } from './quotes/quotes.controller';
+import { SeoController } from './seo/seo.controller';
 import { QuotesService } from './quotes/quotes.service';
 import { UsersController } from './users/users.controller';
 import { UsersService } from './users/users.service';
@@ -51,6 +52,7 @@ export function createAppModule(config: AppConfig) {
       MediaController,
       QuotesController,
       OrdersController,
+      SeoController,
     ],
     providers: [
       { provide: APP_CONFIG, useValue: config },

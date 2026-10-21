@@ -29,6 +29,13 @@ function renderAt(path: string) {
   );
 }
 
+/** Checkout is lazy-loaded: wait until its first heading is on screen. */
+async function renderCheckout() {
+  const result = renderAt("/odeme");
+  await screen.findByRole("heading", { level: 1 });
+  return result;
+}
+
 function storeCart(lines: object[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(lines));
 }
@@ -50,8 +57,8 @@ beforeEach(() => localStorage.clear());
 afterEach(() => vi.restoreAllMocks());
 
 describe("checkout", () => {
-  it("says the cart is empty when it is", () => {
-    renderAt("/odeme");
+  it("says the cart is empty when it is", async () => {
+    await renderCheckout();
     expect(screen.getByRole("heading", { level: 1, name: "Sepetiniz boş" })).toBeInTheDocument();
   });
 
@@ -82,7 +89,7 @@ describe("checkout", () => {
       );
     });
     const user = userEvent.setup();
-    renderAt("/odeme");
+    await renderCheckout();
     expect(screen.getByRole("note")).toHaveTextContent(/test siparişi.*ödeme alınmaz/i);
     await fillContact(user);
     await user.click(screen.getByRole("button", { name: "Test Siparişi Ver" }));
@@ -107,7 +114,7 @@ describe("checkout", () => {
     storeCart([mlLine]);
     const fetchSpy = vi.spyOn(globalThis, "fetch");
     const user = userEvent.setup();
-    renderAt("/odeme");
+    await renderCheckout();
     await user.click(screen.getByRole("button", { name: "Test Siparişi Ver" }));
     expect(screen.getByLabelText("Telefon")).toHaveAttribute("aria-invalid", "true");
     expect(screen.getByLabelText("İl")).toHaveAttribute("aria-invalid", "true");
@@ -116,14 +123,14 @@ describe("checkout", () => {
 
   it("asks no address for a digital-only cart", async () => {
     storeCart([{ product: digital, quantity: 1 }]);
-    renderAt("/odeme");
+    await renderCheckout();
     expect(screen.queryByLabelText("Açık adres")).not.toBeInTheDocument();
     expect(screen.getByText(/teslimat adresi gerekmez/)).toBeInTheDocument();
   });
 
   it("blocks lines saved without their options", async () => {
     storeCart([{ product: multilayer, quantity: 1 }]);
-    renderAt("/odeme");
+    await renderCheckout();
     expect(screen.getByRole("alert")).toHaveTextContent(/seçenekleri kayıtlı değil/);
     expect(screen.getByRole("button", { name: "Test Siparişi Ver" })).toBeDisabled();
   });
@@ -132,7 +139,7 @@ describe("checkout", () => {
     storeCart([mlLine]);
     vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json({ message: `${multilayer.title} tükendi.` }, { status: 400 }));
     const user = userEvent.setup();
-    renderAt("/odeme");
+    await renderCheckout();
     await fillContact(user);
     await user.click(screen.getByRole("button", { name: "Test Siparişi Ver" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("tükendi");

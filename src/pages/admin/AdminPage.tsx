@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { brand } from "@/config/brand";
 import { AdminLoginGate } from "@/pages/admin/AdminLoginGate";
 import { useAdminSession } from "@/pages/admin/useAdminSession";
+import { useSeo } from "@/lib/seo";
 import { AdminButton } from "@/pages/admin/controls";
 import { BrandTab } from "@/pages/admin/tabs/BrandTab";
 import { HomeContentTab } from "@/pages/admin/tabs/HomeContentTab";
@@ -36,6 +37,7 @@ type TabId = (typeof TABS)[number]["id"];
  * server-side session; the API checks the role on every request.
  */
 export function AdminPage() {
+  useSeo({ title: "Yönetim Paneli", noindex: true });
   const { session, login, logout } = useAdminSession();
   const [tab, setTab] = useState<TabId>("brand");
 

@@ -10,4 +10,12 @@ describe('loadConfig', () => {
   it('rejects an invalid port', () => {
     expect(() => loadConfig({ DATABASE_URL: 'postgresql://x', PORT: 'abc' })).toThrow(/PORT/);
   });
+
+  it('requires https SITE_URL and secure cookies in production', () => {
+    const base = { DATABASE_URL: 'postgresql://x', NODE_ENV: 'production', COOKIE_SECURE: 'true', UPLOAD_DIR: '/srv/uploads' };
+    expect(() => loadConfig({ ...base, SITE_URL: 'http://shop.example' })).toThrow(/SITE_URL/);
+    expect(() => loadConfig({ ...base, SITE_URL: 'https://shop.example', COOKIE_SECURE: 'false' })).toThrow(/COOKIE_SECURE/);
+    expect(() => loadConfig({ ...base, SITE_URL: 'https://shop.example', UPLOAD_DIR: 'storage' })).toThrow(/UPLOAD_DIR/);
+    expect(loadConfig({ ...base, SITE_URL: 'https://shop.example/' }).SITE_URL).toBe('https://shop.example');
+  });
 });
