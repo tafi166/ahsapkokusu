@@ -6,10 +6,12 @@ import { categories } from "@/data/categories";
 import { Section } from "@/components/ui/Section";
 import { PlaceholderMedia } from "@/lib/placeholder";
 import { staggerContainer, fadeUp, viewportOnce } from "@/lib/motion";
+import { useI18n } from "@/i18n/I18nProvider";
 
 const { categoryShowcase } = homeContent;
 
 export function CategoryShowcase() {
+  const { t } = useI18n();
   return (
     <Section>
       <div className="mb-10 max-w-lg">
@@ -38,7 +40,7 @@ export function CategoryShowcase() {
                 <h3 className="text-lg">{category.title}</h3>
                 <p className="mt-1 text-sm text-body/60">{category.shortDescription}</p>
                 <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-ink">
-                  Keşfet <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
+                  {t.common.explore} <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
                 </span>
               </div>
             </Link>

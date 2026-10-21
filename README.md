@@ -132,6 +132,15 @@ file formats for digital wall art) lives in `ProductPage.tsx`.
   `/sitemap.xml` and `/robots.txt` to `/api/sitemap.xml` and `/api/robots.txt`
   as the Vite dev proxy does. Meta tags are not in the raw HTML response;
   that needs SSR or prerendering.
+- **Languages:** the storefront interface is Turkish (default) or English
+  (switcher in the header, remembered per browser, sets `<html lang>`).
+  Interface text lives in `src/i18n/messages.ts`; the English dictionary
+  must match the Turkish one key for key (a type error otherwise). Catalog
+  and page content — product names and descriptions, categories, homepage
+  copy, FAQ, blog — is Turkish only, and so are messages coming from the
+  API server and the admin panel. URLs are the same in both languages, so
+  English pages aren't separately indexable. Prices are formatted for the
+  language but never converted between currencies.
 - **Accessibility** is checked with axe-core (WCAG 2.1 A/AA) on the main
   pages in the test suite (`src/tests/a11y.test.tsx`). Colour contrast
   can't be computed in jsdom and still needs a check in a real browser.

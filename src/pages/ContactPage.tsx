@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/Button";
 import { brand } from "@/config/brand";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
+import { useI18n } from "@/i18n/I18nProvider";
 
 type Status = "idle" | "loading" | "success" | "error";
 
 export function ContactPage() {
+  const { t } = useI18n();
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [status, setStatus] = useState<Status>("idle");
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -15,7 +17,7 @@ export function ContactPage() {
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setStatus("loading");
-    const result = await api.submitContactForm(form);
+    const result = await api.submitContactForm(form, t.api);
     setStatus(result.ok ? "success" : "error");
     setFeedback(result.message);
     if (result.ok) setForm({ name: "", email: "", message: "" });
@@ -24,20 +26,19 @@ export function ContactPage() {
   return (
     <Section containerSize="sm">
       <div className="mx-auto max-w-xl">
-        <h1>İletişim</h1>
+        <h1>{t.contact.title}</h1>
         <p className="mt-3 text-body/70">
-          Ölçü, malzeme veya ticari bir proje hakkında sorularınız mı var? Bize yazın — genellikle bir
-          iş günü içinde dönüş yapıyoruz. Doğrudan{" "}
+          {t.contact.introBefore}{" "}
           <a href={`mailto:${brand.contact.email}`} className="underline">
             {brand.contact.email}
-          </a>{" "}
-          adresinden de ulaşabilirsiniz.
+          </a>
+          {t.contact.introAfter}
         </p>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-5" noValidate>
           <div>
             <label htmlFor="name" className="mb-1.5 block text-sm">
-              Ad Soyad
+              {t.forms.name}
             </label>
             <input
               id="name"
@@ -50,7 +51,7 @@ export function ContactPage() {
           </div>
           <div>
             <label htmlFor="email" className="mb-1.5 block text-sm">
-              E-posta
+              {t.forms.email}
             </label>
             <input
               id="email"
@@ -64,7 +65,7 @@ export function ContactPage() {
           </div>
           <div>
             <label htmlFor="message" className="mb-1.5 block text-sm">
-              Mesajınız
+              {t.contact.message}
             </label>
             <textarea
               id="message"
@@ -78,7 +79,7 @@ export function ContactPage() {
           </div>
 
           <Button type="submit" size="lg" isLoading={status === "loading"} className="w-full">
-            Mesajı Gönder
+            {t.contact.submit}
           </Button>
 
           {feedback ? (

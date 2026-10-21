@@ -2,6 +2,8 @@ import { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from "r
 import { Button } from "@/components/ui/Button";
 import { cncQuoteConfig } from "@/config/cncQuote";
 import { api } from "@/lib/api";
+import { useI18n } from "@/i18n/I18nProvider";
+import { INTL_LOCALE } from "@/i18n/money";
 import {
   checkFileMeta,
   formatBytes,
@@ -18,7 +20,7 @@ import {
 import { cn } from "@/lib/cn";
 import { Field, fieldProps } from "@/components/ui/FormField";
 
-const STEPS = ["Dosya", "Ölçü & Malzeme", "İletişim", "Gözden Geçir"] as const;
+const STEP_COUNT = 4;
 
 interface UploadedFile {
   /** Held in memory until the request is sent; never stored. */
@@ -36,6 +38,7 @@ interface UploadedFile {
  * the request; the server checks it again before storing it.
  */
 export function CncQuoteForm() {
+  const { t, locale } = useI18n();
   const [step, setStep] = useState(0);
   const [file, setFile] = useState<UploadedFile | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
@@ -69,8 +72,8 @@ export function CncQuoteForm() {
     [],
   );
 
-  const detailErrors = validateDetails(details);
-  const contactErrors = validateContact(contact);
+  const detailErrors = validateDetails(details, t.validation);
+  const contactErrors = validateContact(contact, t.validation);
   const stepValid = [Boolean(file), isEmpty(detailErrors), isEmpty(contactErrors), true];
   // Errors appear only after the shopper tries to move on from the step.
   const dErr: FieldErrors<keyof QuoteDetails> = showErrors ? detailErrors : {};
@@ -82,14 +85,14 @@ export function CncQuoteForm() {
     if (!picked) return;
 
     setFileError(null);
-    const metaError = checkFileMeta(picked);
+    const metaError = checkFileMeta(picked, t.validation);
     if (metaError) {
       setFileError(metaError);
       return;
     }
     setCheckingFile(true);
     try {
-      const inspection = inspectSvgText(await picked.text());
+      const inspection = inspectSvgText(await picked.text(), t.validation);
       if (!inspection.ok) {
         setFileError(inspection.error);
         return;
@@ -99,7 +102,7 @@ export function CncQuoteForm() {
       previewUrlRef.current = previewUrl;
       setFile({ blob: picked, name: picked.name, size: picked.size, info: inspection.info, previewUrl });
     } catch {
-      setFileError("Dosya okunamadı.");
+      setFileError(t.quote.fileUnreadable);
     } finally {
       setCheckingFile(false);
     }
@@ -108,11 +111,11 @@ export function CncQuoteForm() {
   function next() {
     if (!stepValid[step]) {
       setShowErrors(true);
-      if (step === 0) setFileError((err) => err ?? "Devam etmek için bir SVG dosyası seçin.");
+      if (step === 0) setFileError((err) => err ?? t.quote.chooseFileFirst);
       return;
     }
     setShowErrors(false);
-    setStep((s) => Math.min(s + 1, STEPS.length - 1));
+    setStep((s) => Math.min(s + 1, STEP_COUNT - 1));
   }
 
   function goTo(target: number) {
@@ -125,7 +128,7 @@ export function CncQuoteForm() {
     if (!file) return;
     setSubmitting(true);
     setSubmitError(null);
-    const result = await api.submitCncQuote({ file: file.blob, details, contact });
+    const result = await api.submitCncQuote({ file: file.blob, details, contact }, t.api);
     setSubmitting(false);
     if (result.ok) setReference(result.reference);
     else setSubmitError(result.message);
@@ -157,30 +160,27 @@ export function CncQuoteForm() {
     return (
       <div className="space-y-4">
         <h2 ref={confirmationRef} tabIndex={-1} className="text-xl outline-none">
-          Teklif talebiniz alındı
+          {t.quote.received}
         </h2>
         <p role="status" className="rounded-input border border-divider bg-paper-soft px-4 py-3 text-sm">
-          Talebiniz ve dosyanız kaydedildi. Ekibimiz dosyanızı inceleyip <strong>{contact.email}</strong> adresine
-          teklifle dönecek. Referans numaranızı saklayın.
+          {t.quote.receivedBefore} <strong>{contact.email}</strong> {t.quote.receivedAfter}
         </p>
         <dl className="space-y-1 text-sm">
           <div className="flex gap-2">
-            <dt className="text-body/60">Referans:</dt>
+            <dt className="text-body/60">{t.quote.reference}:</dt>
             <dd className="font-medium">{reference}</dd>
           </div>
           <div className="flex gap-2">
-            <dt className="text-body/60">Dosya:</dt>
+            <dt className="text-body/60">{t.quote.file}:</dt>
             <dd className="break-all">{file.name}</dd>
           </div>
           <div className="flex gap-2">
-            <dt className="text-body/60">Talep:</dt>
-            <dd>
-              {details.widthCm} × {details.heightCm} cm · {details.material} · {details.quantity} adet
-            </dd>
+            <dt className="text-body/60">{t.quote.request}:</dt>
+            <dd>{t.quote.summary(details.widthCm, details.heightCm, details.material, details.quantity)}</dd>
           </div>
         </dl>
         <Button type="button" variant="secondary" onClick={startOver}>
-          Yeni talep oluştur
+          {t.quote.newRequest}
         </Button>
       </div>
     );
@@ -188,8 +188,8 @@ export function CncQuoteForm() {
 
   return (
     <div>
-      <ol className="mb-8 flex flex-wrap gap-x-4 gap-y-2 text-xs" aria-label="Adımlar">
-        {STEPS.map((label, i) => (
+      <ol className="mb-8 flex flex-wrap gap-x-4 gap-y-2 text-xs" aria-label={t.quote.stepsLabel}>
+        {t.quote.steps.map((label, i) => (
           <li
             key={label}
             aria-current={i === step ? "step" : undefined}
@@ -209,21 +209,20 @@ export function CncQuoteForm() {
       </ol>
 
       <h2 ref={headingRef} tabIndex={-1} className="mb-5 text-xl outline-none">
-        {STEPS[step]}
+        {t.quote.steps[step]}
       </h2>
 
       {step === 0 ? (
         <div className="space-y-4">
           <p className="text-sm text-body/70">
-            Kesilmesini istediğiniz tasarımı SVG olarak yükleyin. Dosya en fazla{" "}
-            {formatBytes(cncQuoteConfig.maxFileBytes)} olmalı; betik, gömülü HTML veya dış bağlantı içermemeli.
+            {t.quote.uploadIntro(formatBytes(cncQuoteConfig.maxFileBytes))}
           </p>
           <div>
             <label
               htmlFor="cnc-file"
               className="flex cursor-pointer flex-col items-center justify-center gap-1 rounded-card border border-dashed border-divider px-4 py-8 text-center text-sm transition-colors hover:border-ink focus-within:border-ink"
             >
-              <span className="font-medium">{file ? "Başka bir dosya seç" : "SVG dosyası seç"}</span>
+              <span className="font-medium">{file ? t.quote.chooseAnother : t.quote.chooseFile}</span>
               <span className="text-xs text-body/60">.svg</span>
               <input
                 id="cnc-file"
@@ -235,7 +234,7 @@ export function CncQuoteForm() {
                 className="sr-only"
               />
             </label>
-            {checkingFile ? <p className="mt-2 text-xs text-body/60">Dosya kontrol ediliyor…</p> : null}
+            {checkingFile ? <p className="mt-2 text-xs text-body/60">{t.quote.checking}</p> : null}
             {fileError ? (
               <p id="cnc-file-error" role="alert" className="mt-2 text-xs text-danger">
                 {fileError}
@@ -248,7 +247,7 @@ export function CncQuoteForm() {
               {file.previewUrl ? (
                 <img
                   src={file.previewUrl}
-                  alt={`${file.name} önizlemesi`}
+                  alt={t.quote.previewAlt(file.name)}
                   className="h-24 w-24 shrink-0 rounded-input bg-white object-contain p-1"
                 />
               ) : null}
@@ -256,9 +255,7 @@ export function CncQuoteForm() {
                 <p className="font-medium break-all">{file.name}</p>
                 <p className="text-body/60">{formatBytes(file.size)}</p>
                 <p className="mt-1 text-xs text-body/60">
-                  {physical
-                    ? `Dosyadaki ölçü: ${physical.width} × ${physical.height} cm`
-                    : "Dosyada fiziksel ölçü belirtilmemiş — ölçüyü bir sonraki adımda girin."}
+                  {physical ? t.quote.fileSize(physical.width, physical.height) : t.quote.noPhysicalSize}
                 </p>
               </div>
             </div>
@@ -280,11 +277,11 @@ export function CncQuoteForm() {
               }
               className="rounded-full border border-line px-3 py-1.5 text-xs transition-colors hover:border-ink"
             >
-              Dosyadaki ölçüyü kullan ({physical.width} × {physical.height} cm)
+              {t.quote.useFileSize(physical.width, physical.height)}
             </button>
           ) : null}
           <div className="grid grid-cols-2 gap-4">
-            <Field id="cnc-width" label="Genişlik (cm)" error={dErr.widthCm}>
+            <Field id="cnc-width" label={t.quote.width} error={dErr.widthCm}>
               <input
                 {...fieldProps("cnc-width", dErr.widthCm)}
                 inputMode="decimal"
@@ -294,9 +291,9 @@ export function CncQuoteForm() {
             </Field>
             <Field
               id="cnc-height"
-              label="Yükseklik (cm)"
+              label={t.quote.height}
               error={dErr.heightCm}
-              hint={ratioHeight ? `Dosyanın oranına göre ≈ ${ratioHeight.toLocaleString("tr-TR")} cm` : undefined}
+              hint={ratioHeight ? t.quote.ratioHint(ratioHeight.toLocaleString(INTL_LOCALE[locale])) : undefined}
             >
               <input
                 {...fieldProps("cnc-height", dErr.heightCm)}
@@ -307,15 +304,15 @@ export function CncQuoteForm() {
             </Field>
           </div>
           <p className="-mt-2 text-xs text-body/60">
-            {cncQuoteConfig.minSizeCm}–{cncQuoteConfig.maxSizeCm} cm arası.
+            {t.quote.sizeRange(cncQuoteConfig.minSizeCm, cncQuoteConfig.maxSizeCm)}
           </p>
-          <Field id="cnc-material" label="Malzeme" error={dErr.material}>
+          <Field id="cnc-material" label={t.quote.material} error={dErr.material}>
             <select
               {...fieldProps("cnc-material", dErr.material)}
               value={details.material}
               onChange={(e) => setDetails((d) => ({ ...d, material: e.target.value }))}
             >
-              <option value="">Seçin…</option>
+              <option value="">{t.quote.choose}</option>
               {cncQuoteConfig.materials.map((m) => (
                 <option key={m} value={m}>
                   {m}
@@ -323,7 +320,7 @@ export function CncQuoteForm() {
               ))}
             </select>
           </Field>
-          <Field id="cnc-quantity" label="Adet" error={dErr.quantity}>
+          <Field id="cnc-quantity" label={t.quote.quantity} error={dErr.quantity}>
             <input
               {...fieldProps("cnc-quantity", dErr.quantity)}
               inputMode="numeric"
@@ -336,7 +333,7 @@ export function CncQuoteForm() {
 
       {step === 2 ? (
         <div className="space-y-5">
-          <Field id="cnc-name" label="Ad Soyad" error={cErr.name}>
+          <Field id="cnc-name" label={t.forms.name} error={cErr.name}>
             <input
               {...fieldProps("cnc-name", cErr.name)}
               autoComplete="name"
@@ -344,7 +341,7 @@ export function CncQuoteForm() {
               onChange={(e) => setContact((c) => ({ ...c, name: e.target.value }))}
             />
           </Field>
-          <Field id="cnc-email" label="E-posta" error={cErr.email}>
+          <Field id="cnc-email" label={t.forms.email} error={cErr.email}>
             <input
               {...fieldProps("cnc-email", cErr.email)}
               type="email"
@@ -353,7 +350,7 @@ export function CncQuoteForm() {
               onChange={(e) => setContact((c) => ({ ...c, email: e.target.value }))}
             />
           </Field>
-          <Field id="cnc-phone" label="Telefon (isteğe bağlı)" error={cErr.phone}>
+          <Field id="cnc-phone" label={t.forms.phoneOptional} error={cErr.phone}>
             <input
               {...fieldProps("cnc-phone", cErr.phone)}
               type="tel"
@@ -364,7 +361,7 @@ export function CncQuoteForm() {
           </Field>
           <Field
             id="cnc-notes"
-            label="Notlar (isteğe bağlı)"
+            label={t.forms.notesOptional}
             error={cErr.notes}
             hint={`${contact.notes.length}/${NOTES_MAX}`}
           >
@@ -372,7 +369,7 @@ export function CncQuoteForm() {
               {...fieldProps("cnc-notes", cErr.notes)}
               rows={4}
               value={contact.notes}
-              placeholder="Kalınlık, boya/vernik, teslim tarihi…"
+              placeholder={t.quote.notesPlaceholder}
               onChange={(e) => setContact((c) => ({ ...c, notes: e.target.value }))}
             />
           </Field>
@@ -381,24 +378,22 @@ export function CncQuoteForm() {
 
       {step === 3 && file ? (
         <div className="space-y-4 text-sm">
-          <ReviewBlock title="Dosya" onEdit={() => goTo(0)}>
+          <ReviewBlock title={t.quote.steps[0]!} onEdit={() => goTo(0)}>
             <p className="break-all">
               {file.name} · {formatBytes(file.size)}
             </p>
           </ReviewBlock>
-          <ReviewBlock title="Ölçü & Malzeme" onEdit={() => goTo(1)}>
-            <p>
-              {details.widthCm} × {details.heightCm} cm · {details.material} · {details.quantity} adet
-            </p>
+          <ReviewBlock title={t.quote.steps[1]!} onEdit={() => goTo(1)}>
+            <p>{t.quote.summary(details.widthCm, details.heightCm, details.material, details.quantity)}</p>
           </ReviewBlock>
-          <ReviewBlock title="İletişim" onEdit={() => goTo(2)}>
+          <ReviewBlock title={t.quote.steps[2]!} onEdit={() => goTo(2)}>
             <p>{contact.name}</p>
             <p>{contact.email}</p>
             {contact.phone ? <p>{contact.phone}</p> : null}
             {contact.notes ? <p className="mt-1 whitespace-pre-line text-body/70">{contact.notes}</p> : null}
           </ReviewBlock>
           <p className="text-xs text-body/60">
-            Fiyat, dosyanız incelendikten sonra teklif olarak iletilir; bu formda fiyat hesaplanmaz.
+            {t.quote.priceNote}
           </p>
         </div>
       ) : null}
@@ -406,18 +401,18 @@ export function CncQuoteForm() {
       <div className="mt-8 flex items-center justify-between gap-3">
         {step > 0 ? (
           <Button type="button" variant="secondary" onClick={() => goTo(step - 1)} disabled={submitting}>
-            Geri
+            {t.quote.back}
           </Button>
         ) : (
           <span />
         )}
-        {step < STEPS.length - 1 ? (
+        {step < STEP_COUNT - 1 ? (
           <Button type="button" onClick={next} disabled={checkingFile}>
-            İleri
+            {t.quote.next}
           </Button>
         ) : (
           <Button type="button" onClick={submit} isLoading={submitting}>
-            Teklif Talebini Gönder
+            {t.quote.submit}
           </Button>
         )}
       </div>
@@ -431,12 +426,13 @@ export function CncQuoteForm() {
 }
 
 function ReviewBlock({ title, onEdit, children }: { title: string; onEdit: () => void; children: ReactNode }) {
+  const { t } = useI18n();
   return (
     <div className="rounded-card border border-line p-4">
       <div className="mb-2 flex items-center justify-between">
         <h3 className="text-base font-body font-medium">{title}</h3>
-        <button type="button" onClick={onEdit} className="text-xs underline" aria-label={`${title} bölümünü düzenle`}>
-          Düzenle
+        <button type="button" onClick={onEdit} className="text-xs underline" aria-label={t.quote.editSection(title)}>
+          {t.quote.edit}
         </button>
       </div>
       {children}

@@ -112,3 +112,32 @@ describe("catalog pages in English", () => {
     expect(screen.getByRole("heading", { level: 1, name: "Page Not Found" })).toBeInTheDocument();
   });
 });
+
+describe("forms in English", () => {
+  beforeEach(() => localStorage.clear());
+
+  it("checkout shows the test-order notice and field errors in English", async () => {
+    const product = allProducts.find((p) => !p.variants)!;
+    localStorage.setItem("panelio.cart.v1", JSON.stringify([{ product, quantity: 1 }]));
+    const user = userEvent.setup();
+    renderApp("en", "/odeme");
+
+    expect(await screen.findByRole("heading", { level: 1, name: "Checkout" })).toBeInTheDocument();
+    expect(screen.getByRole("note")).toHaveTextContent(/Test order\..*no payment is taken/);
+    await user.click(screen.getByRole("button", { name: "Place Test Order" }));
+    expect(screen.getByText("Enter a valid phone number.")).toBeInTheDocument();
+  }, 20000);
+
+  it("quote form steps and file errors are in English", async () => {
+    const user = userEvent.setup();
+    renderApp("en", "/ozel-tasarim?sekme=dosya");
+
+    expect(await screen.findByRole("tab", { name: "Upload a file (SVG)" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("heading", { level: 2, name: "File" })).toBeInTheDocument();
+    await user.upload(
+      screen.getByLabelText(/choose an svg file/i),
+      new File(['<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>'], "x.svg", { type: "image/svg+xml" }),
+    );
+    expect(await screen.findByRole("alert")).toHaveTextContent("The file contains a disallowed element: <script>.");
+  }, 20000);
+});

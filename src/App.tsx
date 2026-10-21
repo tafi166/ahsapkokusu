@@ -1,5 +1,6 @@
 import { lazy, Suspense, type ReactNode } from "react";
 import { Route, Routes } from "react-router-dom";
+import { useI18n } from "@/i18n/I18nProvider";
 import { Layout } from "@/components/layout/Layout";
 import { HomePage } from "@/pages/HomePage";
 import { CategoryPage } from "@/pages/CategoryPage";
@@ -21,11 +22,12 @@ const CheckoutPage = lazy(() => import("@/pages/CheckoutPage").then((m) => ({ de
 const CustomDesignPage = lazy(() => import("@/pages/CustomDesignPage").then((m) => ({ default: m.CustomDesignPage })));
 
 function Loading({ children }: { children: ReactNode }) {
+  const { t } = useI18n();
   return (
     <Suspense
       fallback={
         <div role="status" className="flex min-h-[40vh] items-center justify-center text-sm text-body/50">
-          Yükleniyor…
+          {t.common.loading}
         </div>
       }
     >

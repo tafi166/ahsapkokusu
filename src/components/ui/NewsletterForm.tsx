@@ -20,7 +20,7 @@ export function NewsletterForm({ placeholder, ctaLabel, className, buttonVariant
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setStatus("loading");
-    const result = await api.subscribeToNewsletter(email);
+    const result = await api.subscribeToNewsletter(email, t.api, t.validation);
     setStatus(result.ok ? "success" : "error");
     setMessage(result.message);
     if (result.ok) setEmail("");

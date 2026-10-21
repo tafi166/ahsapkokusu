@@ -6,16 +6,17 @@ import { Field, fieldProps } from "@/components/ui/FormField";
 import { isLegacyLine, useCart } from "@/hooks/useCart";
 import { placeOrder, validateCheckout, type CheckoutForm, type PlacedOrder } from "@/lib/checkout";
 import { ProductMedia } from "@/lib/placeholder";
-import { calculatePrice, describeOptions, formatPrice } from "@/lib/price";
+import { calculatePrice, describeOptions } from "@/lib/price";
 import { useSeo } from "@/lib/seo";
+import { useI18n } from "@/i18n/I18nProvider";
 
 const EMPTY_FORM: CheckoutForm = { name: "", email: "", phone: "", line: "", district: "", city: "", postalCode: "", notes: "" };
 
 function TestOrderNotice() {
+  const { t } = useI18n();
   return (
     <p className="rounded-input border border-accent bg-accent/10 px-4 py-3 text-sm text-ink" role="note">
-      <strong>Test siparişi.</strong> Bu mağaza henüz deneme aşamasında: ödeme alınmaz, kart bilgisi istenmez ve ürün
-      gönderilmez. Verdiğiniz sipariş yalnızca test olarak kaydedilir.
+      <strong>{t.checkout.testStrong}</strong> {t.checkout.testBody}
     </p>
   );
 }
@@ -26,7 +27,8 @@ function TestOrderNotice() {
  * provider is involved.
  */
 export function CheckoutPage() {
-  useSeo({ title: "Ödeme", description: "Siparişinizi tamamlayın.", noindex: true });
+  const { t, money } = useI18n();
+  useSeo({ title: t.checkout.seoTitle, description: t.checkout.seoDescription, noindex: true });
   const { lines, clear } = useCart();
   const [form, setForm] = useState<CheckoutForm>(EMPTY_FORM);
   const [showErrors, setShowErrors] = useState(false);
@@ -45,7 +47,7 @@ export function CheckoutPage() {
   const currencies = new Set(lines.map((l) => l.product.currency));
   const currency = lines[0]?.product.currency ?? "TRY";
   const estimate = lines.reduce((sum, l) => sum + l.quantity * calculatePrice(l.product, l.selection).unitPrice, 0);
-  const errors = validateCheckout(form, needsShipping);
+  const errors = validateCheckout(form, needsShipping, t.validation);
   const shown = showErrors ? errors : {};
   const blocked = legacyLines.length > 0 || currencies.size > 1;
 
@@ -59,7 +61,7 @@ export function CheckoutPage() {
     }
     setSubmitting(true);
     setError(null);
-    const result = await placeOrder(lines, form, needsShipping);
+    const result = await placeOrder(lines, form, needsShipping, t.api);
     setSubmitting(false);
     if (!result.ok) {
       setError(result.message);
@@ -75,11 +77,11 @@ export function CheckoutPage() {
       <Section containerSize="sm">
         <div className="mx-auto max-w-xl space-y-5">
           <h1 ref={confirmationRef} tabIndex={-1} className="outline-none">
-            Test siparişiniz alındı
+            {t.checkout.received}
           </h1>
           <TestOrderNotice />
           <p>
-            Sipariş numarası: <strong>{order.number}</strong>
+            {t.checkout.orderNumber}: <strong>{order.number}</strong>
           </p>
           <ul className="divide-y divide-line rounded-card border border-line text-sm">
             {order.lines.map((l, i) => (
@@ -87,21 +89,21 @@ export function CheckoutPage() {
                 <span>
                   {l.title} × {l.quantity}
                   {describeOptions(l.options).length > 0 ? (
-                    <span className="block text-xs text-body/60">{describeOptions(l.options).join(" · ")}</span>
+                    <span className="block text-xs text-body/60">{describeOptions(l.options, t.options).join(" · ")}</span>
                   ) : null}
                 </span>
-                <span>{formatPrice(l.lineTotal, order.currency)}</span>
+                <span>{money(l.lineTotal, order.currency)}</span>
               </li>
             ))}
             <li className="flex justify-between px-4 py-3 font-medium">
-              <span>Ara toplam</span>
-              <span>{formatPrice(order.subtotal, order.currency)}</span>
+              <span>{t.checkout.subtotal}</span>
+              <span>{money(order.subtotal, order.currency)}</span>
             </li>
           </ul>
           {Math.abs(order.subtotal - placed.estimate) > 0.001 ? (
-            <p className="text-xs text-body/60">Tutarlar sipariş anındaki güncel katalog fiyatlarıyla hesaplandı.</p>
+            <p className="text-xs text-body/60">{t.checkout.catalogNote}</p>
           ) : null}
-          <Button href="/">Alışverişe dön</Button>
+          <Button href="/">{t.checkout.backToShop}</Button>
         </div>
       </Section>
     );
@@ -111,10 +113,10 @@ export function CheckoutPage() {
     return (
       <Section containerSize="sm">
         <div className="mx-auto max-w-xl text-center">
-          <h1>Sepetiniz boş</h1>
-          <p className="mt-3 text-body/60">Ödeme adımına geçmek için önce sepete ürün ekleyin.</p>
+          <h1>{t.checkout.emptyTitle}</h1>
+          <p className="mt-3 text-body/60">{t.checkout.emptyBody}</p>
           <Button href="/parametrik-duvar-tablolari" className="mt-6">
-            Ürünlere göz at
+            {t.product.browse}
           </Button>
         </div>
       </Section>
@@ -125,19 +127,19 @@ export function CheckoutPage() {
     <Section containerSize="sm">
       <div className="mx-auto grid max-w-5xl gap-10 md:grid-cols-[1fr_22rem]">
         <form onSubmit={handleSubmit} noValidate className="space-y-6">
-          <h1>Ödeme</h1>
+          <h1>{t.checkout.title}</h1>
           <TestOrderNotice />
 
           <fieldset className="space-y-4">
-            <legend className="mb-2 text-lg font-heading">İletişim</legend>
-            <Field id="co-name" label="Ad Soyad" error={shown.name}>
+            <legend className="mb-2 text-lg font-heading">{t.checkout.contact}</legend>
+            <Field id="co-name" label={t.forms.name} error={shown.name}>
               <input {...fieldProps("co-name", shown.name)} autoComplete="name" value={form.name} onChange={set("name")} />
             </Field>
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field id="co-email" label="E-posta" error={shown.email}>
+              <Field id="co-email" label={t.forms.email} error={shown.email}>
                 <input {...fieldProps("co-email", shown.email)} type="email" autoComplete="email" value={form.email} onChange={set("email")} />
               </Field>
-              <Field id="co-phone" label="Telefon" error={shown.phone}>
+              <Field id="co-phone" label={t.forms.phone} error={shown.phone}>
                 <input {...fieldProps("co-phone", shown.phone)} type="tel" autoComplete="tel" value={form.phone} onChange={set("phone")} />
               </Field>
             </div>
@@ -145,18 +147,18 @@ export function CheckoutPage() {
 
           {needsShipping ? (
             <fieldset className="space-y-4">
-              <legend className="mb-2 text-lg font-heading">Teslimat Adresi</legend>
-              <Field id="co-line" label="Açık adres" error={shown.line}>
+              <legend className="mb-2 text-lg font-heading">{t.checkout.address}</legend>
+              <Field id="co-line" label={t.checkout.line} error={shown.line}>
                 <input {...fieldProps("co-line", shown.line)} autoComplete="street-address" value={form.line} onChange={set("line")} />
               </Field>
               <div className="grid gap-4 sm:grid-cols-3">
-                <Field id="co-district" label="İlçe" error={shown.district}>
+                <Field id="co-district" label={t.checkout.district} error={shown.district}>
                   <input {...fieldProps("co-district", shown.district)} autoComplete="address-level2" value={form.district} onChange={set("district")} />
                 </Field>
-                <Field id="co-city" label="İl" error={shown.city}>
+                <Field id="co-city" label={t.checkout.city} error={shown.city}>
                   <input {...fieldProps("co-city", shown.city)} autoComplete="address-level1" value={form.city} onChange={set("city")} />
                 </Field>
-                <Field id="co-postal" label="Posta kodu (isteğe bağlı)" error={shown.postalCode}>
+                <Field id="co-postal" label={t.checkout.postalOptional} error={shown.postalCode}>
                   <input
                     {...fieldProps("co-postal", shown.postalCode)}
                     inputMode="numeric"
@@ -168,16 +170,16 @@ export function CheckoutPage() {
               </div>
             </fieldset>
           ) : (
-            <p className="text-sm text-body/70">Sepetinizde yalnızca dijital ürünler var; teslimat adresi gerekmez.</p>
+            <p className="text-sm text-body/70">{t.checkout.digitalOnly}</p>
           )}
 
-          <Field id="co-notes" label="Sipariş notu (isteğe bağlı)" error={shown.notes}>
+          <Field id="co-notes" label={t.checkout.notes} error={shown.notes}>
             <textarea {...fieldProps("co-notes", shown.notes)} rows={3} value={form.notes} onChange={set("notes")} />
           </Field>
 
           {legacyLines.length > 0 ? (
             <div role="alert" className="rounded-input border border-danger/40 px-4 py-3 text-sm">
-              Şu ürünlerin seçenekleri kayıtlı değil; sepetten kaldırıp ürün sayfasından yeniden ekleyin:{" "}
+              {t.checkout.legacyLines}{" "}
               {legacyLines.map((l, i) => (
                 <span key={l.product.id}>
                   {i > 0 ? ", " : ""}
@@ -190,7 +192,7 @@ export function CheckoutPage() {
           ) : null}
           {currencies.size > 1 ? (
             <p role="alert" className="text-sm text-danger">
-              Farklı para birimindeki ürünler aynı siparişte olamaz.
+              {t.checkout.mixedCurrency}
             </p>
           ) : null}
           {error ? (
@@ -200,16 +202,16 @@ export function CheckoutPage() {
           ) : null}
 
           <Button type="submit" size="lg" className="w-full" isLoading={submitting} disabled={blocked}>
-            Test Siparişi Ver
+            {t.checkout.submit}
           </Button>
         </form>
 
-        <aside aria-label="Sipariş özeti" className="h-fit space-y-4 rounded-card bg-paper-soft p-5">
-          <h2 className="text-lg">Sipariş Özeti</h2>
+        <aside aria-label={t.checkout.summary} className="h-fit space-y-4 rounded-card bg-paper-soft p-5">
+          <h2 className="text-lg">{t.checkout.summary}</h2>
           <ul className="space-y-4">
             {lines.map((l) => {
               const price = calculatePrice(l.product, l.selection);
-              const options = describeOptions(l.selection);
+              const options = describeOptions(l.selection, t.options);
               return (
                 <li key={`${l.product.id}:${options.join("|")}`} className="flex gap-3 text-sm">
                   <ProductMedia src={l.product.thumbnail} className="h-14 w-14 shrink-0 rounded-card" />
@@ -219,17 +221,17 @@ export function CheckoutPage() {
                     </p>
                     {options.length > 0 ? <p className="text-xs text-body/60">{options.join(" · ")}</p> : null}
                   </div>
-                  <span>{formatPrice(price.unitPrice * l.quantity, price.currency)}</span>
+                  <span>{money(price.unitPrice * l.quantity, price.currency)}</span>
                 </li>
               );
             })}
           </ul>
           <div className="flex justify-between border-t border-divider pt-3 font-medium">
-            <span>Ara toplam</span>
-            <span>{formatPrice(estimate, currency)}</span>
+            <span>{t.checkout.subtotal}</span>
+            <span>{money(estimate, currency)}</span>
           </div>
           <p className="text-xs text-body/60">
-            Kesin tutarı sipariş anında sunucu hesaplar. Kargo ücreti varsa sipariş sonrası ayrıca teyit edilir.
+            {t.checkout.estimateNote}
           </p>
         </aside>
       </div>

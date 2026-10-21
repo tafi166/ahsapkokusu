@@ -1,4 +1,7 @@
 import { cncQuoteConfig } from "@/config/cncQuote";
+import { tr, type Dictionary } from "@/i18n/messages";
+
+type Messages = Dictionary["validation"];
 
 /**
  * Client-side checks for the CNC quote request (prototype).
@@ -23,12 +26,12 @@ export interface FileMeta {
 }
 
 /** Name, reported type and size — checked before the file is read. */
-export function checkFileMeta(file: FileMeta): string | null {
-  if (!file.name.toLowerCase().endsWith(".svg")) return "Yalnızca .svg uzantılı dosyalar kabul edilir.";
-  if (!ACCEPTED_MIME.includes(file.type)) return "Dosya türü SVG değil.";
-  if (file.size === 0) return "Dosya boş.";
+export function checkFileMeta(file: FileMeta, m: Messages = tr.validation): string | null {
+  if (!file.name.toLowerCase().endsWith(".svg")) return m.svgExtension;
+  if (!ACCEPTED_MIME.includes(file.type)) return m.svgType;
+  if (file.size === 0) return m.fileEmpty;
   if (file.size > cncQuoteConfig.maxFileBytes) {
-    return `Dosya çok büyük (en fazla ${formatBytes(cncQuoteConfig.maxFileBytes)}).`;
+    return m.fileTooBig(formatBytes(cncQuoteConfig.maxFileBytes));
   }
   return null;
 }
@@ -57,41 +60,41 @@ const LINK_ATTRS = new Set(["href", "xlink:href", "src"]);
  * non-SVG content, DOCTYPE/entity declarations, scripts, event-handler
  * attributes, embedded HTML and references to anything outside the file.
  */
-export function inspectSvgText(text: string): SvgInspection {
+export function inspectSvgText(text: string, m: Messages = tr.validation): SvgInspection {
   if (/<!DOCTYPE|<!ENTITY/i.test(text)) {
-    return { ok: false, error: "Dosya DOCTYPE/ENTITY tanımı içeriyor; düz bir SVG dışa aktarın." };
+    return { ok: false, error: m.doctype };
   }
 
   let doc: Document;
   try {
     doc = new DOMParser().parseFromString(text, "image/svg+xml");
   } catch {
-    return { ok: false, error: "Dosya okunamadı — geçerli bir SVG değil." };
+    return { ok: false, error: m.invalidSvg };
   }
   const root = doc.documentElement;
   if (!root || doc.getElementsByTagName("parsererror").length > 0 || root.localName !== "svg") {
-    return { ok: false, error: "Dosya okunamadı — geçerli bir SVG değil." };
+    return { ok: false, error: m.invalidSvg };
   }
 
   for (const el of [root, ...Array.from(root.getElementsByTagName("*"))]) {
     if (BLOCKED_ELEMENTS.has(el.localName.toLowerCase())) {
-      return { ok: false, error: `Dosyada izin verilmeyen öğe var: <${el.localName}>.` };
+      return { ok: false, error: m.blockedElement(el.localName) };
     }
     for (const attr of Array.from(el.attributes)) {
       const name = attr.name.toLowerCase();
       const value = attr.value.trim();
       if (name.startsWith("on")) {
-        return { ok: false, error: "Dosyada betik (olay işleyicisi) var; düz bir SVG dışa aktarın." };
+        return { ok: false, error: m.script };
       }
       if (LINK_ATTRS.has(name) && value && !value.startsWith("#")) {
-        return { ok: false, error: "Dosya dış bir kaynağa bağlantı içeriyor; tüm öğeler dosyanın içinde olmalı." };
+        return { ok: false, error: m.externalRef };
       }
       if (name === "style" && hasExternalCssRef(value)) {
-        return { ok: false, error: "Dosya dış bir kaynağa bağlantı içeriyor; tüm öğeler dosyanın içinde olmalı." };
+        return { ok: false, error: m.externalRef };
       }
     }
     if (el.localName.toLowerCase() === "style" && hasExternalCssRef(el.textContent ?? "")) {
-      return { ok: false, error: "Dosya dış bir kaynağa bağlantı içeriyor; tüm öğeler dosyanın içinde olmalı." };
+      return { ok: false, error: m.externalRef };
     }
   }
 
@@ -142,22 +145,22 @@ export interface QuoteDetails {
   quantity: string;
 }
 
-export function validateDetails(d: QuoteDetails): FieldErrors<keyof QuoteDetails> {
+export function validateDetails(d: QuoteDetails, m: Messages = tr.validation): FieldErrors<keyof QuoteDetails> {
   const errors: FieldErrors<keyof QuoteDetails> = {};
   const { minSizeCm, maxSizeCm, minQuantity, maxQuantity, materials } = cncQuoteConfig;
 
   for (const key of ["widthCm", "heightCm"] as const) {
     const n = parseDecimal(d[key]);
-    if (n === undefined) errors[key] = "Bir sayı girin (cm).";
-    else if (n < minSizeCm || n > maxSizeCm) errors[key] = `${minSizeCm}–${maxSizeCm} cm arasında olmalı.`;
+    if (n === undefined) errors[key] = m.number;
+    else if (n < minSizeCm || n > maxSizeCm) errors[key] = m.sizeRange(minSizeCm, maxSizeCm);
   }
 
-  if (!(materials as readonly string[]).includes(d.material)) errors.material = "Bir malzeme seçin.";
+  if (!(materials as readonly string[]).includes(d.material)) errors.material = m.chooseMaterial;
 
   const q = d.quantity.trim();
   const qty = /^\d+$/.test(q) ? Number(q) : NaN;
   if (!Number.isInteger(qty) || qty < minQuantity || qty > maxQuantity) {
-    errors.quantity = `${minQuantity}–${maxQuantity} arasında bir tam sayı girin.`;
+    errors.quantity = m.quantityRange(minQuantity, maxQuantity);
   }
   return errors;
 }
@@ -178,18 +181,18 @@ export interface ContactDetails {
 
 export const NOTES_MAX = 2000;
 
-export function validateContact(c: ContactDetails): FieldErrors<keyof ContactDetails> {
+export function validateContact(c: ContactDetails, m: Messages = tr.validation): FieldErrors<keyof ContactDetails> {
   const errors: FieldErrors<keyof ContactDetails> = {};
   const name = c.name.trim();
-  if (!name) errors.name = "Adınızı girin.";
-  else if (name.length > 100) errors.name = "En fazla 100 karakter.";
+  if (!name) errors.name = m.name;
+  else if (name.length > 100) errors.name = m.maxChars(100);
 
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c.email.trim())) errors.email = "Geçerli bir e-posta adresi girin.";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c.email.trim())) errors.email = m.email;
 
   const phone = c.phone.trim();
-  if (phone && !/^\+?[\d\s()-]{7,20}$/.test(phone)) errors.phone = "Geçerli bir telefon numarası girin.";
+  if (phone && !/^\+?[\d\s()-]{7,20}$/.test(phone)) errors.phone = m.phone;
 
-  if (c.notes.length > NOTES_MAX) errors.notes = `En fazla ${NOTES_MAX} karakter.`;
+  if (c.notes.length > NOTES_MAX) errors.notes = m.maxChars(NOTES_MAX);
   return errors;
 }
 

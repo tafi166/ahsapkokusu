@@ -6,17 +6,17 @@ import { CncQuoteForm } from "@/components/cnc/CncQuoteForm";
 import { categories } from "@/data/categories";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
+import { useI18n } from "@/i18n/I18nProvider";
 import type { CategorySlug } from "@/types";
 
 type Status = "idle" | "loading" | "success" | "error";
 
-const TABS = [
-  { key: "fikir", label: "Fikir anlat" },
-  { key: "dosya", label: "Dosya yükle (SVG)" },
-] as const;
-type TabKey = (typeof TABS)[number]["key"];
+const TABS = ["fikir", "dosya"] as const;
+type TabKey = (typeof TABS)[number];
 
 export function CustomDesignPage() {
+  const { t } = useI18n();
+  const tabLabel: Record<TabKey, string> = { fikir: t.customDesign.tabIdea, dosya: t.customDesign.tabFile };
   const [params, setParams] = useSearchParams();
   const active: TabKey = params.get("sekme") === "dosya" ? "dosya" : "fikir";
 
@@ -27,8 +27,8 @@ export function CustomDesignPage() {
   // Arrow keys move between tabs (WAI-ARIA tabs pattern).
   function onTabKey(e: KeyboardEvent<HTMLButtonElement>) {
     if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
-    const i = TABS.findIndex((t) => t.key === active);
-    const next = TABS[(i + (e.key === "ArrowRight" ? 1 : TABS.length - 1)) % TABS.length].key;
+    const i = TABS.indexOf(active);
+    const next = TABS[(i + (e.key === "ArrowRight" ? 1 : TABS.length - 1)) % TABS.length];
     select(next);
     document.getElementById(`tab-${next}`)?.focus();
   }
@@ -36,32 +36,28 @@ export function CustomDesignPage() {
   return (
     <Section containerSize="sm">
       <div className="mx-auto max-w-xl">
-        <p className="text-xs uppercase tracking-wide text-body/50">Özel Tasarım</p>
-        <h1 className="mt-1">Mekanınıza Özel Tasarım Talep Edin</h1>
-        <p className="mt-3 text-body/70">
-          Kendi fotoğrafınızdan bir portre, markanıza özel bir logo panosu ya da tamamen size özgü bir
-          kompozisyon — isteğinizi bize iletin, birlikte tasarlayalım. Hazır bir SVG dosyanız varsa
-          doğrudan kesim teklifi isteyebilirsiniz.
-        </p>
+        <p className="text-xs uppercase tracking-wide text-body/50">{t.customDesign.eyebrow}</p>
+        <h1 className="mt-1">{t.customDesign.title}</h1>
+        <p className="mt-3 text-body/70">{t.customDesign.intro}</p>
 
-        <div role="tablist" aria-label="Talep türü" className="mt-8 flex gap-1 border-b border-line">
-          {TABS.map((t) => (
+        <div role="tablist" aria-label={t.customDesign.tabs} className="mt-8 flex gap-1 border-b border-line">
+          {TABS.map((key) => (
             <button
-              key={t.key}
-              id={`tab-${t.key}`}
+              key={key}
+              id={`tab-${key}`}
               role="tab"
               type="button"
-              aria-selected={active === t.key}
-              aria-controls={`panel-${t.key}`}
-              tabIndex={active === t.key ? 0 : -1}
-              onClick={() => select(t.key)}
+              aria-selected={active === key}
+              aria-controls={`panel-${key}`}
+              tabIndex={active === key ? 0 : -1}
+              onClick={() => select(key)}
               onKeyDown={onTabKey}
               className={cn(
                 "-mb-px border-b-2 px-4 py-2.5 text-sm transition-colors",
-                active === t.key ? "border-ink font-medium text-ink" : "border-transparent text-body/60 hover:text-ink",
+                active === key ? "border-ink font-medium text-ink" : "border-transparent text-body/60 hover:text-ink",
               )}
             >
-              {t.label}
+              {tabLabel[key]}
             </button>
           ))}
         </div>
@@ -76,6 +72,7 @@ export function CustomDesignPage() {
 
 /** The original free-text design request. */
 function IdeaForm() {
+  const { t } = useI18n();
   const [form, setForm] = useState({ name: "", email: "", category: categories[0].slug, message: "" });
   const [status, setStatus] = useState<Status>("idle");
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -83,7 +80,7 @@ function IdeaForm() {
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setStatus("loading");
-    const result = await api.submitContactForm({ name: form.name, email: form.email, message: form.message });
+    const result = await api.submitContactForm({ name: form.name, email: form.email, message: form.message }, t.api);
     setStatus(result.ok ? "success" : "error");
     setFeedback(result.message);
     if (result.ok) setForm({ name: "", email: "", category: categories[0].slug, message: "" });
@@ -92,7 +89,7 @@ function IdeaForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-5" noValidate>
       <div>
-        <label htmlFor="name" className="mb-1.5 block text-sm">Ad Soyad</label>
+        <label htmlFor="name" className="mb-1.5 block text-sm">{t.forms.name}</label>
         <input
           id="name"
           required
@@ -103,7 +100,7 @@ function IdeaForm() {
         />
       </div>
       <div>
-        <label htmlFor="email" className="mb-1.5 block text-sm">E-posta</label>
+        <label htmlFor="email" className="mb-1.5 block text-sm">{t.forms.email}</label>
         <input
           id="email"
           type="email"
@@ -115,7 +112,7 @@ function IdeaForm() {
         />
       </div>
       <div>
-        <label htmlFor="category" className="mb-1.5 block text-sm">İlgilendiğiniz Kategori</label>
+        <label htmlFor="category" className="mb-1.5 block text-sm">{t.customDesign.category}</label>
         <select
           id="category"
           value={form.category}
@@ -129,7 +126,7 @@ function IdeaForm() {
         </select>
       </div>
       <div>
-        <label htmlFor="message" className="mb-1.5 block text-sm">Tasarım Talebiniz</label>
+        <label htmlFor="message" className="mb-1.5 block text-sm">{t.customDesign.request}</label>
         <textarea
           id="message"
           required
@@ -137,13 +134,13 @@ function IdeaForm() {
           value={form.message}
           onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
           disabled={status === "loading"}
-          placeholder="Ölçü, malzeme, ilham aldığınız görsel/fikir..."
+          placeholder={t.customDesign.requestPlaceholder}
           className="w-full rounded-input border border-line px-4 py-3 text-sm outline-none focus:border-ink disabled:opacity-60"
         />
       </div>
 
       <Button type="submit" size="lg" isLoading={status === "loading"} className="w-full">
-        Talebi Gönder
+        {t.customDesign.submit}
       </Button>
 
       {feedback ? (
