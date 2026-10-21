@@ -116,11 +116,11 @@ file formats for digital wall art) lives in `ProductPage.tsx`.
   one. No real product photography, real customer reviews, or the
   reference shop's actual brand/listing text were copied — all names,
   copy and placeholder gradient images here are original.
-- **No real backend.** Cart, wishlist, compare, search, quick view,
-  contact/custom-design forms and newsletter are fully interactive against
-  local state and a mock service layer (`lib/api.ts`) — nothing is
-  persisted server-side, there's no real checkout/payment/digital-file
-  delivery, and account/login is a labeled placeholder. The `/admin`
+- **No real payments.** Cart, wishlist, compare, search, quick view, the
+  contact and free-text design forms and the newsletter run on local state
+  and a mock service layer (`lib/api.ts`) — there's no real payment or digital-file
+  delivery (checkout records labelled test orders only), and account/login
+  is a labeled placeholder. The `/admin`
   content panel is the exception: it is backed by the API server in
   `server/` (see "Admin panel" and "API server" below).
 - **SEO is client-side only** (`document.title`/meta/JSON-LD set via a
@@ -192,6 +192,16 @@ reference. Staff see requests in the admin panel's "Teklif Talepleri" tab
 (`/api/admin/quotes`), download files as sandboxed attachments and set a status.
 No e-mail is sent yet. The limits in `src/config/cncQuote.ts` are still
 provisional.
+
+Checkout (prototype): the cart's "Ödemeye Geç" leads to `/odeme`, which places
+a **test order** through `POST /api/orders`. No payment provider is involved, no
+card details are asked for, and every order is stored with `isTest = true` and a
+`T-` number. The client sends only product ids, quantities and options; the
+server re-validates the options and prices every line from the catalog
+(`server/src/orders/pricing.ts`, kept in step with `src/lib/price.ts` by a parity
+test over the whole catalog). Shipping cost has no business rule yet, so totals
+are the line subtotal and shipping is "confirmed separately". Staff see orders
+in the admin panel's "Siparişler" tab.
 
 After changing `src/config/brandDefaults.ts`, `contentDefaults.ts` or `cncQuote.ts`, run
 `npm run sync:storefront` (a test fails until you do).

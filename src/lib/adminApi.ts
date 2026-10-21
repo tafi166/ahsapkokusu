@@ -82,6 +82,22 @@ type ContentKey = Exclude<keyof AdminOverrides, "products" | "categories">;
 
 export type QuoteStatus = "NEW" | "REVIEWING" | "QUOTED" | "CLOSED";
 
+export type OrderStatus = "RECEIVED" | "PROCESSING" | "SHIPPED" | "CANCELLED";
+
+export interface StaffOrder {
+  id: string;
+  number: string;
+  isTest: boolean;
+  status: OrderStatus;
+  currency: "TRY" | "USD";
+  subtotal: number;
+  customer: { name: string; email: string; phone: string };
+  address: { line: string; district: string; city: string; postalCode: string | null } | null;
+  notes: string | null;
+  lines: { productId: string; productSlug: string; title: string; options: Record<string, string | number>; unitPrice: number; quantity: number; lineTotal: number }[];
+  createdAt: string;
+}
+
 export interface StaffUser extends AdminUser {
   isActive: boolean;
   createdAt: string;
@@ -161,6 +177,14 @@ export const adminApi = {
 
   resetUserPassword(id: string, password: string): Promise<void> {
     return request("POST", `/api/users/${encodeURIComponent(id)}/password`, { password });
+  },
+
+  listOrders(): Promise<StaffOrder[]> {
+    return request("GET", "/api/admin/orders");
+  },
+
+  setOrderStatus(id: string, status: OrderStatus): Promise<StaffOrder> {
+    return request("PATCH", `/api/admin/orders/${encodeURIComponent(id)}`, { status });
   },
 
   listQuotes(): Promise<QuoteRequest[]> {

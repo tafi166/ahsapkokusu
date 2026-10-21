@@ -21,6 +21,7 @@ export function installFakeApi(options: { password?: string; role?: "ADMIN" | "E
     content: {} as Record<string, unknown>,
     uploads: 0,
     quotes: [] as { id: string; status: string; [key: string]: unknown }[],
+    orders: [] as { id: string; status: string; [key: string]: unknown }[],
     users: [] as { id: string; email: string; name: string; role: string; isActive: boolean; createdAt: string }[],
     passwordResets: [] as { id: string; password: string }[],
   };
@@ -90,6 +91,14 @@ export function installFakeApi(options: { password?: string; role?: "ADMIN" | "E
       if (target.id === user.id) return json(409, { message: "Kendi yönetici yetkinizi kaldıramaz veya hesabınızı kapatamazsınız." });
       Object.assign(target, body);
       return json(200, target);
+    }
+    if (url === "/api/admin/orders" && method === "GET") return json(200, state.orders);
+    const order = /^\/api\/admin\/orders\/([\w-]+)$/.exec(url);
+    if (order && method === "PATCH") {
+      const found = state.orders.find((o) => o.id === order[1]);
+      if (!found) return json(404, { message: "Sipariş bulunamadı." });
+      found.status = (body as { status: string }).status;
+      return json(200, found);
     }
     if (url === "/api/admin/quotes" && method === "GET") return json(200, state.quotes);
     const quote = /^\/api\/admin\/quotes\/([\w-]+)$/.exec(url);

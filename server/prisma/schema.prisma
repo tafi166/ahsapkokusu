@@ -198,3 +198,58 @@ model QuoteRequest {
 
   @@index([status, createdAt])
 }
+
+// ---------------------------------------------------------------------------
+// Orders (prototype: test orders only — no payment is taken)
+// ---------------------------------------------------------------------------
+
+enum OrderStatus {
+  RECEIVED
+  PROCESSING
+  SHIPPED
+  CANCELLED
+}
+
+model Order {
+  id                String      @id @default(uuid()) @db.Uuid
+  /// "T-XXXXXXXX" while orders are tests.
+  number            String      @unique
+  /// Every order is a test until a payment provider is integrated.
+  isTest            Boolean     @default(true)
+  status            OrderStatus @default(RECEIVED)
+  currency          Currency
+  /// Sum of the lines, priced by the server. Shipping is confirmed separately.
+  subtotal          Decimal     @db.Decimal(12, 2)
+  customerName      String
+  customerEmail     String
+  customerPhone     String
+  /// Shipping address — null when every line is a digital download.
+  addressLine       String?
+  district          String?
+  city              String?
+  postalCode        String?
+  notes             String?
+  lines             OrderLine[]
+  createdAt         DateTime    @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime    @updatedAt @db.Timestamptz(3)
+
+  @@index([createdAt])
+}
+
+/// Snapshot of what was ordered, at the price the server computed then.
+model OrderLine {
+  id          String  @id @default(uuid()) @db.Uuid
+  orderId     String  @db.Uuid
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  sortOrder   Int
+  productId   String
+  productSlug String
+  title       String
+  /// Chosen options, normalized to the axes the product offers.
+  options     Json    @default("{}")
+  unitPrice   Decimal @db.Decimal(12, 2)
+  quantity    Int
+  lineTotal   Decimal @db.Decimal(12, 2)
+
+  @@index([orderId])
+}

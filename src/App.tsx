@@ -12,6 +12,7 @@ import { ReviewsPage } from "@/pages/ReviewsPage";
 import { FaqPage } from "@/pages/FaqPage";
 import { InfoPage } from "@/pages/InfoPage";
 import { AccountPage } from "@/pages/AccountPage";
+import { CheckoutPage } from "@/pages/CheckoutPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { AdminPage } from "@/pages/admin/AdminPage";
 
@@ -38,6 +39,7 @@ export default function App() {
         <Route path="yorumlar" element={<ReviewsPage />} />
         <Route path="sss" element={<FaqPage />} />
         <Route path="hesabim" element={<AccountPage />} />
+        <Route path="odeme" element={<CheckoutPage />} />
         <Route path="sayfa/:slug" element={<InfoPage />} />
 
         {/* Category pages last — :categorySlug is a catch-all-ish dynamic

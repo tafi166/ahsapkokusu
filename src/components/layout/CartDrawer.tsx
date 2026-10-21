@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Minus, Plus, X } from "lucide-react";
+import { Link } from "react-router-dom";
 import { isLegacyLine, useCart } from "@/hooks/useCart";
 import { ProductMedia } from "@/lib/placeholder";
 import { Button } from "@/components/ui/Button";
@@ -109,11 +110,21 @@ export function CartDrawer() {
                 <span className="text-body/60">Ara Toplam</span>
                 <span className="font-medium">₺{subtotal.toLocaleString("tr-TR")}</span>
               </div>
-              <Button variant="primary" size="lg" className="w-full" disabled={lines.length === 0}>
-                Ödemeye Geç
-              </Button>
+              {lines.length > 0 ? (
+                <Link
+                  to="/odeme"
+                  onClick={closeCart}
+                  className="flex w-full items-center justify-center rounded-pill border border-btn-bg bg-btn-bg px-8 py-4 font-medium text-btn-text transition-colors hover:bg-btn-bg-hover hover:text-btn-text-hover"
+                >
+                  Ödemeye Geç
+                </Link>
+              ) : (
+                <Button variant="primary" size="lg" className="w-full" disabled>
+                  Ödemeye Geç
+                </Button>
+              )}
               <p className="mt-3 text-center text-xs text-body/50">
-                Bu bir demo sepettir — gerçek ödeme/checkout işlemi yapılmaz.
+                Test aşaması — ödeme alınmaz, siparişler yalnızca test olarak kaydedilir.
               </p>
             </div>
           </motion.aside>

@@ -16,50 +16,9 @@ import {
   type SvgInfo,
 } from "@/lib/cncQuote";
 import { cn } from "@/lib/cn";
+import { Field, fieldProps } from "@/components/ui/FormField";
 
 const STEPS = ["Dosya", "Ölçü & Malzeme", "İletişim", "Gözden Geçir"] as const;
-
-const inputClass =
-  "w-full rounded-input border px-4 py-3 text-sm outline-none focus:border-ink disabled:opacity-60";
-
-function Field({
-  id,
-  label,
-  error,
-  hint,
-  children,
-}: {
-  id: string;
-  label: string;
-  error?: string;
-  hint?: ReactNode;
-  children: ReactNode;
-}) {
-  return (
-    <div>
-      <label htmlFor={id} className="mb-1.5 block text-sm">
-        {label}
-      </label>
-      {children}
-      {hint && !error ? <p className="mt-1 text-xs text-body/60">{hint}</p> : null}
-      {error ? (
-        <p id={`${id}-error`} className="mt-1 text-xs text-danger">
-          {error}
-        </p>
-      ) : null}
-    </div>
-  );
-}
-
-/** Props shared by every input: error styling and the aria link to the message. */
-function fieldProps(id: string, error?: string) {
-  return {
-    id,
-    "aria-invalid": error ? true : undefined,
-    "aria-describedby": error ? `${id}-error` : undefined,
-    className: cn(inputClass, error ? "border-danger" : "border-line"),
-  };
-}
 
 interface UploadedFile {
   /** Held in memory until the request is sent; never stored. */

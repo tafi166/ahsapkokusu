@@ -14,6 +14,8 @@ import { ContentService } from './content/content.service';
 import { HealthController } from './health/health.controller';
 import { MediaController } from './media/media.controller';
 import { MediaService } from './media/media.service';
+import { OrdersController } from './orders/orders.controller';
+import { OrdersService } from './orders/orders.service';
 import { PrismaLifecycle, prismaProvider } from './prisma/prisma';
 import { QuotesController } from './quotes/quotes.controller';
 import { QuotesService } from './quotes/quotes.service';
@@ -48,6 +50,7 @@ export function createAppModule(config: AppConfig) {
       ContentAdminController,
       MediaController,
       QuotesController,
+      OrdersController,
     ],
     providers: [
       { provide: APP_CONFIG, useValue: config },
@@ -59,6 +62,7 @@ export function createAppModule(config: AppConfig) {
       ContentService,
       MediaService,
       QuotesService,
+      OrdersService,
       UsersService,
       // Rate limiting runs first so rejected credentials still count toward the limit.
       { provide: APP_GUARD, useClass: ThrottlerGuard },

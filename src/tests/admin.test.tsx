@@ -61,7 +61,7 @@ describe("admin sign-in", () => {
     const user = userEvent.setup();
     const nav = await signIn(user);
     expect(screen.getByText("Ada · Yönetici")).toBeInTheDocument();
-    for (const label of ["Ana Sayfa İçerikleri", "Kategoriler", "Ürünler", "Listeler", "Teklif Talepleri", "Kullanıcılar", "Yedekle & Sıfırla"]) {
+    for (const label of ["Ana Sayfa İçerikleri", "Kategoriler", "Ürünler", "Listeler", "Siparişler", "Teklif Talepleri", "Kullanıcılar", "Yedekle & Sıfırla"]) {
       await user.click(within(nav).getByText(label));
       expect(await screen.findByRole("heading", { level: 2, name: label })).toBeInTheDocument();
     }
@@ -258,5 +258,31 @@ describe("users tab", () => {
     const selfRow = screen.getByText("(siz)").closest("li")!;
     await user.click(within(selfRow).getByRole("button", { name: "Devre Dışı Bırak" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Kendi yönetici yetkinizi kaldıramaz");
+  });
+});
+
+describe("orders tab", () => {
+  it("lists test orders, clearly marked, and changes their status", async () => {
+    api.state.orders.push({
+      id: "8f0c2f1e-0000-4000-8000-0000000000aa",
+      number: "T-ZXCV2345",
+      isTest: true,
+      status: "RECEIVED",
+      currency: "TRY",
+      subtotal: 3960,
+      customer: { name: "Bob", email: "bob@example.com", phone: "+90 532 000 00 00" },
+      address: { line: "Moda Cad. No: 1", district: "Kadıköy", city: "İstanbul", postalCode: null },
+      notes: null,
+      lines: [{ productId: "ml-2", productSlug: "x", title: "Orman", options: { layerCount: 5 }, unitPrice: 1980, quantity: 2, lineTotal: 3960 }],
+      createdAt: "2026-10-21T08:00:00.000Z",
+    });
+    const user = userEvent.setup();
+    const nav = await signIn(user);
+    await user.click(within(nav).getByText("Siparişler"));
+    expect(await screen.findByText("T-ZXCV2345")).toBeInTheDocument();
+    expect(screen.getByText("Test")).toBeInTheDocument();
+    expect(screen.getByText("Katman sayısı: 5")).toBeInTheDocument();
+    await user.selectOptions(screen.getByLabelText("T-ZXCV2345 durumu"), "CANCELLED");
+    expect(api.state.orders[0]!.status).toBe("CANCELLED");
   });
 });

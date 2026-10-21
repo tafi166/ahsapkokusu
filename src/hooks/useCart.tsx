@@ -23,6 +23,8 @@ interface CartContextValue {
   addItem: (product: Product, quantity?: number, selection?: ConfiguredOptions) => AddItemResult;
   removeItem: (productId: string, selection?: ConfiguredOptions) => void;
   setQuantity: (productId: string, quantity: number, selection?: ConfiguredOptions) => void;
+  /** Empties the cart (after an order is placed). */
+  clear: () => void;
   itemCount: number;
   subtotal: number;
 }
@@ -133,6 +135,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       addItem,
       removeItem,
       setQuantity,
+      clear: () => setLines([]),
       itemCount,
       subtotal,
     };
