@@ -9,6 +9,8 @@ interface SectionProps {
   /** Background color scheme, named after the reference theme's section "schemes". */
   scheme?: "primary" | "secondary" | "tertiary";
   id?: string;
+  /** The page's first section, opening with a breadcrumb: little space under the header. */
+  pageTop?: boolean;
 }
 
 const schemeClass = {
@@ -17,9 +19,12 @@ const schemeClass = {
   tertiary: "bg-ink text-white",
 } as const;
 
-export function Section({ children, className, containerSize = "lg", scheme = "primary", id }: SectionProps) {
+export function Section({ children, className, containerSize = "lg", scheme = "primary", id, pageTop = false }: SectionProps) {
   return (
-    <section id={id} className={cn("py-14 md:py-20 lg:py-24", schemeClass[scheme], className)}>
+    <section
+      id={id}
+      className={cn(pageTop ? "pb-14 pt-6 md:pb-20 md:pt-8 lg:pb-24" : "py-14 md:py-20 lg:py-24", schemeClass[scheme], className)}
+    >
       <Container size={containerSize}>{children}</Container>
     </section>
   );

@@ -79,7 +79,7 @@ describe("routing smoke test — every nav/footer destination renders without th
 
     const nav = screen.getByRole("navigation", { name: "Ana menü" });
     const trigger = within(nav).getByText("Parametrik Mobilyalar");
-    await user.hover(trigger.closest("div")!);
+    await user.hover(trigger.closest("li")!);
 
     expect(await screen.findByRole("menuitem", { name: "Sandalye & Tabure" })).toBeInTheDocument();
   });
@@ -151,7 +151,7 @@ describe("routing smoke test — every nav/footer destination renders without th
 
     const nav = screen.getByRole("navigation", { name: "Ana menü" });
     const trigger = within(nav).getByText("Parametrik Duvar Tabloları");
-    await user.hover(trigger.closest("div")!);
+    await user.hover(trigger.closest("li")!);
     await user.click(await screen.findByRole("menuitem", { name: "Hayvan Figürleri" }));
 
     // Same route (:categorySlug unchanged, only ?alt= changed) — must still re-filter, not stay stuck.

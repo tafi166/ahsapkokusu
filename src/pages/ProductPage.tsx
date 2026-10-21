@@ -108,7 +108,7 @@ export function ProductPage() {
   }
 
   return (
-    <Section>
+    <Section pageTop>
       <Breadcrumb
         items={[
           { label: t.product.home, href: "/" },

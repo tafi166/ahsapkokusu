@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Heart, Menu, Search, ShoppingBag, User } from "lucide-react";
+import { ChevronDown, Heart, Menu, Search, ShoppingBag, User } from "lucide-react";
 import { useState } from "react";
 import { brand } from "@/config/brand";
 import { primaryNav } from "@/config/navigation";
@@ -39,15 +39,38 @@ function LanguageSwitcher() {
   );
 }
 
+// No display class here: callers add `inline-flex`, or `hidden sm:inline-flex` (cn doesn't resolve conflicting classes).
+const iconButton = "relative h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-paper-soft";
+
+function CountBadge({ count }: { count: number }) {
+  if (count <= 0) return null;
+  return (
+    <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent-deep px-1 text-[10px] leading-none text-white">
+      {count}
+    </span>
+  );
+}
+
+/**
+ * Two rows on large screens: language, logo (centred) and icons; below them
+ * the category menu on one centred line, so long category names never wrap.
+ * Below 1280 px the logo row stands alone and the menu sits behind the burger.
+ */
 export function Header() {
   const { t } = useI18n();
   const nav = primaryNav(t);
+  const { pathname } = useLocation();
   const { isScrolled } = useStickyHeader();
   const { itemCount, openCart } = useCart();
   const { count: wishlistCount } = useWishlist();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+
+  const isActive = (href: string) => {
+    const path = href.split("?")[0]!;
+    return path !== "/" && (pathname === path || pathname.startsWith(`${path}/`));
+  };
 
   return (
     <>
@@ -59,88 +82,79 @@ export function Header() {
             isScrolled && "shadow-sm",
           )}
         >
-          <div className="mx-auto flex h-16 max-w-[1760px] items-center justify-between px-4 md:h-20 md:px-8">
-            <button
-              className="p-2 lg:hidden"
-              aria-label={t.header.openMenu}
-              onClick={() => setMobileOpen(true)}
-            >
-              <Menu size={22} />
-            </button>
+          <div className="mx-auto grid h-16 max-w-[1760px] grid-cols-[1fr_auto_1fr] items-center px-4 md:h-[76px] md:px-8">
+            <div className="flex items-center">
+              <button className={cn(iconButton, "-ml-2 mr-1 inline-flex xl:hidden")} aria-label={t.header.openMenu} onClick={() => setMobileOpen(true)}>
+                <Menu size={22} />
+              </button>
+              <LanguageSwitcher />
+            </div>
 
-            <Link to="/" className="font-heading text-xl tracking-wide md:text-2xl">
+            <Link to="/" className="font-heading text-[1.35rem] tracking-[0.1em] sm:text-2xl md:text-[1.75rem]">
               {brand.name}
             </Link>
 
-            <nav aria-label={t.header.primaryNav} className="hidden items-center gap-1 lg:flex">
-              {nav.map((item) => (
-                <div
-                  key={item.label}
-                  className="relative"
-                  onMouseEnter={() => item.children && setOpenMenu(item.label)}
-                  onMouseLeave={() => item.children && setOpenMenu(null)}
-                >
-                  <Link
-                    to={item.href}
-                    className="flex items-center px-3 py-2 text-sm transition-colors hover:text-accent-deep"
-                    aria-haspopup={item.children ? "menu" : undefined}
-                    aria-expanded={item.children ? openMenu === item.label : undefined}
-                  >
-                    {item.label}
-                  </Link>
-                  {item.children ? (
-                    <MegaMenu
-                      open={openMenu === item.label}
-                      links={item.children}
-                      id={`menu-${item.label}`}
-                    />
-                  ) : null}
-                </div>
-              ))}
-            </nav>
-
-            <div className="flex items-center gap-1">
-              <LanguageSwitcher />
-              <button
-                aria-label={t.header.search}
-                className="rounded-full p-2 transition-colors hover:bg-paper-soft"
-                onClick={() => setSearchOpen(true)}
-              >
+            <div className="flex items-center justify-end gap-0.5">
+              <button aria-label={t.header.search} className={cn(iconButton, "inline-flex")} onClick={() => setSearchOpen(true)}>
                 <Search size={19} />
               </button>
               <Link
                 to={localePath("/favoriler")}
                 aria-label={t.header.wishlist(wishlistCount)}
-                className="relative hidden rounded-full p-2 transition-colors hover:bg-paper-soft sm:inline-flex"
+                className={cn(iconButton, "hidden sm:inline-flex")}
               >
                 <Heart size={19} />
-                {wishlistCount > 0 ? (
-                  <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-accent-deep text-[10px] text-white">
-                    {wishlistCount}
-                  </span>
-                ) : null}
+                <CountBadge count={wishlistCount} />
               </Link>
-              <Link
-                to={localePath("/hesabim")}
-                aria-label={t.header.account}
-                className="hidden rounded-full p-2 transition-colors hover:bg-paper-soft sm:inline-flex"
-              >
+              <Link to={localePath("/hesabim")} aria-label={t.header.account} className={cn(iconButton, "hidden sm:inline-flex")}>
                 <User size={19} />
               </Link>
-              <button
-                aria-label={t.header.openCart(itemCount)}
-                className="relative rounded-full p-2 transition-colors hover:bg-paper-soft"
-                onClick={openCart}
-              >
+              <button aria-label={t.header.openCart(itemCount)} className={cn(iconButton, "-mr-2 inline-flex")} onClick={openCart}>
                 <ShoppingBag size={19} />
-                {itemCount > 0 ? (
-                  <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-accent-deep text-[10px] text-white">
-                    {itemCount}
-                  </span>
-                ) : null}
+                <CountBadge count={itemCount} />
               </button>
             </div>
           </div>
+
+          <nav aria-label={t.header.primaryNav} className="hidden border-t border-line/70 xl:block">
+            <ul className="mx-auto flex max-w-[1760px] items-center justify-center gap-x-1 px-8 2xl:gap-x-4">
+              {nav.map((item, index) => {
+                const active = isActive(item.href);
+                return (
+                  <li
+                    key={item.label}
+                    className="relative"
+                    onMouseEnter={() => item.children && setOpenMenu(item.label)}
+                    onMouseLeave={() => item.children && setOpenMenu(null)}
+                  >
+                    <Link
+                      to={item.href}
+                      className={cn(
+                        "group relative flex items-center gap-1 whitespace-nowrap px-3 py-3 text-[14px] tracking-[0.02em] transition-colors hover:text-ink",
+                        active ? "text-ink" : "text-body/80",
+                      )}
+                      aria-current={active ? "page" : undefined}
+                      aria-haspopup={item.children ? "menu" : undefined}
+                      aria-expanded={item.children ? openMenu === item.label : undefined}
+                    >
+                      {item.label}
+                      {item.children && item.children.length > 0 ? (
+                        <ChevronDown size={13} aria-hidden="true" className="opacity-50 transition-transform group-hover:rotate-180" />
+                      ) : null}
+                      <span
+                        aria-hidden="true"
+                        className={cn(
+                          "absolute inset-x-3 bottom-2 h-px origin-left bg-ink transition-transform duration-300",
+                          active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100",
+                        )}
+                      />
+                    </Link>
+                    {item.children ? <MegaMenu open={openMenu === item.label} links={item.children} id={`nav-menu-${index}`} /> : null}
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
         </div>
       </header>
 

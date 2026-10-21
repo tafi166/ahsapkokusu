@@ -20,7 +20,7 @@ export function MobileMenu({ open, onClose }: { open: boolean; onClose: () => vo
       {open ? (
         <>
           <motion.div
-            className="fixed inset-0 z-50 bg-black/40 lg:hidden"
+            className="fixed inset-0 z-50 bg-black/40 xl:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -29,7 +29,7 @@ export function MobileMenu({ open, onClose }: { open: boolean; onClose: () => vo
           />
           <motion.nav
             aria-label={t.header.mobileNav}
-            className="fixed inset-y-0 left-0 z-50 flex w-full max-w-sm flex-col bg-white shadow-2xl lg:hidden"
+            className="fixed inset-y-0 left-0 z-50 flex w-full max-w-sm flex-col bg-white shadow-2xl xl:hidden"
             initial={{ x: "-100%" }}
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}

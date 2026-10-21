@@ -11,7 +11,7 @@
  */
 @theme {
   /* Fonts */
-  --font-heading: "Tenor Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Belleza", ui-sans-serif, system-ui, sans-serif;
   --font-body: "Work Sans", ui-sans-serif, system-ui, sans-serif;
 
   /* Colors — canonical values live in src/config/tokens.ts (single source of truth). Keep this block in sync with tokens.ts. */
