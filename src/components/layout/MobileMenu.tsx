@@ -5,8 +5,10 @@ import { Link } from "react-router-dom";
 import { primaryNav } from "@/config/navigation";
 import { brand } from "@/config/brand";
 import { useScrollLock } from "@/hooks/useScrollLock";
+import { useI18n } from "@/i18n/I18nProvider";
 
 export function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { t, locale, setLocale } = useI18n();
   const [expanded, setExpanded] = useState<string | null>(null);
   useScrollLock(open);
 
@@ -23,7 +25,7 @@ export function MobileMenu({ open, onClose }: { open: boolean; onClose: () => vo
             aria-hidden="true"
           />
           <motion.nav
-            aria-label="Mobil navigasyon"
+            aria-label={t.header.mobileNav}
             className="fixed inset-y-0 left-0 z-50 flex w-full max-w-sm flex-col bg-white shadow-2xl lg:hidden"
             initial={{ x: "-100%" }}
             animate={{ x: 0 }}
@@ -32,13 +34,13 @@ export function MobileMenu({ open, onClose }: { open: boolean; onClose: () => vo
           >
             <div className="flex items-center justify-between border-b border-line px-6 py-5">
               <span className="font-heading text-lg">{brand.name}</span>
-              <button onClick={onClose} aria-label="Menüyü kapat" className="p-1">
+              <button onClick={onClose} aria-label={t.header.closeMenu} className="p-1">
                 <X size={22} />
               </button>
             </div>
 
             <ul className="flex-1 overflow-y-auto px-2 py-4">
-              {primaryNav.map((item) => {
+              {primaryNav(t).map((item) => {
                 const isExpanded = expanded === item.label;
                 return (
                   <li key={item.label} className="border-b border-line last:border-none">
@@ -91,11 +93,19 @@ export function MobileMenu({ open, onClose }: { open: boolean; onClose: () => vo
 
             <div className="flex items-center gap-4 border-t border-line px-6 py-5">
               <Link to="/favoriler" onClick={onClose} className="text-sm text-body/70">
-                Favorilerim
+                {t.header.favourites}
               </Link>
               <Link to="/hesabim" onClick={onClose} className="text-sm text-body/70">
-                Hesabım
+                {t.header.account}
               </Link>
+              <button
+                type="button"
+                onClick={() => setLocale(locale === "tr" ? "en" : "tr")}
+                className="ml-auto text-sm text-body/70 underline"
+                lang={locale === "tr" ? "en" : "tr"}
+              >
+                {locale === "tr" ? t.locale.en : t.locale.tr}
+              </button>
             </div>
           </motion.nav>
         </>

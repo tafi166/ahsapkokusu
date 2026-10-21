@@ -1,3 +1,4 @@
+import type { Dictionary } from "@/i18n/messages";
 import type { FooterColumn, NavItem } from "@/types";
 import { categories } from "@/data/categories";
 
@@ -7,7 +8,7 @@ import { categories } from "@/data/categories";
  * drift out of sync. Each subcategory link deep-links into its category
  * page pre-filtered via `?alt=<subcategory-slug>` (see CategoryPage.tsx).
  */
-export const primaryNav: NavItem[] = [
+export const primaryNav = (t: Dictionary): NavItem[] => [
   ...categories.map((category) => ({
     label: category.title,
     href: `/${category.slug}`,
@@ -17,34 +18,34 @@ export const primaryNav: NavItem[] = [
       href: `/${category.slug}?alt=${sub.slug}`,
     })),
   })),
-  { label: "Özel Tasarım", href: "/ozel-tasarim" },
-  { label: "İletişim", href: "/iletisim" },
+  { label: t.nav.customDesign, href: "/ozel-tasarim" },
+  { label: t.nav.contact, href: "/iletisim" },
 ];
 
-export const footerColumns: FooterColumn[] = [
+export const footerColumns = (t: Dictionary): FooterColumn[] => [
   {
-    title: "Kategoriler",
+    title: t.nav.categories,
     links: categories.map((c) => ({ label: c.title, href: `/${c.slug}` })),
   },
   {
-    title: "Hızlı Bağlantılar",
+    title: t.nav.quickLinks,
     links: [
-      { label: "Hakkımızda", href: "/sayfa/hakkimizda" },
-      { label: "Sıkça Sorulan Sorular", href: "/sss" },
-      { label: "Yorumlar", href: "/yorumlar" },
-      { label: "Blog", href: "/blog" },
-      { label: "Özel Tasarım", href: "/ozel-tasarim" },
-      { label: "Favorilerim", href: "/favoriler" },
+      { label: t.nav.about, href: "/sayfa/hakkimizda" },
+      { label: t.nav.faq, href: "/sss" },
+      { label: t.nav.reviews, href: "/yorumlar" },
+      { label: t.nav.blog, href: "/blog" },
+      { label: t.nav.customDesign, href: "/ozel-tasarim" },
+      { label: t.nav.favourites, href: "/favoriler" },
     ],
   },
   {
-    title: "Destek",
+    title: t.nav.support,
     links: [
-      { label: "İletişim", href: "/iletisim" },
-      { label: "Kullanım Şartları", href: "/sayfa/kullanim-sartlari" },
-      { label: "İade Politikası", href: "/sayfa/iade-politikasi" },
-      { label: "Kargo Politikası", href: "/sayfa/kargo-politikasi" },
-      { label: "Gizlilik Politikası", href: "/sayfa/gizlilik-politikasi" },
+      { label: t.nav.contact, href: "/iletisim" },
+      { label: t.nav.terms, href: "/sayfa/kullanim-sartlari" },
+      { label: t.nav.returns, href: "/sayfa/iade-politikasi" },
+      { label: t.nav.shipping, href: "/sayfa/kargo-politikasi" },
+      { label: t.nav.privacy, href: "/sayfa/gizlilik-politikasi" },
     ],
   },
 ];

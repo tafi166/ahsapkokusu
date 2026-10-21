@@ -1,3 +1,4 @@
+import { formatMoney } from "@/i18n/money";
 import type { ConfiguredOptions, PricedAxis, Product, VariantSelection } from "@/types";
 
 /**
@@ -168,16 +169,18 @@ export function calculatePrice(product: Product, options?: ConfiguredOptions): P
   };
 }
 
-const currencySymbol: Record<Product["currency"], string> = { TRY: "₺", USD: "$" };
-
+/** Turkish formatting; components use `useI18n().money` to follow the interface language. */
 export function formatPrice(value: number, currency: Product["currency"]): string {
-  return `${currencySymbol[currency]}${value.toLocaleString("tr-TR")}`;
+  return formatMoney(value, currency, "tr");
 }
 
-/** Human-readable "Label: value" pairs for a configuration, in a stable order. */
-export function describeOptions(options: ConfiguredOptions | undefined): string[] {
+/** Human-readable "Label: value" pairs for a configuration, in a stable order. Values are catalog content. */
+export function describeOptions(
+  options: ConfiguredOptions | undefined,
+  labels: Record<OptionKey, string> = AXIS_LABEL,
+): string[] {
   if (!options) return [];
   return OPTION_KEYS.filter((k) => options[k] !== undefined).map(
-    (k) => `${AXIS_LABEL[k]}: ${options[k]}${k === "height" ? " cm" : ""}`,
+    (k) => `${labels[k]}: ${options[k]}${k === "height" ? " cm" : ""}`,
   );
 }

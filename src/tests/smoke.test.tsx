@@ -77,7 +77,7 @@ describe("routing smoke test — every nav/footer destination renders without th
     const user = userEvent.setup();
     renderAt("/");
 
-    const nav = screen.getByRole("navigation", { name: "Primary" });
+    const nav = screen.getByRole("navigation", { name: "Ana menü" });
     const trigger = within(nav).getByText("Parametrik Mobilyalar");
     await user.hover(trigger.closest("div")!);
 
@@ -149,7 +149,7 @@ describe("routing smoke test — every nav/footer destination renders without th
     expect(screen.getByText("Parametrik Portre Tablosu — Silüet Serisi")).toBeInTheDocument();
     expect(screen.getByText("Jaguar Parametrik Duvar Tablosu")).toBeInTheDocument();
 
-    const nav = screen.getByRole("navigation", { name: "Primary" });
+    const nav = screen.getByRole("navigation", { name: "Ana menü" });
     const trigger = within(nav).getByText("Parametrik Duvar Tabloları");
     await user.hover(trigger.closest("div")!);
     await user.click(await screen.findByRole("menuitem", { name: "Hayvan Figürleri" }));
@@ -170,7 +170,7 @@ describe("routing smoke test — every nav/footer destination renders without th
     await user.click(screen.getByRole("button", { name: /^uygula$/i }));
     expect(screen.getByText(/eşleşen ürün bulunamadı/i)).toBeInTheDocument();
 
-    const nav = screen.getByRole("navigation", { name: "Primary" });
+    const nav = screen.getByRole("navigation", { name: "Ana menü" });
     await user.click(within(nav).getByText("Duvar Saatleri"));
 
     expect(await screen.findByRole("heading", { level: 1, name: "Duvar Saatleri" })).toBeInTheDocument();

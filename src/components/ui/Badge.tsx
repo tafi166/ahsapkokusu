@@ -1,14 +1,16 @@
+import { useI18n } from "@/i18n/I18nProvider";
 import { cn } from "@/lib/cn";
 import type { BadgeKind } from "@/lib/productBadge";
 
 const badgeClass: Record<BadgeKind, string> = {
-  "İndirim": "bg-danger text-white",
-  "Yeni": "bg-black text-white",
-  "Çok Satan": "bg-accent text-ink",
-  "Özel Tasarım": "bg-badge-custom text-white",
+  sale: "bg-danger text-white",
+  new: "bg-black text-white",
+  bestSeller: "bg-accent text-ink",
+  custom: "bg-badge-custom text-white",
 };
 
 export function Badge({ kind, className }: { kind: BadgeKind; className?: string }) {
+  const { t } = useI18n();
   return (
     <span
       className={cn(
@@ -17,7 +19,7 @@ export function Badge({ kind, className }: { kind: BadgeKind; className?: string
         className,
       )}
     >
-      {kind}
+      {t.badge[kind]}
     </span>
   );
 }

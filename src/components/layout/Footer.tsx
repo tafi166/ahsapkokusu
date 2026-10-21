@@ -2,16 +2,7 @@ import { Link } from "react-router-dom";
 import { brand } from "@/config/brand";
 import { footerColumns } from "@/config/navigation";
 import { Container } from "@/components/ui/Container";
-
-const paymentMethods = [
-  "Visa",
-  "Mastercard",
-  "Amex",
-  "Apple Pay",
-  "Google Pay",
-  "Shop Pay",
-  "Klarna",
-];
+import { useI18n } from "@/i18n/I18nProvider";
 
 // lucide-react no longer ships trademarked brand marks — plain text
 // abbreviations avoid reproducing a logo we don't have rights to.
@@ -21,6 +12,7 @@ const socialLinks = [
 ];
 
 export function Footer() {
+  const { t } = useI18n();
   return (
     <footer className="bg-footer-bg text-footer-ink">
       <Container size="lg" className="py-14 md:py-20">
@@ -44,7 +36,7 @@ export function Footer() {
             </div>
           </div>
 
-          {footerColumns.map((column) => (
+          {footerColumns(t).map((column) => (
             <nav key={column.title} aria-label={column.title}>
               <h3 className="mb-4 text-sm font-medium uppercase tracking-wide text-footer-ink">
                 {column.title}
@@ -67,15 +59,8 @@ export function Footer() {
 
         <div className="mt-12 flex flex-col items-center gap-4 border-t border-footer-border pt-8 text-xs text-footer-link md:flex-row md:justify-between">
           <p>
-            © {brand.copyrightYear} {brand.legalName}. Tüm hakları saklıdır.
+            © {brand.copyrightYear} {brand.legalName}. {t.footer.rights}
           </p>
-          <ul className="flex flex-wrap items-center justify-center gap-3" aria-label="Kabul edilen ödeme yöntemleri">
-            {paymentMethods.map((method) => (
-              <li key={method} className="rounded-input border border-footer-border px-2 py-1">
-                {method}
-              </li>
-            ))}
-          </ul>
         </div>
       </Container>
     </footer>
