@@ -25,3 +25,17 @@ export const CurrentAuth = createParamDecorator((_data: unknown, ctx: ExecutionC
   if (!auth) throw new UnauthorizedException();
   return auth;
 });
+
+/**
+ * The language of a customer-facing response: English when the request's
+ * Accept-Language starts with `en` (the English storefront sends that), else Turkish.
+ */
+export type Lang = 'tr' | 'en';
+
+export function langOf(acceptLanguage: string | undefined): Lang {
+  return /^\s*en\b/i.test(acceptLanguage ?? '') ? 'en' : 'tr';
+}
+
+export const RequestLang = createParamDecorator((_data: unknown, ctx: ExecutionContext): Lang =>
+  langOf(ctx.switchToHttp().getRequest<Request>().headers['accept-language']),
+);

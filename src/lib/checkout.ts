@@ -2,6 +2,7 @@ import type { CartLine } from "@/hooks/useCart";
 import type { FieldErrors } from "@/lib/cncQuote";
 import type { ConfiguredOptions } from "@/types";
 import { tr, type Dictionary } from "@/i18n/messages";
+import { contentLocale } from "@/i18n/locale";
 
 export interface CheckoutForm {
   name: string;
@@ -65,7 +66,8 @@ export async function placeOrder(
   try {
     res = await fetch("/api/orders", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      // The server answers errors in this language.
+      headers: { "Content-Type": "application/json", "Accept-Language": contentLocale() },
       body: JSON.stringify(body),
       credentials: "same-origin",
     });

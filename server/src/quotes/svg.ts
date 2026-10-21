@@ -1,4 +1,5 @@
 import { DOMParser, type Element as XmlElement } from '@xmldom/xmldom';
+import type { Lang } from '../common/decorators';
 
 /**
  * Server-side check of an uploaded SVG. Unlike the storefront's quick
@@ -33,6 +34,32 @@ export type SvgCheck =
   | { ok: true; physicalCm?: { width: number; height: number } }
   | { ok: false; error: string };
 
+const MESSAGES: Record<Lang, {
+  notUtf8: string;
+  doctype: string;
+  notSvg: string;
+  element: (name: string) => string;
+  script: string;
+  external: string;
+}> = {
+  tr: {
+    notUtf8: 'Dosya UTF-8 metin değil.',
+    doctype: 'Dosya DOCTYPE/ENTITY tanımı içeriyor.',
+    notSvg: 'Dosya geçerli bir SVG değil.',
+    element: (name) => `İzin verilmeyen öğe: <${name}>.`,
+    script: 'Dosyada betik (olay işleyicisi) var.',
+    external: 'Dosya dış bir kaynağa bağlantı içeriyor.',
+  },
+  en: {
+    notUtf8: "The file isn't UTF-8 text.",
+    doctype: 'The file contains a DOCTYPE or ENTITY declaration.',
+    notSvg: "The file isn't a valid SVG.",
+    element: (name) => `The file contains a disallowed element: <${name}>.`,
+    script: 'The file contains a script (an event handler).',
+    external: 'The file links to an external resource.',
+  },
+};
+
 const fail = (error: string): SvgCheck => ({ ok: false, error });
 
 /** `url(...)` pointing anywhere but a `#fragment`, or a CSS import. */
@@ -50,14 +77,15 @@ function toCm(raw: string | null): number | undefined {
   return Number.isFinite(n) && n > 0 ? Math.round(n * CM_PER_UNIT[m[2]!.toLowerCase()]! * 10) / 10 : undefined;
 }
 
-export function checkSvg(bytes: Buffer): SvgCheck {
+export function checkSvg(bytes: Buffer, lang: Lang = 'tr'): SvgCheck {
+  const m = MESSAGES[lang];
   let text: string;
   try {
     text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
   } catch {
-    return fail('Dosya UTF-8 metin değil.');
+    return fail(m.notUtf8);
   }
-  if (/<!DOCTYPE|<!ENTITY/i.test(text)) return fail('Dosya DOCTYPE/ENTITY tanımı içeriyor.');
+  if (/<!DOCTYPE|<!ENTITY/i.test(text)) return fail(m.doctype);
 
   let root: XmlElement | null;
   try {
@@ -68,33 +96,33 @@ export function checkSvg(bytes: Buffer): SvgCheck {
     }).parseFromString(text, 'application/xml');
     root = doc.documentElement;
   } catch {
-    return fail('Dosya geçerli bir SVG değil.');
+    return fail(m.notSvg);
   }
-  if (!root || root.namespaceURI !== SVG_NS || root.localName !== 'svg') return fail('Dosya geçerli bir SVG değil.');
+  if (!root || root.namespaceURI !== SVG_NS || root.localName !== 'svg') return fail(m.notSvg);
 
   const elements = [root, ...Array.from(root.getElementsByTagName('*'))];
   for (const el of elements) {
     const ns = el.namespaceURI ?? '';
     const name = el.localName ?? el.nodeName;
     if (ns === SVG_NS) {
-      if (!ALLOWED_SVG_ELEMENTS.has(name)) return fail(`İzin verilmeyen öğe: <${name}>.`);
+      if (!ALLOWED_SVG_ELEMENTS.has(name)) return fail(m.element(name));
     } else if (!EDITOR_NAMESPACES.has(ns)) {
-      return fail(`İzin verilmeyen öğe: <${el.nodeName}>.`);
+      return fail(m.element(el.nodeName));
     }
 
     for (const attr of Array.from(el.attributes)) {
       const attrName = attr.name.toLowerCase();
       const value = attr.value.trim();
-      if (attrName.startsWith('on')) return fail('Dosyada betik (olay işleyicisi) var.');
+      if (attrName.startsWith('on')) return fail(m.script);
       if (LINK_ATTRIBUTES.has(attrName) && value && !value.startsWith('#')) {
-        return fail('Dosya dış bir kaynağa bağlantı içeriyor.');
+        return fail(m.external);
       }
       if (/javascript:|data:/i.test(value) || hasExternalCssRef(value)) {
-        return fail('Dosya dış bir kaynağa bağlantı içeriyor.');
+        return fail(m.external);
       }
     }
     if (ns === SVG_NS && name === 'style' && hasExternalCssRef(el.textContent ?? '')) {
-      return fail('Dosya dış bir kaynağa bağlantı içeriyor.');
+      return fail(m.external);
     }
   }
 

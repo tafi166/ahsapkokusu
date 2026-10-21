@@ -1,4 +1,6 @@
 import { formatMoney } from "@/i18n/money";
+import { contentLocale } from "@/i18n/locale";
+import { en, tr, type Dictionary } from "@/i18n/messages";
 import type { ConfiguredOptions, PricedAxis, Product, VariantSelection } from "@/types";
 
 /**
@@ -58,13 +60,15 @@ export interface SelectionValidation {
 export function validateSelection(
   product: Product,
   selection: ConfiguredOptions | VariantSelection | undefined,
+  messages: Pick<Dictionary, "options" | "selection"> = contentLocale() === "en" ? en : tr,
 ): SelectionValidation {
   const errors: string[] = [];
   const variants = product.variants;
+  const { options: label, selection: m } = messages;
 
   if (!variants) {
     const extra = OPTION_KEYS.filter((k) => selection?.[k] !== undefined);
-    if (extra.length > 0) errors.push("Bu ürün için seçenek belirlenemez.");
+    if (extra.length > 0) errors.push(m.noOptions);
     return { options: undefined, errors };
   }
 
@@ -74,13 +78,13 @@ export function validateSelection(
     const offered = offeredValues(product, axis);
     const value = selection?.[axis];
     if (!offered) {
-      if (value !== undefined) errors.push(`${AXIS_LABEL[axis]} bu ürün için desteklenmiyor.`);
+      if (value !== undefined) errors.push(m.unsupported(label[axis]));
       continue;
     }
     if (value === undefined) {
-      errors.push(`${AXIS_LABEL[axis]} seçilmedi.`);
+      errors.push(m.notChosen(label[axis]));
     } else if (!offered.includes(value)) {
-      errors.push(`Geçersiz ${AXIS_LABEL[axis].toLocaleLowerCase("tr-TR")}: ${value}`);
+      errors.push(m.invalid(label[axis], value));
     } else {
       (options as Record<PricedAxis, string | number>)[axis] = value;
     }
@@ -88,13 +92,13 @@ export function validateSelection(
 
   const height = selection?.height;
   if (!variants.heightRange) {
-    if (height !== undefined) errors.push(`${AXIS_LABEL.height} bu ürün için desteklenmiyor.`);
+    if (height !== undefined) errors.push(m.unsupported(label.height));
   } else {
     const [min, max] = variants.heightRange;
     if (height === undefined) {
-      errors.push(`${AXIS_LABEL.height} seçilmedi.`);
+      errors.push(m.notChosen(label.height));
     } else if (!Number.isFinite(height) || height < min || height > max) {
-      errors.push(`Yükseklik aralığın dışında: ${height} cm (${min}–${max} cm)`);
+      errors.push(m.heightOutOfRange(height, min, max));
     } else {
       options.height = height;
     }

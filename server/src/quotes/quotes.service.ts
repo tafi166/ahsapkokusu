@@ -10,6 +10,21 @@ import { Prisma, type QuoteRequest, type QuoteStatus } from '../generated/prisma
 import { PRISMA, type PrismaClient } from '../prisma/prisma';
 import { checkSvg } from './svg';
 import type { quoteFieldsSchema } from './quotes.schemas';
+import type { Lang } from '../common/decorators';
+
+/** Customer-facing errors of a quote request. */
+const MESSAGES: Record<Lang, { noFile: string; svgOnly: string; busy: string }> = {
+  tr: {
+    noFile: 'Bir SVG dosyası ekleyin.',
+    svgOnly: 'Yalnızca .svg dosyaları kabul edilir.',
+    busy: 'Şu anda çok fazla teklif talebi var; lütfen daha sonra tekrar deneyin veya bize e-posta ile ulaşın.',
+  },
+  en: {
+    noFile: 'Please attach an SVG file.',
+    svgOnly: 'Only .svg files are accepted.',
+    busy: "We're receiving a lot of quote requests right now. Please try again later or email us.",
+  },
+};
 
 /** What multer hands over for the uploaded file (memory storage). */
 export interface UploadedSvg {
@@ -91,18 +106,20 @@ export class QuotesService {
     return path.join(this.dir, `${fileId}.svg`);
   }
 
-  async create(file: UploadedSvg | undefined, fields: z.infer<typeof quoteFieldsSchema>): Promise<{ reference: string }> {
-    if (!file || file.size === 0) throw new BadRequestException({ message: 'Bir SVG dosyası ekleyin.' });
+  /** Stores a customer's request; errors are in `lang`. */
+  async create(file: UploadedSvg | undefined, fields: z.infer<typeof quoteFieldsSchema>, lang: Lang = 'tr'): Promise<{ reference: string }> {
+    const m = MESSAGES[lang];
+    if (!file || file.size === 0) throw new BadRequestException({ message: m.noFile });
     if (!file.originalname.toLowerCase().endsWith('.svg') || !ACCEPTED_MIME.has(file.mimetype)) {
-      throw new BadRequestException({ message: 'Yalnızca .svg dosyaları kabul edilir.' });
+      throw new BadRequestException({ message: m.svgOnly });
     }
-    const check = checkSvg(file.buffer);
+    const check = checkSvg(file.buffer, lang);
     if (!check.ok) throw new BadRequestException({ message: check.error });
 
     const since = new Date(Date.now() - 24 * 3_600_000);
     if ((await this.prisma.quoteRequest.count({ where: { createdAt: { gte: since } } })) >= this.config.QUOTE_DAILY_LIMIT) {
       throw new HttpException(
-        { message: 'Şu anda çok fazla teklif talebi var; lütfen daha sonra tekrar deneyin veya bize e-posta ile ulaşın.' },
+        { message: m.busy },
         HttpStatus.TOO_MANY_REQUESTS,
       );
     }

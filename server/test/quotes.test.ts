@@ -155,6 +155,9 @@ describe('quote API', () => {
   it('rejects an unsafe SVG, a non-SVG name and a missing file', async () => {
     const res = await submit(app, `<svg ${SVG_NS}><script>alert(1)</script></svg>`).expect(400);
     expect(res.body.message).toMatch(/İzin verilmeyen öğe/);
+    const english = await submit(app, `<svg ${SVG_NS}><script>alert(1)</script></svg>`).set('Accept-Language', 'en-GB,en;q=0.9').expect(400);
+    expect(english.body.message).toBe('The file contains a disallowed element: <script>.');
+    expect((await submit(app, GOOD_SVG, {}, 'logo.png').set('Accept-Language', 'en').expect(400)).body.message).toBe('Only .svg files are accepted.');
     await submit(app, GOOD_SVG, {}, 'logo.png').expect(400);
     let req = request(app.getHttpServer()).post('/api/quotes').set('Origin', ORIGIN);
     for (const [k, v] of Object.entries(fields)) req = req.field(k, v);

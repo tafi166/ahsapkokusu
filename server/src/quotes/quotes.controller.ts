@@ -2,7 +2,7 @@ import { Body, Controller, Get, HttpCode, Param, Patch, Post, Res, UploadedFile,
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { Response } from 'express';
 import type { AuthContext } from '../auth/auth-context';
-import { CurrentAuth, Public, PublicFormRateLimited, Roles } from '../common/decorators';
+import { CurrentAuth, Public, PublicFormRateLimited, Roles, RequestLang, type Lang } from '../common/decorators';
 import { parseOrThrow } from '../common/zod';
 import { quoteConfig } from './quote-config';
 import { quoteFieldsSchema, quoteIdSchema, quoteStatusSchema } from './quotes.schemas';
@@ -24,8 +24,8 @@ export class QuotesController {
       limits: { fileSize: quoteConfig.maxFileBytes, files: 1, fields: 10, fieldSize: 4000, parts: 12 },
     }),
   )
-  create(@UploadedFile() file: UploadedSvg | undefined, @Body() body: unknown) {
-    return this.quotes.create(file, parseOrThrow(quoteFieldsSchema, body));
+  create(@UploadedFile() file: UploadedSvg | undefined, @Body() body: unknown, @RequestLang() lang: Lang) {
+    return this.quotes.create(file, parseOrThrow(quoteFieldsSchema, body, lang), lang);
   }
 
   @Roles('ADMIN', 'EDITOR')

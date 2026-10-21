@@ -3,6 +3,7 @@ import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { ConfiguredOptions, Product } from '@/types';
 import { calculatePrice, validateSelection as storefrontValidate } from '../../src/lib/price';
+import { en, tr } from '../../src/i18n/messages';
 import { defaultProducts } from '../../src/data/products/defaults';
 import { seedCatalog } from '../prisma/seed-catalog';
 import { unitPrice, validateSelection } from '../src/orders/pricing';
@@ -50,8 +51,9 @@ describe('server pricing matches the storefront', () => {
     for (const product of [...defaultProducts, priced]) {
       for (const selection of configurations(product)) {
         const server = validateSelection(product, selection);
-        const client = storefrontValidate(product, selection);
+        const client = storefrontValidate(product, selection, tr);
         expect(server, `${product.id} ${JSON.stringify(selection)}`).toEqual(client);
+        expect(validateSelection(product, selection, 'en')).toEqual(storefrontValidate(product, selection, en));
         if (server.errors.length === 0) {
           expect(unitPrice(product, server.options).toNumber()).toBe(calculatePrice(product, client.options).unitPrice);
         }
@@ -141,6 +143,18 @@ describe('orders API', () => {
   ])('rejects %s and records nothing', async (_label, patch) => {
     await place({ lines: [mlLine], customer, address, ...patch }).expect(400);
     expect(await prisma.order.count()).toBe(0);
+  });
+
+  it('answers errors in English when the English storefront asks', async () => {
+    const english = (body: object) => place(body).set('Accept-Language', 'en');
+    const soldOutRes = await english({ lines: [{ productId: soldOut.id, quantity: 1 }], customer, address }).expect(400);
+    expect(soldOutRes.body.message).toBe('Small Decorative Object — Cell is sold out.');
+    const optionRes = await english({ lines: [{ ...mlLine, selection: { ...mlLine.selection, color: 'Mor' } }], customer, address }).expect(400);
+    expect(optionRes.body.message).toContain('Invalid colour: Mor');
+    const invalid = await english({ lines: [mlLine], customer: { ...customer, phone: 'abc' }, address }).expect(400);
+    expect(invalid.body.message).toBe('The information sent is not valid.');
+    // Without the header (or with any other language) the answer stays Turkish.
+    expect((await place({ lines: [{ productId: soldOut.id, quantity: 1 }], customer, address }).expect(400)).body.message).toMatch(/tükendi\.$/);
   });
 
   it('needs an address only when something ships', async () => {

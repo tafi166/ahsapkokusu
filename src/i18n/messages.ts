@@ -359,6 +359,15 @@ const trMessages = {
     frame: "Çerçeve",
     height: "Yükseklik",
   },
+  /** Product configuration errors — the API server's orders/pricing.ts returns the same texts. */
+  selection: {
+    noOptions: "Bu ürün için seçenek belirlenemez.",
+    unsupported: (axis: string) => `${axis} bu ürün için desteklenmiyor.`,
+    notChosen: (axis: string) => `${axis} seçilmedi.`,
+    invalid: (axis: string, value: string | number) => `Geçersiz ${axis.toLocaleLowerCase("tr-TR")}: ${value}`,
+    heightOutOfRange: (height: number, min: number, max: number) => `Yükseklik aralığın dışında: ${height} cm (${min}–${max} cm)`,
+    invalidQuantity: "Geçersiz adet.",
+  },
 };
 
 export type Dictionary = typeof trMessages;
@@ -713,5 +722,13 @@ export const en: Dictionary = {
     finish: "Finish",
     frame: "Frame",
     height: "Height",
+  },
+  selection: {
+    noOptions: "This product has no options to choose.",
+    unsupported: (axis) => `${axis} isn't available for this product.`,
+    notChosen: (axis) => `Please choose a ${axis.toLowerCase()}.`,
+    invalid: (axis, value) => `Invalid ${axis.toLowerCase()}: ${value}`,
+    heightOutOfRange: (height, min, max) => `Height out of range: ${height} cm (${min}–${max} cm)`,
+    invalidQuantity: "Invalid quantity.",
   },
 };

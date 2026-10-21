@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import type { ConfiguredOptions, Product } from "@/types";
 import { calculatePrice, pickOptions, sameConfiguration, validateSelection } from "@/lib/price";
 import { allProducts } from "@/data/products";
+import { contentLocale } from "@/i18n/locale";
+import { en, tr } from "@/i18n/messages";
 
 export interface CartLine {
   product: Product;
@@ -104,7 +106,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     l.product.id === productId && sameConfiguration(l.selection, selection);
 
   const addItem: CartContextValue["addItem"] = (product, quantity = 1, selection) => {
-    if (!isPositiveInt(quantity)) return { ok: false, errors: ["Geçersiz adet."] };
+    if (!isPositiveInt(quantity)) return { ok: false, errors: [(contentLocale() === "en" ? en : tr).selection.invalidQuantity] };
     const { options, errors } = validateSelection(product, selection);
     if (errors.length > 0) return { ok: false, errors };
 

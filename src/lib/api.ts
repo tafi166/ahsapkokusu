@@ -12,6 +12,7 @@ import { allProducts } from "@/data/products";
 import { validateContact, validateDetails, type ContactDetails, type QuoteDetails } from "@/lib/cncQuote";
 import type { Product } from "@/types";
 import { tr, type Dictionary } from "@/i18n/messages";
+import { contentLocale } from "@/i18n/locale";
 
 /** Shown by the forms that are still mocks (contact, free-text design request) — nothing is sent or stored. */
 export const PROTOTYPE_NOTICE = tr.api.prototypeNotice;
@@ -71,7 +72,13 @@ export const api = {
 
     let res: Response;
     try {
-      res = await fetch("/api/quotes", { method: "POST", body: form, credentials: "same-origin" });
+      res = await fetch("/api/quotes", {
+        method: "POST",
+        body: form,
+        credentials: "same-origin",
+        // The server answers errors in this language.
+        headers: { "Accept-Language": contentLocale() },
+      });
     } catch {
       return { ok: false, message: a.quoteUnreachable };
     }
