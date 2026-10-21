@@ -20,7 +20,7 @@ interface SectionConfig {
 // handled separately below), so this table drives the whole tab
 // generically instead of hand-writing ~14 near-identical section blocks —
 // add a field here and it's editable, no new JSX needed.
-const SECTIONS: SectionConfig[] = [
+export const HOME_SECTIONS: SectionConfig[] = [
   {
     key: "hero",
     title: "Hero (Ana Görsel Alanı)",
@@ -182,7 +182,7 @@ export function HomeContentTab() {
         <StringListEditor items={announcements} onChange={setAnnouncements} itemLabel="Duyuru" placeholder="Duyuru metni" />
       </SectionCard>
 
-      {SECTIONS.map((section) => (
+      {HOME_SECTIONS.map((section) => (
         <SectionCard key={section.key} title={section.title}>
           {section.key === "hero" ? (
             <Field label="Hero Görselleri">

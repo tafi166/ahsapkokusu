@@ -9,6 +9,9 @@ import { CompareProvider } from "@/hooks/useCompare";
 import { QuickViewProvider } from "@/hooks/useQuickView";
 import { importToServer } from "@/lib/adminImport";
 import { LEGACY_STORAGE_KEY } from "@/lib/adminStore";
+import { enDefaults } from "@/i18n/content/en";
+import { TRANSLATION_KEYS } from "@/i18n/content/types";
+import { buildBlock, rowValues, TRANSLATION_BLOCKS } from "@/pages/admin/translationRows";
 import { installFakeApi } from "./fakeApi";
 
 function renderAdmin() {
@@ -61,7 +64,7 @@ describe("admin sign-in", () => {
     const user = userEvent.setup();
     const nav = await signIn(user);
     expect(screen.getByText("Ada · Yönetici")).toBeInTheDocument();
-    for (const label of ["Ana Sayfa İçerikleri", "Kategoriler", "Ürünler", "Listeler", "Siparişler", "Teklif Talepleri", "Kullanıcılar", "Yedekle & Sıfırla"]) {
+    for (const label of ["Ana Sayfa İçerikleri", "Kategoriler", "Ürünler", "Listeler", "İngilizce", "Siparişler", "Teklif Talepleri", "Kullanıcılar", "Yedekle & Sıfırla"]) {
       await user.click(within(nav).getByText(label));
       expect(await screen.findByRole("heading", { level: 2, name: label })).toBeInTheDocument();
     }
@@ -170,6 +173,48 @@ describe("moving browser-only edits to the server", () => {
     expect(localStorage.getItem(LEGACY_STORAGE_KEY)).toBeNull();
     expect(screen.queryByRole("button", { name: "Sunucuya Aktar" })).not.toBeInTheDocument();
   });
+});
+
+describe("English tab", () => {
+  it("has a row for every built-in English text, so saving the draft unchanged keeps all of it", () => {
+    expect(TRANSLATION_BLOCKS.map((b) => b.key).sort()).toEqual([...TRANSLATION_KEYS].sort());
+    for (const block of TRANSLATION_BLOCKS) {
+      const rows = block.rows();
+      expect(buildBlock(rows, rowValues(rows, enDefaults[block.key])), block.key).toEqual(enDefaults[block.key]);
+    }
+  });
+
+  it("leaves blank rows out and keeps list positions aligned", () => {
+    const block = TRANSLATION_BLOCKS.find((b) => b.key === "announcementMessages")!;
+    const rows = block.rows();
+    expect(buildBlock(rows, { [JSON.stringify([1])]: "Second" })).toEqual(["", "Second"]);
+  });
+
+  it("shows Turkish next to English and saves the edited block", async () => {
+    const user = userEvent.setup();
+    const nav = await signIn(user);
+    await user.click(within(nav).getByText("İngilizce"));
+    await user.selectOptions(await screen.findByLabelText("Bölüm"), "Ürünler");
+
+    const card = screen.getByRole("heading", { level: 3, name: "Jaguar Parametrik Duvar Tablosu" }).parentElement!;
+    const title = within(card).getByLabelText("Ad · İngilizce");
+    expect(title).toHaveValue("Jaguar Parametric Wall Art");
+    await user.clear(title);
+    await user.type(title, "Jaguar Wall Panel");
+
+    const slug = within(card).getByLabelText("Adres (/en/product/…) · İngilizce");
+    await user.clear(slug);
+    await user.type(slug, "Bad Slug");
+    expect(screen.getByRole("button", { name: "Kaydet" })).toBeDisabled();
+    await user.clear(slug);
+    await user.type(slug, "jaguar-wall-panel");
+
+    await user.click(screen.getByRole("button", { name: "Kaydet" }));
+    expect(await screen.findByRole("status")).toHaveTextContent("Kaydedildi");
+    const saved = api.state.translations["en:products"] as Record<string, { title?: string; slug?: string }>;
+    expect(saved["wa-2"]).toMatchObject({ title: "Jaguar Wall Panel", slug: "jaguar-wall-panel" });
+    expect(saved["wa-1"]?.title).toBe("Parametric Portrait — Silhouette Series");
+  }, 30000);
 });
 
 describe("quote requests tab", () => {

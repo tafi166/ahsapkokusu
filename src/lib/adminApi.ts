@@ -1,5 +1,6 @@
 import type { AdminOverrides } from "@/lib/adminStore";
 import type { Category, Product } from "@/types";
+import type { ContentTranslations, TranslationKey } from "@/i18n/content/types";
 
 /**
  * Client for the API server (`server/`). Requests go to the same origin —
@@ -78,7 +79,7 @@ export function dataUrlToBlob(dataUrl: string): Blob {
   return new Blob([bytes], { type: match[1] });
 }
 
-type ContentKey = Exclude<keyof AdminOverrides, "products" | "categories">;
+type ContentKey = Exclude<keyof AdminOverrides, "products" | "categories" | "translations">;
 
 export type QuoteStatus = "NEW" | "REVIEWING" | "QUOTED" | "CLOSED";
 
@@ -153,6 +154,15 @@ export const adminApi = {
 
   resetContent(key: ContentKey): Promise<void> {
     return request("DELETE", `/api/admin/content/${key}`);
+  },
+
+  saveTranslation<K extends TranslationKey>(locale: "en", key: K, value: NonNullable<ContentTranslations[K]>): Promise<void> {
+    return request("PUT", `/api/admin/translations/${locale}/${key}`, { value });
+  },
+
+  /** Back to the built-in translation of this block. */
+  resetTranslation(locale: "en", key: TranslationKey): Promise<void> {
+    return request("DELETE", `/api/admin/translations/${locale}/${key}`);
   },
 
   saveProducts(products: Product[]): Promise<void> {

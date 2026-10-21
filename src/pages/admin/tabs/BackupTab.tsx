@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { adminApi, CONTENT_KEYS, errorMessage } from "@/lib/adminApi";
+import { TRANSLATION_KEYS } from "@/i18n/content/types";
 import { importToServer, parseBackup, type ImportResult } from "@/lib/adminImport";
 import { clearLegacyBrowserOverrides, loadLegacyBrowserOverrides } from "@/lib/adminStore";
 import { AdminButton, SectionCard } from "@/pages/admin/controls";
@@ -70,9 +71,10 @@ export function BackupTab() {
   }
 
   function handleReset() {
-    if (!window.confirm("Tüm metin içerikleri varsayılana dönsün mü? Ürünler ve kategoriler değişmez.")) return;
+    if (!window.confirm("Tüm metin içerikleri ve İngilizce çeviriler varsayılana dönsün mü? Ürünler ve kategoriler değişmez.")) return;
     void run(async () => {
       for (const key of CONTENT_KEYS) await adminApi.resetContent(key);
+      for (const key of TRANSLATION_KEYS) await adminApi.resetTranslation("en", key);
       return { message: "Metin içerikleri varsayılana döndü. Sitede görmek için sayfayı yenileyin.", error: null };
     });
   }

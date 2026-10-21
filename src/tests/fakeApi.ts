@@ -19,6 +19,8 @@ export function installFakeApi(options: { password?: string; role?: "ADMIN" | "E
   const state = {
     signedIn: false,
     content: {} as Record<string, unknown>,
+    /** By `<locale>:<block>`. */
+    translations: {} as Record<string, unknown>,
     uploads: 0,
     quotes: [] as { id: string; status: string; [key: string]: unknown }[],
     orders: [] as { id: string; status: string; [key: string]: unknown }[],
@@ -61,6 +63,15 @@ export function installFakeApi(options: { password?: string; role?: "ADMIN" | "E
     }
     if (content && method === "DELETE") {
       delete state.content[content[1]];
+      return json(204);
+    }
+    const translation = /^\/api\/admin\/translations\/(\w+)\/(\w+)$/.exec(url);
+    if (translation && method === "PUT") {
+      state.translations[`${translation[1]}:${translation[2]}`] = (body as { value: unknown }).value;
+      return json(204);
+    }
+    if (translation && method === "DELETE") {
+      delete state.translations[`${translation[1]}:${translation[2]}`];
       return json(204);
     }
     if (url === "/api/admin/products" && method === "PUT") {

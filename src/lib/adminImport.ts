@@ -1,5 +1,6 @@
 import { adminApi, CONTENT_KEYS, errorMessage } from "@/lib/adminApi";
 import type { AdminOverrides } from "@/lib/adminStore";
+import { TRANSLATION_KEYS } from "@/i18n/content/types";
 
 export interface ImportResult {
   saved: string[];
@@ -59,6 +60,11 @@ export async function importToServer(overrides: AdminOverrides): Promise<ImportR
       }
       await adminApi.saveContent(key, value as never);
     });
+  }
+  for (const key of TRANSLATION_KEYS) {
+    const value = overrides.translations?.en?.[key];
+    if (value === undefined) continue;
+    await attempt(`translations.en.${key}`, () => adminApi.saveTranslation("en", key, value as never));
   }
   return result;
 }
