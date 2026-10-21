@@ -49,33 +49,26 @@ mouse (or a touchscreen — both are the same pointer gesture to a browser)
 to move between slides, or use the arrow buttons / numbered dots. One
 photo (or none) renders exactly as before — a plain static hero.
 
-Because photos are stored as data URIs in the same localStorage override
-(see below), a product — or the hero — with many large photos can hit
-the browser's storage quota — the panel surfaces
-that as an error on save rather than silently dropping the images.
+Uploaded photos are sent to the API server (`/api/admin/media`) and the
+product/hero keeps only the returned `/api/media/...` URL.
 
-**How it actually persists content, given there's no backend:** every data
-module (`config/brand.ts`, `config/content.ts`, `data/categories.ts`,
-`data/products/index.ts`, `data/testimonials.ts`, `data/trustSignals.ts`,
-`data/blog.ts`, `data/faq.ts`) checks `lib/adminStore.ts`'s localStorage-
-backed override store once at module-load time and uses a saved override
-in place of its hand-written default when one exists. The admin panel
-always edits a live copy of the *already-merged* data, and a "Kaydet"
-always writes the whole object/array back — see the doc comment at the top
-of `lib/adminStore.ts` for why that's simpler and safer than a partial/deep
-merge. Because overrides are read once per page load rather than
-reactively, saving shows a "sayfayı yenileyin" prompt instead of updating
-the live site instantly.
+**How content persists:** the admin panel needs the API server (`server/`)
+and an account on it — sign in with email and password; the session is a
+server-side, HttpOnly cookie. Saves go through `lib/adminApi.ts` to the
+server, which validates them and stores them in PostgreSQL. At start-up
+`main.tsx` fetches `/api/site` and hands it to `lib/adminStore.ts` before
+the app is imported; every data module (`config/brand.ts`,
+`config/content.ts`, `data/categories.ts`, `data/products/index.ts`, ...)
+reads those overrides once when it loads and falls back to its
+hand-written default otherwise. Because overrides are read once per page
+load, saving shows a "sayfayı yenileyin" prompt instead of updating the
+live site instantly. When the API server can't be reached the storefront
+still works on its built-in defaults; only the admin panel needs it.
 
-This means: edits are **per-browser** (localStorage), not synced to other
-visitors or devices, and won't survive the user clearing site data — the
-"Yedekle & Sıfırla" tab's export/import JSON is the way to move edits
-between browsers or hand them to a developer to bake into the next real
-deploy. The `/admin` password gate (`src/pages/admin/adminAuth.ts`) is
-explicitly **not real authentication** — it's a plaintext client-side
-password meant only to stop accidental clicks, documented as such in the
-panel itself. Don't put this route on a public domain without a real auth
-layer in front of it.
+The "Yedekle & Sıfırla" tab exports what the server serves, imports a
+backup through the same validation, resets text blocks to their defaults,
+and moves edits left in a browser by the earlier localStorage-only panel
+to the server (embedded photos are uploaded on the way).
 
 ## Rebrand / customize this project
 
@@ -128,8 +121,8 @@ file formats for digital wall art) lives in `ProductPage.tsx`.
   local state and a mock service layer (`lib/api.ts`) — nothing is
   persisted server-side, there's no real checkout/payment/digital-file
   delivery, and account/login is a labeled placeholder. The `/admin`
-  content panel is subject to the same constraint — see "Admin panel"
-  above — its edits live in that browser's localStorage, not a database.
+  content panel is the exception: it is backed by the API server in
+  `server/` (see "Admin panel" and "API server" below).
 - **SEO is client-side only** (`document.title`/meta/JSON-LD set via a
   hook after mount) since this is a Vite SPA with no server-rendering
   framework. Google's renderer executes JS before indexing, so this is a
@@ -154,8 +147,10 @@ npm run lint       # oxlint
 ## API server (`server/`) — in progress
 
 A NestJS + Prisma + PostgreSQL REST API lives in `server/` with its own
-`package.json`. The storefront does **not** use it yet; it still reads the
-catalog from `src/data`. So far the server serves the catalog read-only
+`package.json`. The storefront loads its catalog and content from it at
+start-up (falling back to `src/data` when it's unreachable) and the admin
+panel saves through it. Run both: `npm run dev` here and `npm run dev` in
+`server/`; Vite proxies `/api` to port 3000. The server serves the catalog
 (`GET /api/health`, `/api/categories[/:slug]`, `/api/products[/:slug]`,
 filters `category`, `featured`, `bestSeller`, `newProduct`) and handles
 admin sign-in and user management.

@@ -1,5 +1,13 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { applyOverride, loadOverrides, mergeShallowNested, resetOverrides, saveOverrides, STORAGE_KEY } from "@/lib/adminStore";
+import {
+  applyOverride,
+  clearLegacyBrowserOverrides,
+  LEGACY_STORAGE_KEY,
+  loadLegacyBrowserOverrides,
+  loadOverrides,
+  mergeShallowNested,
+  setServerOverrides,
+} from "@/lib/adminStore";
 
 describe("mergeShallowNested", () => {
   const base = {
@@ -46,21 +54,35 @@ describe("applyOverride", () => {
   });
 });
 
-describe("admin overrides localStorage round-trip", () => {
+describe("server overrides", () => {
+  it("are what the data modules read, once set at start-up", () => {
+    setServerOverrides({ partnerLogos: ["A", "B"] });
+    expect(loadOverrides()).toEqual({ partnerLogos: ["A", "B"] });
+    setServerOverrides({});
+    expect(loadOverrides()).toEqual({});
+  });
+
+  it("ignore edits left in localStorage by the pre-server admin panel", () => {
+    localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify({ partnerLogos: ["Old"] }));
+    expect(loadOverrides()).toEqual({});
+    localStorage.clear();
+  });
+});
+
+describe("legacy browser overrides", () => {
   beforeEach(() => {
     localStorage.clear();
   });
 
-  it("returns {} when nothing is stored, and survives corrupted JSON instead of throwing", () => {
-    expect(loadOverrides()).toEqual({});
-    localStorage.setItem(STORAGE_KEY, "{not valid json");
-    expect(loadOverrides()).toEqual({});
-  });
-
-  it("round-trips a save through loadOverrides, and resetOverrides clears it", () => {
-    saveOverrides({ partnerLogos: ["A", "B"] });
-    expect(loadOverrides().partnerLogos).toEqual(["A", "B"]);
-    resetOverrides();
-    expect(loadOverrides()).toEqual({});
+  it("are readable for migration, tolerating missing or corrupted data", () => {
+    expect(loadLegacyBrowserOverrides()).toBeNull();
+    localStorage.setItem(LEGACY_STORAGE_KEY, "{not valid json");
+    expect(loadLegacyBrowserOverrides()).toBeNull();
+    localStorage.setItem(LEGACY_STORAGE_KEY, "[1,2]");
+    expect(loadLegacyBrowserOverrides()).toBeNull();
+    localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify({ partnerLogos: ["A"] }));
+    expect(loadLegacyBrowserOverrides()).toEqual({ partnerLogos: ["A"] });
+    clearLegacyBrowserOverrides();
+    expect(loadLegacyBrowserOverrides()).toBeNull();
   });
 });

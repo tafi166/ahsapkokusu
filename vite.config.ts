@@ -17,5 +17,10 @@ export default defineConfig({
     // resolves localhost -> 127.0.0.1 gets ERR_CONNECTION_REFUSED even
     // though the dev server is running.
     host: true,
+    // The API server (server/, `npm run dev` there) answers /api on the same origin,
+    // so the admin session cookie stays first-party.
+    proxy: {
+      '/api': 'http://localhost:3000',
+    },
   },
 })

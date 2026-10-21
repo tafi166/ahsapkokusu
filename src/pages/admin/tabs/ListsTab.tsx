@@ -3,7 +3,8 @@ import { testimonials as currentTestimonials } from "@/data/testimonials";
 import { trustSignals as currentTrustSignals, partnerLogos as currentPartnerLogos } from "@/data/trustSignals";
 import { blogPosts as currentBlogPosts } from "@/data/blog";
 import { productFaq as currentProductFaq } from "@/data/faq";
-import { patchOverrides } from "@/lib/adminStore";
+import { adminApi } from "@/lib/adminApi";
+import { runSave } from "@/pages/admin/saving";
 import type { BlogPost, FaqItem, Testimonial, TrustSignal } from "@/types";
 import { AdminButton, ColorInput, Field, SavedBanner, SectionCard, StringListEditor, TextArea, TextInput } from "@/pages/admin/controls";
 
@@ -55,6 +56,7 @@ export function ListsTab() {
 function TestimonialsEditor() {
   const [items, setItems] = useState<Testimonial[]>(() => structuredClone(currentTestimonials));
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   function update(i: number, patch: Partial<Testimonial>) {
     setItems((prev) => prev.map((it, idx) => (idx === i ? { ...it, ...patch } : it)));
@@ -102,14 +104,11 @@ function TestimonialsEditor() {
       </AdminButton>
       <div className="flex flex-wrap items-center gap-3 border-t border-black/10 pt-4">
         <AdminButton
-          onClick={() => {
-            patchOverrides({ testimonials: items });
-            setSaved(true);
-          }}
+          onClick={() => void runSave(() => adminApi.saveContent("testimonials", items), setSaved, setSaveError)}
         >
           Kaydet
         </AdminButton>
-        <SavedBanner show={saved} onReload={() => window.location.reload()} />
+        <SavedBanner show={saved} error={saveError} onReload={() => window.location.reload()} />
       </div>
     </div>
   );
@@ -120,6 +119,7 @@ const ICON_OPTIONS: TrustSignal["icon"][] = ["craft", "shipping", "payments", "r
 function TrustSignalsEditor() {
   const [items, setItems] = useState<TrustSignal[]>(() => structuredClone(currentTrustSignals));
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   function update(i: number, patch: Partial<TrustSignal>) {
     setItems((prev) => prev.map((it, idx) => (idx === i ? { ...it, ...patch } : it)));
@@ -162,14 +162,11 @@ function TrustSignalsEditor() {
       </AdminButton>
       <div className="flex flex-wrap items-center gap-3 border-t border-black/10 pt-4">
         <AdminButton
-          onClick={() => {
-            patchOverrides({ trustSignals: items });
-            setSaved(true);
-          }}
+          onClick={() => void runSave(() => adminApi.saveContent("trustSignals", items), setSaved, setSaveError)}
         >
           Kaydet
         </AdminButton>
-        <SavedBanner show={saved} onReload={() => window.location.reload()} />
+        <SavedBanner show={saved} error={saveError} onReload={() => window.location.reload()} />
       </div>
     </div>
   );
@@ -178,6 +175,7 @@ function TrustSignalsEditor() {
 function PartnerLogosEditor() {
   const [items, setItems] = useState<string[]>(() => [...currentPartnerLogos]);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   return (
     <div className="space-y-4">
@@ -193,14 +191,11 @@ function PartnerLogosEditor() {
       </SectionCard>
       <div className="flex flex-wrap items-center gap-3 border-t border-black/10 pt-4">
         <AdminButton
-          onClick={() => {
-            patchOverrides({ partnerLogos: items.filter((i) => i.trim().length > 0) });
-            setSaved(true);
-          }}
+          onClick={() => void runSave(() => adminApi.saveContent("partnerLogos", items.filter((i) => i.trim().length > 0)), setSaved, setSaveError)}
         >
           Kaydet
         </AdminButton>
-        <SavedBanner show={saved} onReload={() => window.location.reload()} />
+        <SavedBanner show={saved} error={saveError} onReload={() => window.location.reload()} />
       </div>
     </div>
   );
@@ -209,6 +204,7 @@ function PartnerLogosEditor() {
 function BlogPostsEditor() {
   const [items, setItems] = useState<BlogPost[]>(() => structuredClone(currentBlogPosts));
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   function update(i: number, patch: Partial<BlogPost>) {
     setItems((prev) => prev.map((it, idx) => (idx === i ? { ...it, ...patch } : it)));
@@ -253,14 +249,11 @@ function BlogPostsEditor() {
       </AdminButton>
       <div className="flex flex-wrap items-center gap-3 border-t border-black/10 pt-4">
         <AdminButton
-          onClick={() => {
-            patchOverrides({ blogPosts: items });
-            setSaved(true);
-          }}
+          onClick={() => void runSave(() => adminApi.saveContent("blogPosts", items), setSaved, setSaveError)}
         >
           Kaydet
         </AdminButton>
-        <SavedBanner show={saved} onReload={() => window.location.reload()} />
+        <SavedBanner show={saved} error={saveError} onReload={() => window.location.reload()} />
       </div>
     </div>
   );
@@ -269,6 +262,7 @@ function BlogPostsEditor() {
 function ProductFaqEditor() {
   const [items, setItems] = useState<FaqItem[]>(() => structuredClone(currentProductFaq));
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   function update(i: number, patch: Partial<FaqItem>) {
     setItems((prev) => prev.map((it, idx) => (idx === i ? { ...it, ...patch } : it)));
@@ -295,14 +289,11 @@ function ProductFaqEditor() {
       </AdminButton>
       <div className="flex flex-wrap items-center gap-3 border-t border-black/10 pt-4">
         <AdminButton
-          onClick={() => {
-            patchOverrides({ productFaq: items });
-            setSaved(true);
-          }}
+          onClick={() => void runSave(() => adminApi.saveContent("productFaq", items), setSaved, setSaveError)}
         >
           Kaydet
         </AdminButton>
-        <SavedBanner show={saved} onReload={() => window.location.reload()} />
+        <SavedBanner show={saved} error={saveError} onReload={() => window.location.reload()} />
       </div>
     </div>
   );

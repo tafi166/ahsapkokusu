@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { allProducts as currentProducts } from "@/data/products";
 import { categories } from "@/data/categories";
-import { patchOverrides } from "@/lib/adminStore";
+import { adminApi } from "@/lib/adminApi";
+import { runSave } from "@/pages/admin/saving";
 import { ProductMedia } from "@/lib/placeholder";
 import type { Availability, Product, ProductDeliveryType, ProductType } from "@/types";
 import { AdminButton, Checkbox, Field, ImageGalleryField, SavedBanner, SectionCard, TextArea, TextInput } from "@/pages/admin/controls";
@@ -104,9 +105,7 @@ export function ProductsTab() {
   }
 
   function handleSaveAll() {
-    const { ok } = patchOverrides({ products });
-    setSaved(ok);
-    setSaveError(ok ? null : "Kaydedilemedi — tarayıcı depolama alanı dolu olabilir. Bazı ürün görsellerini kaldırıp tekrar deneyin.");
+    void runSave(() => adminApi.saveProducts(products), setSaved, setSaveError);
   }
 
   function setDraftImages(nextImages: string[]) {
@@ -204,7 +203,7 @@ export function ProductsTab() {
 
           <div className="flex flex-wrap items-center gap-3 border-t border-black/10 pt-4">
             <AdminButton onClick={handleSaveAll}>Tüm Değişiklikleri Kaydet</AdminButton>
-            <SavedBanner show={saved} onReload={() => window.location.reload()} />
+            <SavedBanner show={saved} error={saveError} onReload={() => window.location.reload()} />
             {saveError ? <p className="text-sm text-red-600">{saveError}</p> : null}
           </div>
         </>

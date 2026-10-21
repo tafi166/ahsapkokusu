@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { announcementMessages as currentAnnouncementMessages, homeContent as currentHomeContent, type HomeContent } from "@/config/content";
-import { patchOverrides } from "@/lib/adminStore";
+import { adminApi } from "@/lib/adminApi";
+import { runSave } from "@/pages/admin/saving";
 import { AdminButton, Field, ImageGalleryField, SavedBanner, SectionCard, StringListEditor, TextArea, TextInput } from "@/pages/admin/controls";
 
 type FieldKind = "text" | "textarea";
@@ -157,12 +158,17 @@ export function HomeContentTab() {
   const heroImages = (form.hero?.images as string[] | undefined) ?? [];
 
   function handleSave() {
-    const { ok } = patchOverrides({
-      homeContent: form as unknown as HomeContent,
-      announcementMessages: announcements.filter((a) => a.trim().length > 0),
-    });
-    setSaved(ok);
-    setSaveError(ok ? null : "Kaydedilemedi — tarayıcı depolama alanı dolu olabilir (hero görseli büyükse özellikle).");
+    void runSave(
+      async () => {
+        await adminApi.saveContent("homeContent", form as unknown as HomeContent);
+        await adminApi.saveContent(
+          "announcementMessages",
+          announcements.filter((a) => a.trim().length > 0),
+        );
+      },
+      setSaved,
+      setSaveError,
+    );
   }
 
   return (
@@ -211,7 +217,7 @@ export function HomeContentTab() {
 
       <div className="flex flex-wrap items-center gap-3 border-t border-black/10 pt-4">
         <AdminButton onClick={handleSave}>Kaydet</AdminButton>
-        <SavedBanner show={saved} onReload={() => window.location.reload()} />
+        <SavedBanner show={saved} error={saveError} onReload={() => window.location.reload()} />
         {saveError ? <p className="text-sm text-red-600">{saveError}</p> : null}
       </div>
     </div>

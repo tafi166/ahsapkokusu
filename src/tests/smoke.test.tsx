@@ -9,8 +9,6 @@ import { QuickViewProvider } from "@/hooks/useQuickView";
 import { brand } from "@/config/brand";
 import { homeContent } from "@/config/content";
 import { categories } from "@/data/categories";
-import { ADMIN_PASSWORD } from "@/pages/admin/adminAuth";
-import { loadOverrides } from "@/lib/adminStore";
 
 function renderAt(path: string) {
   return render(
@@ -179,114 +177,5 @@ describe("routing smoke test — every nav/footer destination renders without th
     // The sold-out filter from the previous category must not have carried over.
     expect(screen.queryByText(/eşleşen ürün bulunamadı/i)).not.toBeInTheDocument();
     expect(screen.getByText("Minimal Çizgisel Duvar Saati — Mono")).toBeInTheDocument();
-  });
-
-  describe("admin content panel (/admin)", () => {
-    it("blocks access behind a password gate and rejects a wrong password", async () => {
-      const { default: userEvent } = await import("@testing-library/user-event");
-      const user = userEvent.setup();
-      renderAt("/admin");
-
-      expect(screen.getByRole("heading", { name: "Yönetim Paneli" })).toBeInTheDocument();
-      await user.type(screen.getByLabelText(/şifre/i), "yanlis-sifre");
-      await user.click(screen.getByRole("button", { name: /giriş yap/i }));
-
-      expect(screen.getByText(/şifre yanlış/i)).toBeInTheDocument();
-      // Still gated — the tab navigation must not have rendered.
-      expect(screen.queryByRole("button", { name: "Ürünler" })).not.toBeInTheDocument();
-    });
-
-    it("logs in with the correct password and can switch between every tab without throwing", async () => {
-      const { default: userEvent } = await import("@testing-library/user-event");
-      const user = userEvent.setup();
-      renderAt("/admin");
-
-      await user.type(screen.getByLabelText(/şifre/i), ADMIN_PASSWORD);
-      await user.click(screen.getByRole("button", { name: /giriş yap/i }));
-
-      const nav = screen.getByRole("navigation", { name: "Yönetim Paneli Bölümleri" });
-      expect(within(nav).getByText("Marka & İletişim")).toBeInTheDocument();
-
-      for (const label of ["Ana Sayfa İçerikleri", "Kategoriler", "Ürünler", "Listeler", "Yedekle & Sıfırla"]) {
-        await user.click(within(nav).getByText(label));
-        expect(await screen.findByRole("heading", { level: 2, name: label })).toBeInTheDocument();
-      }
-    });
-
-    it("editing the brand name and saving persists an override that later page loads would pick up", async () => {
-      const { default: userEvent } = await import("@testing-library/user-event");
-      const user = userEvent.setup();
-      renderAt("/admin");
-
-      await user.type(screen.getByLabelText(/şifre/i), ADMIN_PASSWORD);
-      await user.click(screen.getByRole("button", { name: /giriş yap/i }));
-
-      expect(loadOverrides().brand).toBeUndefined();
-
-      const nameField = screen.getByLabelText("Marka Adı");
-      await user.clear(nameField);
-      await user.type(nameField, "Yeni Marka Adı");
-      await user.click(screen.getByRole("button", { name: "Kaydet" }));
-
-      expect(await screen.findByRole("status")).toHaveTextContent(/kaydedildi/i);
-      expect(loadOverrides().brand?.name).toBe("Yeni Marka Adı");
-    });
-
-    it("adding a new product from the Ürünler tab and saving persists it in the products override", async () => {
-      const { default: userEvent } = await import("@testing-library/user-event");
-      const user = userEvent.setup();
-      renderAt("/admin");
-
-      await user.type(screen.getByLabelText(/şifre/i), ADMIN_PASSWORD);
-      await user.click(screen.getByRole("button", { name: /giriş yap/i }));
-      await user.click(within(screen.getByRole("navigation", { name: "Yönetim Paneli Bölümleri" })).getByText("Ürünler"));
-
-      await user.click(screen.getByRole("button", { name: "+ Yeni Ürün" }));
-      await user.type(screen.getByLabelText("Başlık"), "Test Ürünü");
-      await user.click(screen.getByRole("button", { name: "Ürünü Uygula" }));
-
-      expect(screen.getByText("Test Ürünü")).toBeInTheDocument();
-
-      await user.click(screen.getByRole("button", { name: "Tüm Değişiklikleri Kaydet" }));
-      expect(await screen.findByRole("status")).toHaveTextContent(/kaydedildi/i);
-      expect(loadOverrides().products?.some((p) => p.title === "Test Ürünü")).toBe(true);
-    });
-
-    it("offers a file picker for uploading product photos from the computer", async () => {
-      const { default: userEvent } = await import("@testing-library/user-event");
-      const user = userEvent.setup();
-      renderAt("/admin");
-
-      await user.type(screen.getByLabelText(/şifre/i), ADMIN_PASSWORD);
-      await user.click(screen.getByRole("button", { name: /giriş yap/i }));
-      await user.click(within(screen.getByRole("navigation", { name: "Yönetim Paneli Bölümleri" })).getByText("Ürünler"));
-      await user.click(screen.getByRole("button", { name: "+ Yeni Ürün" }));
-
-      const fileInput = screen.getByLabelText(/fotoğraf ekle/i);
-      expect(fileInput).toHaveAttribute("type", "file");
-      expect(fileInput).toHaveAttribute("accept", "image/*");
-      expect(fileInput).toHaveAttribute("multiple");
-    });
-
-    it("offers a multi-photo gallery picker for the homepage hero on the Ana Sayfa tab", async () => {
-      const { default: userEvent } = await import("@testing-library/user-event");
-      const user = userEvent.setup();
-      renderAt("/admin");
-
-      await user.type(screen.getByLabelText(/şifre/i), ADMIN_PASSWORD);
-      await user.click(screen.getByRole("button", { name: /giriş yap/i }));
-      await user.click(within(screen.getByRole("navigation", { name: "Yönetim Paneli Bölümleri" })).getByText("Ana Sayfa İçerikleri"));
-
-      expect(screen.getByText("Hero Görselleri")).toBeInTheDocument();
-      const fileInputs = screen.getAllByLabelText(/fotoğraf ekle/i);
-      expect(fileInputs.length).toBeGreaterThan(0);
-      for (const input of fileInputs) {
-        expect(input).toHaveAttribute("type", "file");
-        expect(input).toHaveAttribute("accept", "image/*");
-        expect(input).toHaveAttribute("multiple");
-      }
-      // No images uploaded yet, so there is nothing to reorder/remove.
-      expect(screen.getByText(/henüz fotoğraf eklenmedi/i)).toBeInTheDocument();
-    });
   });
 });

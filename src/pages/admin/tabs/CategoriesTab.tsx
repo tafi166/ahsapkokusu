@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { categories as currentCategories } from "@/data/categories";
-import { patchOverrides } from "@/lib/adminStore";
+import { adminApi } from "@/lib/adminApi";
+import { runSave } from "@/pages/admin/saving";
 import type { Category } from "@/types";
 import { AdminButton, ColorInput, Field, SavedBanner, SectionCard, TextArea, TextInput } from "@/pages/admin/controls";
 
@@ -16,6 +17,7 @@ export function CategoriesTab() {
   const [form, setForm] = useState<Category[]>(() => structuredClone(currentCategories));
   const [activeSlug, setActiveSlug] = useState(form[0]?.slug);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const activeIndex = form.findIndex((c) => c.slug === activeSlug);
   const active = form[activeIndex];
@@ -26,8 +28,7 @@ export function CategoriesTab() {
   }
 
   function handleSave() {
-    patchOverrides({ categories: form });
-    setSaved(true);
+    void runSave(() => adminApi.saveCategories(form), setSaved, setSaveError);
   }
 
   if (!active) return null;
@@ -125,7 +126,7 @@ export function CategoriesTab() {
 
       <div className="flex flex-wrap items-center gap-3 border-t border-black/10 pt-4">
         <AdminButton onClick={handleSave}>Kaydet</AdminButton>
-        <SavedBanner show={saved} onReload={() => window.location.reload()} />
+        <SavedBanner show={saved} error={saveError} onReload={() => window.location.reload()} />
       </div>
     </div>
   );

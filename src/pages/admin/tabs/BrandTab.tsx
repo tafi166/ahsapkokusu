@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { brand as currentBrand, type Brand } from "@/config/brand";
-import { patchOverrides } from "@/lib/adminStore";
+import { adminApi } from "@/lib/adminApi";
+import { runSave } from "@/pages/admin/saving";
 import { AdminButton, Field, SavedBanner, SectionCard, TextArea, TextInput } from "@/pages/admin/controls";
 
 export function BrandTab() {
   const [form, setForm] = useState<Brand>(() => structuredClone(currentBrand));
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   function set<K extends keyof Brand>(key: K, value: Brand[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -22,8 +24,11 @@ export function BrandTab() {
 
   function handleSave() {
     // copyrightYear is always computed fresh, never frozen by a saved override.
-    patchOverrides({ brand: { ...form, copyrightYear: new Date().getFullYear() } });
-    setSaved(true);
+    void runSave(
+      () => adminApi.saveContent("brand", { ...form, copyrightYear: new Date().getFullYear() }),
+      setSaved,
+      setSaveError,
+    );
   }
 
   return (
@@ -80,7 +85,7 @@ export function BrandTab() {
 
       <div className="flex flex-wrap items-center gap-3 border-t border-black/10 pt-4">
         <AdminButton onClick={handleSave}>Kaydet</AdminButton>
-        <SavedBanner show={saved} onReload={() => window.location.reload()} />
+        <SavedBanner show={saved} error={saveError} onReload={() => window.location.reload()} />
       </div>
     </div>
   );

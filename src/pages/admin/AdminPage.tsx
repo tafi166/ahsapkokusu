@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { brand } from "@/config/brand";
-import { adminLogout, isAdminAuthed } from "@/pages/admin/adminAuth";
 import { AdminLoginGate } from "@/pages/admin/AdminLoginGate";
+import { useAdminSession } from "@/pages/admin/useAdminSession";
 import { AdminButton } from "@/pages/admin/controls";
 import { BrandTab } from "@/pages/admin/tabs/BrandTab";
 import { HomeContentTab } from "@/pages/admin/tabs/HomeContentTab";
@@ -25,15 +25,22 @@ type TabId = (typeof TABS)[number]["id"];
 /**
  * Content admin panel at `/admin` — outside the normal `<Layout>` (no
  * storefront header/footer/cart, this is a tool, not a page). See
- * `lib/adminStore.ts` for how edits are persisted and picked back up by
- * the rest of the site, and `README.md` for the full explanation of why
- * this is browser-local instead of server-backed.
+ * `lib/adminApi.ts` for how edits reach the API server and
+ * `lib/adminStore.ts` for how the site picks them back up. Access needs a
+ * server-side session; the API checks the role on every request.
  */
 export function AdminPage() {
-  const [authed, setAuthed] = useState(isAdminAuthed());
+  const { session, login, logout } = useAdminSession();
   const [tab, setTab] = useState<TabId>("brand");
 
-  if (!authed) return <AdminLoginGate onSuccess={() => setAuthed(true)} />;
+  if (session.status === "loading") {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#f4f4f4] text-sm text-black/50" role="status">
+        Oturum kontrol ediliyor…
+      </div>
+    );
+  }
+  if (session.status === "signed-out") return <AdminLoginGate onLogin={login} initialError={session.error} />;
 
   return (
     <div className="min-h-screen bg-[#f4f4f4] text-[#1c1c1c]">
@@ -43,15 +50,15 @@ export function AdminPage() {
           <h1 className="text-base font-semibold">{brand.name}</h1>
         </div>
         <div className="flex items-center gap-3">
+          <span className="text-sm text-black/60">
+            {session.user.name} · {session.user.role === "ADMIN" ? "Yönetici" : "Editör"}
+          </span>
           <Link to="/" className="text-sm underline">
             ← Siteye Dön
           </Link>
           <AdminButton
             variant="outline"
-            onClick={() => {
-              adminLogout();
-              setAuthed(false);
-            }}
+            onClick={() => void logout()}
           >
             Çıkış Yap
           </AdminButton>

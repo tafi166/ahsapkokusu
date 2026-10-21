@@ -1,5 +1,6 @@
 import { useState, type InputHTMLAttributes, type ReactNode, type TextareaHTMLAttributes } from "react";
 import { cn } from "@/lib/cn";
+import { adminApi } from "@/lib/adminApi";
 import { resizeImageFiles } from "@/lib/imageResize";
 import { isRealImageSrc, ProductMedia } from "@/lib/placeholder";
 
@@ -80,7 +81,14 @@ export function AdminButton({
   );
 }
 
-export function SavedBanner({ show, onReload }: { show: boolean; onReload: () => void }) {
+export function SavedBanner({ show, onReload, error }: { show: boolean; onReload: () => void; error?: string | null }) {
+  if (error) {
+    return (
+      <div role="alert" className="rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+        Kaydedilemedi: {error}
+      </div>
+    );
+  }
   if (!show) return null;
   return (
     <div role="status" className="flex flex-wrap items-center gap-3 rounded-md border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-800">
@@ -173,9 +181,12 @@ export function ImageGalleryField({
         setError("Seçilen dosyalar görsel olarak tanınmadı.");
         return;
       }
+      // Each resized photo is uploaded; the product/hero keeps only the returned URL.
+      const urls: string[] = [];
+      for (const dataUrl of dataUrls) urls.push(await adminApi.uploadImage(dataUrl));
       // Replace the placeholder swatch (if that's all there is so far) instead of appending after it.
       const isPlaceholderOnly = !images.some(isRealImageSrc);
-      onChange(isPlaceholderOnly ? dataUrls : [...images, ...dataUrls]);
+      onChange(isPlaceholderOnly ? urls : [...images, ...urls]);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Görsel yüklenemedi.");
     } finally {
@@ -233,7 +244,7 @@ export function ImageGalleryField({
           className="block text-sm"
         />
       </label>
-      {uploading ? <p className="text-sm text-black/50">Fotoğraflar işleniyor…</p> : null}
+      {uploading ? <p className="text-sm text-black/50">Fotoğraflar işleniyor ve yükleniyor…</p> : null}
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
     </div>
   );
