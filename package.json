@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "check": "tsc -b && oxlint && vitest run && npm --prefix server run typecheck && npm --prefix server test"
   },
   "dependencies": {
     "clsx": "^2.1.1",

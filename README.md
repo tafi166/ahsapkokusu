@@ -161,6 +161,7 @@ npm run dev       # http://localhost:5173
 npm run build     # tsc -b && vite build
 npm run test       # vitest run — routing/render/interaction smoke tests
 npm run lint       # oxlint
+npm run check      # everything: storefront + server typecheck, lint and tests (server tests need `npm run db:local` in server/)
 ```
 
 ## API server (`server/`)
