@@ -19,6 +19,7 @@ import {
 } from "@/lib/cncQuote";
 import { cn } from "@/lib/cn";
 import { Field, fieldProps } from "@/components/ui/FormField";
+import { optionLabel } from "@/i18n/content";
 
 const STEP_COUNT = 4;
 
@@ -176,7 +177,7 @@ export function CncQuoteForm() {
           </div>
           <div className="flex gap-2">
             <dt className="text-body/60">{t.quote.request}:</dt>
-            <dd>{t.quote.summary(details.widthCm, details.heightCm, details.material, details.quantity)}</dd>
+            <dd>{t.quote.summary(details.widthCm, details.heightCm, optionLabel(details.material), details.quantity)}</dd>
           </div>
         </dl>
         <Button type="button" variant="secondary" onClick={startOver}>
@@ -315,7 +316,7 @@ export function CncQuoteForm() {
               <option value="">{t.quote.choose}</option>
               {cncQuoteConfig.materials.map((m) => (
                 <option key={m} value={m}>
-                  {m}
+                  {optionLabel(m)}
                 </option>
               ))}
             </select>
@@ -384,7 +385,7 @@ export function CncQuoteForm() {
             </p>
           </ReviewBlock>
           <ReviewBlock title={t.quote.steps[1]!} onEdit={() => goTo(1)}>
-            <p>{t.quote.summary(details.widthCm, details.heightCm, details.material, details.quantity)}</p>
+            <p>{t.quote.summary(details.widthCm, details.heightCm, optionLabel(details.material), details.quantity)}</p>
           </ReviewBlock>
           <ReviewBlock title={t.quote.steps[2]!} onEdit={() => goTo(2)}>
             <p>{contact.name}</p>

@@ -7,6 +7,7 @@ import { ProductMedia } from "@/lib/placeholder";
 import { Button } from "@/components/ui/Button";
 import { calculatePrice, describeOptions } from "@/lib/price";
 import { localePath } from "@/i18n/paths";
+import { optionLabel } from "@/i18n/content";
 
 export function CartDrawer() {
   const { isOpen, closeCart, lines, setQuantity, removeItem, subtotal } = useCart();
@@ -52,7 +53,7 @@ export function CartDrawer() {
                 <ul className="space-y-5">
                   {lines.map(({ product, quantity, selection }) => {
                     const price = calculatePrice(product, selection);
-                    const optionText = describeOptions(selection, t.options);
+                    const optionText = describeOptions(selection, t.options, optionLabel);
                     const legacy = isLegacyLine({ product, quantity, selection });
                     return (
                       <li key={`${product.id}:${optionText.join("|")}`} className="flex gap-4">

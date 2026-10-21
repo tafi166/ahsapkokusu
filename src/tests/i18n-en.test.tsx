@@ -84,7 +84,7 @@ describe("product page and cart in English", () => {
     expect(screen.getByRole("heading", { level: 1, name: "5-Layer Forest Silhouette Multilayer Art" })).toBeInTheDocument();
     expect(screen.getByRole("region", { name: "Price breakdown" })).toHaveTextContent("Base price₺1,980");
     expect(screen.getByText(/don't change the price/)).toBeInTheDocument();
-    expect(screen.getByText("Layers: 3 · Colour: Doğal · Frame: Çerçevesiz")).toBeInTheDocument();
+    expect(screen.getByText("Layers: 3 · Colour: Natural · Frame: No Frame")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Türkçe" })).toHaveAttribute("href", "/urun/5-katmanli-orman-siluet-multilayer-tablo");
 
     await user.click(screen.getByRole("button", { name: "Add to Cart" }));

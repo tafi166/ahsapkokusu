@@ -4,6 +4,7 @@ import { useScrollLock } from "@/hooks/useScrollLock";
 import { Button } from "@/components/ui/Button";
 import type { Availability, CategoryFacetConfig, Subcategory } from "@/types";
 import { useI18n } from "@/i18n/I18nProvider";
+import { optionLabel } from "@/i18n/content";
 
 export type SortOption = "featured" | "newest" | "price-asc" | "price-desc" | "best-selling" | "highest-rated";
 export type PriceBucket = "under-500" | "500-2000" | "over-2000";
@@ -172,6 +173,7 @@ export function FilterDrawer({
                 <CheckboxGroup
                   legend={t.catalog.legend.material}
                   options={availableValues.material}
+                  labels={Object.fromEntries(availableValues.material.map((v) => [v, optionLabel(v)]))}
                   selected={filters.material}
                   onToggle={(v) => onChange({ ...filters, material: toggle(filters.material, v) })}
                 />
@@ -181,6 +183,7 @@ export function FilterDrawer({
                 <CheckboxGroup
                   legend={t.catalog.legend.color}
                   options={availableValues.color}
+                  labels={Object.fromEntries(availableValues.color.map((v) => [v, optionLabel(v)]))}
                   selected={filters.color}
                   onToggle={(v) => onChange({ ...filters, color: toggle(filters.color, v) })}
                 />

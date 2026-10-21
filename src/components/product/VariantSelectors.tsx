@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useI18n } from "@/i18n/I18nProvider";
 import { cn } from "@/lib/cn";
 import type { ProductVariantOptions, VariantSelection } from "@/types";
+import { optionLabel } from "@/i18n/content";
 
 const swatchColor: Record<string, string> = {
   Doğal: "#c9a876",
@@ -29,7 +30,7 @@ function ChipGroup({
     <fieldset>
       <legend className="mb-2 text-sm font-medium">
         {label}
-        {value ? `: ${value}` : ""}
+        {value ? `: ${optionLabel(value)}` : ""}
       </legend>
       <div className="flex flex-wrap gap-2">
         {options.map((opt) => (
@@ -43,7 +44,7 @@ function ChipGroup({
               value === opt ? "border-ink bg-ink text-white" : "border-line hover:border-ink",
             )}
           >
-            {opt}
+            {optionLabel(opt)}
           </button>
         ))}
       </div>
@@ -95,7 +96,7 @@ export function VariantSelectors({
 
       {variants.colors ? (
         <fieldset>
-          <legend className="mb-2 text-sm font-medium">{t.options.color}{color ? `: ${color}` : ""}</legend>
+          <legend className="mb-2 text-sm font-medium">{t.options.color}{color ? `: ${optionLabel(color)}` : ""}</legend>
           <div className="flex flex-wrap gap-3">
             {variants.colors.map((c) => (
               <button
@@ -103,8 +104,8 @@ export function VariantSelectors({
                 type="button"
                 onClick={() => setColor(c)}
                 aria-pressed={color === c}
-                aria-label={c}
-                title={c}
+                aria-label={optionLabel(c)}
+                title={optionLabel(c)}
                 className={cn(
                   "h-9 w-9 rounded-full border-2 transition-transform",
                   color === c ? "scale-110 border-ink" : "border-transparent hover:scale-105",

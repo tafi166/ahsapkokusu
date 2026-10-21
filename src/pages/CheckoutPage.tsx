@@ -10,6 +10,7 @@ import { calculatePrice, describeOptions } from "@/lib/price";
 import { useSeo } from "@/lib/seo";
 import { useI18n } from "@/i18n/I18nProvider";
 import { localePath, productPath } from "@/i18n/paths";
+import { optionLabel } from "@/i18n/content";
 
 const EMPTY_FORM: CheckoutForm = { name: "", email: "", phone: "", line: "", district: "", city: "", postalCode: "", notes: "" };
 
@@ -90,7 +91,7 @@ export function CheckoutPage() {
                 <span>
                   {l.title} × {l.quantity}
                   {describeOptions(l.options).length > 0 ? (
-                    <span className="block text-xs text-body/60">{describeOptions(l.options, t.options).join(" · ")}</span>
+                    <span className="block text-xs text-body/60">{describeOptions(l.options, t.options, optionLabel).join(" · ")}</span>
                   ) : null}
                 </span>
                 <span>{money(l.lineTotal, order.currency)}</span>
@@ -212,7 +213,7 @@ export function CheckoutPage() {
           <ul className="space-y-4">
             {lines.map((l) => {
               const price = calculatePrice(l.product, l.selection);
-              const options = describeOptions(l.selection, t.options);
+              const options = describeOptions(l.selection, t.options, optionLabel);
               return (
                 <li key={`${l.product.id}:${options.join("|")}`} className="flex gap-3 text-sm">
                   <ProductMedia src={l.product.thumbnail} className="h-14 w-14 shrink-0 rounded-card" />

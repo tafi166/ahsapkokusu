@@ -1,6 +1,7 @@
 import { calculatePrice, describeOptions, validateSelection } from "@/lib/price";
 import { useI18n } from "@/i18n/I18nProvider";
 import type { Product, VariantSelection } from "@/types";
+import { optionLabel } from "@/i18n/content";
 
 /**
  * Transparent price for the current configuration: base price, any explicit
@@ -24,7 +25,7 @@ export function PriceBreakdown({
   return (
     <section aria-label={t.priceBreakdown.label} className="mt-6 rounded-input bg-paper-soft px-4 py-4 text-sm">
       {options && errors.length === 0 ? (
-        <p className="mb-3 text-body/70">{describeOptions(options, t.options).join(" · ")}</p>
+        <p className="mb-3 text-body/70">{describeOptions(options, t.options, optionLabel).join(" · ")}</p>
       ) : null}
 
       <dl className="space-y-1.5">

@@ -178,9 +178,11 @@ export function formatPrice(value: number, currency: Product["currency"]): strin
 export function describeOptions(
   options: ConfiguredOptions | undefined,
   labels: Record<OptionKey, string> = AXIS_LABEL,
+  /** Display name of a value (e.g. a translated colour); stored values stay as they are. */
+  valueLabel: (value: string | number) => string = String,
 ): string[] {
   if (!options) return [];
   return OPTION_KEYS.filter((k) => options[k] !== undefined).map(
-    (k) => `${labels[k]}: ${options[k]}${k === "height" ? " cm" : ""}`,
+    (k) => `${labels[k]}: ${valueLabel(options[k]!)}${k === "height" ? " cm" : ""}`,
   );
 }

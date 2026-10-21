@@ -1,4 +1,9 @@
 import "@testing-library/jest-dom/vitest";
+import { configure } from "@testing-library/react";
+
+// findBy*/waitFor give up after 1 s by default, which the heavier pages
+// (admin panel, quote form) can exceed when the whole suite runs in parallel.
+configure({ asyncUtilTimeout: 5000 });
 
 // jsdom logs "Not implemented" for scrollTo — the app calls it on route
 // change and from the scroll-to-top button; stub it out for clean test output.

@@ -7,6 +7,7 @@ import { useCompare } from "@/hooks/useCompare";
 import { allProducts } from "@/data/products";
 import { useI18n } from "@/i18n/I18nProvider";
 import { localePath } from "@/i18n/paths";
+import { optionLabel } from "@/i18n/content";
 
 type Product = (typeof allProducts)[number];
 
@@ -17,7 +18,7 @@ export function ComparePage() {
   const dims = t.product.dims;
 
   const rows: { label: string; render: (p: Product) => string }[] = [
-    { label: t.product.material, render: (p) => p.material ?? "—" },
+    { label: t.product.material, render: (p) => (p.material ? optionLabel(p.material) : "—") },
     {
       label: t.product.dimensions,
       render: (p) => {
@@ -30,7 +31,7 @@ export function ComparePage() {
         );
       },
     },
-    { label: t.options.finish, render: (p) => p.finishes?.join(", ") ?? "—" },
+    { label: t.options.finish, render: (p) => p.finishes?.map((f) => optionLabel(f)).join(", ") ?? "—" },
     {
       label: t.product.assembly,
       render: (p) =>
@@ -38,7 +39,7 @@ export function ComparePage() {
           ? `${t.product.assemblyRequired} (${p.assemblyTime ?? t.compare.notSpecified})`
           : t.product.assemblyNotRequired,
     },
-    { label: t.product.productionMethod, render: (p) => p.productionMethod ?? "—" },
+    { label: t.product.productionMethod, render: (p) => (p.productionMethod ? t.product.productionMethods[p.productionMethod] : "—") },
   ];
 
   return (

@@ -1,3 +1,5 @@
+import type { Product } from "@/types";
+
 /**
  * Interface text in Turkish (the source) and English. `en` must have exactly
  * the shape of `tr` — a missing or extra key is a type error. Catalog and
@@ -110,6 +112,12 @@ const trMessages = {
     materialOptions: "Malzeme seçenekleri",
     productionMethod: "Üretim yöntemi",
     difficulty: "Zorluk seviyesi",
+    productionMethods: {
+      "CNC Routing": "CNC frezeleme",
+      "Laser Cutting": "Lazer kesim",
+      "CNC + Hand Finishing": "CNC + el işçiliği",
+    } as Record<NonNullable<Product["productionMethod"]>, string>,
+    difficulties: { Beginner: "Kolay", Intermediate: "Orta", Advanced: "İleri" } as Record<NonNullable<Product["difficulty"]>, string>,
     assembly: "Montaj",
     assemblyRequired: "Gerekli",
     assemblyNotRequired: "Gerekmiyor",
@@ -463,6 +471,8 @@ export const en: Dictionary = {
     materialOptions: "Material options",
     productionMethod: "Production method",
     difficulty: "Difficulty",
+    productionMethods: { "CNC Routing": "CNC routing", "Laser Cutting": "Laser cutting", "CNC + Hand Finishing": "CNC + hand finishing" },
+    difficulties: { Beginner: "Beginner", Intermediate: "Intermediate", Advanced: "Advanced" },
     assembly: "Assembly",
     assemblyRequired: "Required",
     assemblyNotRequired: "Not required",

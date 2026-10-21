@@ -23,6 +23,7 @@ import { useCompare } from "@/hooks/useCompare";
 import { useSeo, productJsonLd, breadcrumbJsonLd } from "@/lib/seo";
 import { cn } from "@/lib/cn";
 import { categoryPath, localePath, productBySegment, productPath } from "@/i18n/paths";
+import { optionLabel } from "@/i18n/content";
 
 function formatDimensions(
   product: Product,
@@ -247,10 +248,10 @@ export function ProductPage() {
             <AccordionSection title={t.product.details}>
               <ul className="space-y-1">
                 {dimensionsText ? <li>{t.product.dimensions}: {dimensionsText}</li> : null}
-                {product.material ? <li>{t.product.material}: {product.material}</li> : null}
-                {product.materials ? <li>{t.product.materialOptions}: {product.materials.join(", ")}</li> : null}
-                {product.productionMethod ? <li>{t.product.productionMethod}: {product.productionMethod}</li> : null}
-                {product.difficulty ? <li>{t.product.difficulty}: {product.difficulty}</li> : null}
+                {product.material ? <li>{t.product.material}: {optionLabel(product.material)}</li> : null}
+                {product.materials ? <li>{t.product.materialOptions}: {product.materials.map((m) => optionLabel(m)).join(", ")}</li> : null}
+                {product.productionMethod ? <li>{t.product.productionMethod}: {t.product.productionMethods[product.productionMethod]}</li> : null}
+                {product.difficulty ? <li>{t.product.difficulty}: {t.product.difficulties[product.difficulty]}</li> : null}
                 {product.assemblyRequired !== undefined ? (
                   <li>
                     {t.product.assembly}:{" "}
