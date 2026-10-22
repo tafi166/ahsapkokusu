@@ -5,7 +5,7 @@ import { Container } from "@/components/ui/Container";
 
 const { partnerLogos: copy } = homeContent;
 
-/** Infinite CSS marquee (pauses entirely for prefers-reduced-motion). */
+/** Infinite CSS marquee (pauses entirely for prefers-reduced-motion); the keyframes are in globals.css. */
 export function PartnerLogos() {
   const prefersReducedMotion = useReducedMotion();
   const track = [...partnerLogos, ...partnerLogos];
@@ -30,13 +30,6 @@ export function PartnerLogos() {
           ))}
         </div>
       </div>
-
-      <style>{`
-        @keyframes marquee {
-          from { transform: translateX(0); }
-          to { transform: translateX(-50%); }
-        }
-      `}</style>
     </section>
   );
 }

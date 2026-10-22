@@ -53,6 +53,12 @@ const schema = z.object({
   /** Uploaded files (images, CNC drawings). Outside any web root; absolute in production. */
   UPLOAD_DIR: z.string().min(1).default('storage'),
   MEDIA_MAX_BYTES: z.coerce.number().int().min(1024).max(50 * 1024 * 1024).default(5 * 1024 * 1024),
+  /**
+   * The storefront build (`dist/`) for this process to serve itself, for hosts
+   * without a configurable web server in front (cPanel "Node.js App"). Unset when
+   * nginx or similar serves the build.
+   */
+  STATIC_DIR: z.string().min(1).optional(),
 });
 
 export type AppConfig = z.infer<typeof schema>;

@@ -45,6 +45,25 @@ is what lets the admin session cookie stay first-party with `SameSite=Strict`.
    that sets its own. Check the Content-Security-Policy in a real browser
    (console) after changes; it hasn't been verified against a live deployment.
 
+## Hosts without a web server config (cPanel "Node.js App")
+
+Shared hosting usually runs one Node app behind Apache/Passenger and gives no
+nginx config. Set `STATIC_DIR` to the absolute path of the storefront `dist/`
+and the API serves the whole site itself, doing what the nginx example does:
+hashed `/assets/*` cached for good, every other page path answered with
+`index.html`, `/sitemap.xml` and `/robots.txt` from the API, and the storefront
+security headers (same CSP as the snippet — checked in Chrome with no
+violations). Requirements on the host:
+
+- Node.js 20 or newer ("Setup Node.js App"), application startup file
+  `dist/main.js`, application root `server/`.
+- PostgreSQL — on the host ("PostgreSQL Databases") or a managed one reachable
+  from it. MySQL won't do.
+- A terminal (SSH or cPanel Terminal) for `npm ci`, `db:deploy`, `db:seed` and
+  `admin:create`; dev dependencies are needed for the last three.
+- HTTPS (AutoSSL / Let's Encrypt) before setting `NODE_ENV=production`.
+- `TRUST_PROXY=loopback` when Apache runs on the same machine (the usual case).
+
 ## Backups
 
 Back up both the database and `UPLOAD_DIR` (uploaded product photos and CNC
@@ -56,7 +75,9 @@ drawings); one without the other leaves broken references.
 - **E-mail**: nothing is sent — no order confirmations, quote notifications or
   password-reset mails. Staff see orders and quotes in the admin panel.
 - **Customer accounts**: none; only staff accounts exist.
-- **Contact, free-text design and newsletter forms** are mocks that say so.
+- **Orders are off by default** (`ORDERS_ENABLED=false`, catalog mode): visitors
+  ask about products through the contact form, which is stored and listed in the
+  admin panel's Messages tab. The newsletter form is hidden.
 - **Business rules not yet defined**: shipping cost, real pricing rules for
   options, confirmed CNC limits (`src/config/cncQuote.ts`), English content.
 - **Unused uploads** (photos replaced in the admin panel) are not cleaned up.
