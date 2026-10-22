@@ -36,6 +36,14 @@ const schema = z.object({
    * file, so this bounds disk use even when many addresses are involved.
    */
   QUOTE_DAILY_LIMIT: z.coerce.number().int().min(1).default(200),
+  /** Contact and custom-design messages accepted across all visitors in any 24 hours. */
+  MESSAGE_DAILY_LIMIT: z.coerce.number().int().min(1).default(500),
+  /**
+   * Whether the storefront takes (test) orders. Off: catalog mode — no cart or
+   * checkout, visitors ask about products through the contact form instead.
+   * There is no payment provider yet, so keep this off on a public site.
+   */
+  ORDERS_ENABLED: bool.default(false),
   /**
    * Which proxies may set X-Forwarded-For (Express "trust proxy"): "loopback" when
    * the web server runs on this machine, its address/subnet otherwise. Rate limits

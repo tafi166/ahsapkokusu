@@ -1,5 +1,10 @@
 import "@testing-library/jest-dom/vitest";
 import { configure } from "@testing-library/react";
+import { setServerOverrides } from "@/lib/adminStore";
+
+// Most tests exercise the cart and checkout, which only exist when the server
+// takes orders; catalog-mode tests switch this off themselves.
+setServerOverrides({ settings: { ordersEnabled: true } });
 
 // findBy*/waitFor give up after 1 s by default, which the heavier pages
 // (admin panel, quote form) can exceed when the whole suite runs in parallel.

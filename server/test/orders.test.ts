@@ -71,7 +71,7 @@ describe('orders API', () => {
 
   beforeAll(async () => {
     prisma = testPrisma();
-    app = await startApp({ PUBLIC_FORM_RATE_LIMIT_PER_MIN: '1000' });
+    app = await startApp({ PUBLIC_FORM_RATE_LIMIT_PER_MIN: '1000', ORDERS_ENABLED: 'true' });
   });
 
   afterAll(async () => {
@@ -161,6 +161,22 @@ describe('orders API', () => {
     await place({ lines: [mlLine], customer }).expect(400);
     const res = await place({ lines: [{ productId: digital.id, quantity: 1 }], customer }).expect(201);
     expect(res.body.address).toBeNull();
+  });
+
+  it('takes no orders in catalog mode (ORDERS_ENABLED=false), and says so in the visitor\'s language', async () => {
+    const catalog = await startApp({ PUBLIC_FORM_RATE_LIMIT_PER_MIN: '1000' });
+    try {
+      const post = () => request(catalog.getHttpServer()).post('/api/orders').set('Origin', ORIGIN);
+      const res = await post().send({ lines: [mlLine], customer, address }).expect(403);
+      expect(res.body.message).toMatch(/sipariş alınmıyor/);
+      const en = await post().set('Accept-Language', 'en').send({ lines: [mlLine], customer, address }).expect(403);
+      expect(en.body.message).toMatch(/not taking online orders/);
+      expect(await prisma.order.count()).toBe(0);
+      const site = await request(catalog.getHttpServer()).get('/api/site').expect(200);
+      expect(site.body.settings).toEqual({ ordersEnabled: false });
+    } finally {
+      await catalog.close();
+    }
   });
 
   it('requires an allowed Origin', async () => {

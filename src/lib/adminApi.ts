@@ -79,9 +79,26 @@ export function dataUrlToBlob(dataUrl: string): Blob {
   return new Blob([bytes], { type: match[1] });
 }
 
-type ContentKey = Exclude<keyof AdminOverrides, "products" | "categories" | "translations">;
+type ContentKey = Exclude<keyof AdminOverrides, "products" | "categories" | "translations" | "settings">;
 
 export type QuoteStatus = "NEW" | "REVIEWING" | "QUOTED" | "CLOSED";
+
+export type MessageStatus = "NEW" | "ANSWERED" | "CLOSED";
+
+/** A message from the contact page, a product's "ask about this" button or the custom-design idea form. */
+export interface ContactMessage {
+  id: string;
+  kind: "CONTACT" | "DESIGN";
+  status: MessageStatus;
+  name: string;
+  email: string;
+  phone: string | null;
+  message: string;
+  productId: string | null;
+  productTitle: string | null;
+  categorySlug: string | null;
+  createdAt: string;
+}
 
 export type OrderStatus = "RECEIVED" | "PROCESSING" | "SHIPPED" | "CANCELLED";
 
@@ -195,6 +212,14 @@ export const adminApi = {
 
   setOrderStatus(id: string, status: OrderStatus): Promise<StaffOrder> {
     return request("PATCH", `/api/admin/orders/${encodeURIComponent(id)}`, { status });
+  },
+
+  listMessages(): Promise<ContactMessage[]> {
+    return request("GET", "/api/admin/messages");
+  },
+
+  setMessageStatus(id: string, status: MessageStatus): Promise<ContactMessage> {
+    return request("PATCH", `/api/admin/messages/${encodeURIComponent(id)}`, { status });
   },
 
   listQuotes(): Promise<QuoteRequest[]> {

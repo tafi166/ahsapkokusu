@@ -7,7 +7,7 @@ import { CartProvider } from "@/hooks/useCart";
 import { WishlistProvider } from "@/hooks/useWishlist";
 import { CompareProvider } from "@/hooks/useCompare";
 import { QuickViewProvider } from "@/hooks/useQuickView";
-import { api, PROTOTYPE_NOTICE } from "@/lib/api";
+import { api } from "@/lib/api";
 import type { ContactDetails, QuoteDetails } from "@/lib/cncQuote";
 
 async function renderAt(path: string) {
@@ -201,13 +201,24 @@ describe("CNC quote submission (prototype)", () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it("the idea form no longer claims the request was received", async () => {
+  it("the idea form sends the request to the server as a design message", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(null, { status: 204 }));
     const user = userEvent.setup();
     await renderAt("/ozel-tasarim");
     await user.type(screen.getByLabelText("Ad Soyad"), "Ada Lovelace");
     await user.type(screen.getByLabelText("E-posta"), "ada@example.com");
     await user.type(screen.getByLabelText("Tasarım Talebiniz"), "Logo panosu");
     await user.click(screen.getByRole("button", { name: /talebi gönder/i }));
-    expect(await screen.findByRole("status")).toHaveTextContent(PROTOTYPE_NOTICE);
+
+    expect(await screen.findByRole("status")).toHaveTextContent("Mesajınız bize ulaştı");
+    const [url, init] = fetchSpy.mock.calls[0]!;
+    expect(url).toBe("/api/messages");
+    expect(JSON.parse(String(init?.body))).toMatchObject({
+      kind: "DESIGN",
+      name: "Ada Lovelace",
+      email: "ada@example.com",
+      message: "Logo panosu",
+      categorySlug: "parametrik-duvar-tablolari",
+    });
   }, 15000);
 });

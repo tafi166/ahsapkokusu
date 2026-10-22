@@ -24,6 +24,7 @@ import { useSeo, productJsonLd, breadcrumbJsonLd } from "@/lib/seo";
 import { cn } from "@/lib/cn";
 import { categoryPath, localePath, productBySegment, productPath } from "@/i18n/paths";
 import { optionLabel } from "@/i18n/content";
+import { ordersEnabled } from "@/config/shop";
 
 function formatDimensions(
   product: Product,
@@ -164,36 +165,45 @@ export function ProductPage() {
             <PriceBreakdown product={product} selection={selection} quantity={quantity} />
           ) : null}
 
-          <div className="mt-8 flex items-center gap-4">
-            {!isDigital ? (
-              <div className="flex items-center gap-3 rounded-full border border-line px-3 py-2">
-                <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} aria-label={t.cart.decrease} disabled={isSoldOut}>
-                  <Minus size={14} />
-                </button>
-                <span className="w-6 text-center">{quantity}</span>
-                <button onClick={() => setQuantity((q) => q + 1)} aria-label={t.cart.increase} disabled={isSoldOut}>
-                  <Plus size={14} />
-                </button>
-              </div>
-            ) : null}
-            <Button
-              size="lg"
-              disabled={!canAddToCart}
-              onClick={() => {
-                const result = addItem(product, quantity, selection);
-                if (!result.ok) {
-                  setAddErrors(result.errors);
-                  return;
-                }
-                setAddErrors([]);
-                setJustAdded(true);
-                setTimeout(() => setJustAdded(false), 1800);
-              }}
-            >
-              {isSoldOut ? t.product.soldOut : justAdded ? t.product.added : isDigital ? t.product.buy : t.product.addToCart}
-            </Button>
-          </div>
-          {!canAddToCart && !isSoldOut ? (
+          {!ordersEnabled() ? (
+            <div className="mt-8">
+              <Button size="lg" href={localePath(`/iletisim?urun=${encodeURIComponent(product.id)}`)}>
+                {t.product.askAbout}
+              </Button>
+              <p className="mt-3 max-w-md text-xs text-body/60">{t.product.catalogNote}</p>
+            </div>
+          ) : (
+            <div className="mt-8 flex items-center gap-4">
+              {!isDigital ? (
+                <div className="flex items-center gap-3 rounded-full border border-line px-3 py-2">
+                  <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} aria-label={t.cart.decrease} disabled={isSoldOut}>
+                    <Minus size={14} />
+                  </button>
+                  <span className="w-6 text-center">{quantity}</span>
+                  <button onClick={() => setQuantity((q) => q + 1)} aria-label={t.cart.increase} disabled={isSoldOut}>
+                    <Plus size={14} />
+                  </button>
+                </div>
+              ) : null}
+              <Button
+                size="lg"
+                disabled={!canAddToCart}
+                onClick={() => {
+                  const result = addItem(product, quantity, selection);
+                  if (!result.ok) {
+                    setAddErrors(result.errors);
+                    return;
+                  }
+                  setAddErrors([]);
+                  setJustAdded(true);
+                  setTimeout(() => setJustAdded(false), 1800);
+                }}
+              >
+                {isSoldOut ? t.product.soldOut : justAdded ? t.product.added : isDigital ? t.product.buy : t.product.addToCart}
+              </Button>
+            </div>
+          )}
+          {ordersEnabled() && !canAddToCart && !isSoldOut ? (
             <p className="mt-2 text-xs text-body/50">{t.product.selectAllOptions}</p>
           ) : null}
           {addErrors.length > 0 ? (

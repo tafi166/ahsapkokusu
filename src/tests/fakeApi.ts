@@ -23,6 +23,7 @@ export function installFakeApi(options: { password?: string; role?: "ADMIN" | "E
     translations: {} as Record<string, unknown>,
     uploads: 0,
     quotes: [] as { id: string; status: string; [key: string]: unknown }[],
+    messages: [] as { id: string; status: string; [key: string]: unknown }[],
     orders: [] as { id: string; status: string; [key: string]: unknown }[],
     users: [] as { id: string; email: string; name: string; role: string; isActive: boolean; createdAt: string }[],
     passwordResets: [] as { id: string; password: string }[],
@@ -108,6 +109,14 @@ export function installFakeApi(options: { password?: string; role?: "ADMIN" | "E
     if (order && method === "PATCH") {
       const found = state.orders.find((o) => o.id === order[1]);
       if (!found) return json(404, { message: "Sipariş bulunamadı." });
+      found.status = (body as { status: string }).status;
+      return json(200, found);
+    }
+    if (url === "/api/admin/messages" && method === "GET") return json(200, state.messages);
+    const message = /^\/api\/admin\/messages\/([\w-]+)$/.exec(url);
+    if (message && method === "PATCH") {
+      const found = state.messages.find((m) => m.id === message[1]);
+      if (!found) return json(404, { message: "Mesaj bulunamadı." });
       found.status = (body as { status: string }).status;
       return json(200, found);
     }

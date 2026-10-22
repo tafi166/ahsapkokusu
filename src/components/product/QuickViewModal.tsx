@@ -10,6 +10,7 @@ import { StarRating } from "@/components/ui/StarRating";
 import { PriceTag } from "@/components/ui/PriceTag";
 import { Button } from "@/components/ui/Button";
 import { productPath } from "@/i18n/paths";
+import { ordersEnabled } from "@/config/shop";
 
 /** Centered modal (distinct from the side drawers) so a product can be previewed without leaving the grid. */
 export function QuickViewModal() {
@@ -58,7 +59,15 @@ export function QuickViewModal() {
               <p className="mt-4 text-sm text-body/70">{product.shortDescription ?? product.description}</p>
 
               <div className="mt-6 flex flex-col gap-3">
-                {product.variants && product.availability !== "sold-out" ? (
+                {!ordersEnabled() ? (
+                  <Link
+                    to={productPath(product)}
+                    onClick={close}
+                    className="inline-flex items-center justify-center rounded-pill border border-btn-bg bg-btn-bg px-8 py-4 font-medium text-btn-text transition-colors hover:bg-btn-bg-hover hover:text-btn-text-hover"
+                  >
+                    {t.product.goToProduct}
+                  </Link>
+                ) : product.variants && product.availability !== "sold-out" ? (
                   // Configurable products are configured on the product page — the cart rejects a line without its options.
                   <Link
                     to={productPath(product)}

@@ -13,6 +13,7 @@ import { SearchOverlay } from "@/components/layout/SearchOverlay";
 import { AnnouncementBar } from "@/components/layout/AnnouncementBar";
 import { useI18n, type Locale } from "@/i18n/I18nProvider";
 import { alternatePath, localePath } from "@/i18n/paths";
+import { ordersEnabled } from "@/config/shop";
 
 /** Links to this page in each language — a full page load, since content is localized when the page loads. */
 function LanguageSwitcher() {
@@ -109,10 +110,12 @@ export function Header() {
               <Link to={localePath("/hesabim")} aria-label={t.header.account} className={cn(iconButton, "hidden sm:inline-flex")}>
                 <User size={19} />
               </Link>
-              <button aria-label={t.header.openCart(itemCount)} className={cn(iconButton, "-mr-2 inline-flex")} onClick={openCart}>
-                <ShoppingBag size={19} />
-                <CountBadge count={itemCount} />
-              </button>
+              {ordersEnabled() ? (
+                <button aria-label={t.header.openCart(itemCount)} className={cn(iconButton, "-mr-2 inline-flex")} onClick={openCart}>
+                  <ShoppingBag size={19} />
+                  <CountBadge count={itemCount} />
+                </button>
+              ) : null}
             </div>
           </div>
 

@@ -11,6 +11,7 @@ import { useSeo } from "@/lib/seo";
 import { useI18n } from "@/i18n/I18nProvider";
 import { localePath, productPath } from "@/i18n/paths";
 import { optionLabel } from "@/i18n/content";
+import { ordersEnabled } from "@/config/shop";
 
 const EMPTY_FORM: CheckoutForm = { name: "", email: "", phone: "", line: "", district: "", city: "", postalCode: "", notes: "" };
 
@@ -29,6 +30,27 @@ function TestOrderNotice() {
  * provider is involved.
  */
 export function CheckoutPage() {
+  return ordersEnabled() ? <OpenCheckout /> : <CheckoutClosed />;
+}
+
+/** Catalog mode: no online orders, so point visitors to the contact form. */
+function CheckoutClosed() {
+  const { t } = useI18n();
+  useSeo({ title: t.checkout.seoTitle, noindex: true });
+  return (
+    <Section containerSize="sm">
+      <div className="mx-auto max-w-xl text-center">
+        <h1>{t.checkout.closedTitle}</h1>
+        <p className="mt-4 text-body/70">{t.checkout.closedBody}</p>
+        <Button href={localePath("/iletisim")} className="mt-6">
+          {t.checkout.closedCta}
+        </Button>
+      </div>
+    </Section>
+  );
+}
+
+function OpenCheckout() {
   const { t, money } = useI18n();
   useSeo({ title: t.checkout.seoTitle, description: t.checkout.seoDescription, noindex: true });
   const { lines, clear } = useCart();

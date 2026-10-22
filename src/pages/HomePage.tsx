@@ -12,6 +12,7 @@ import { FinalCta } from "@/sections/FinalCta";
 import { Newsletter } from "@/sections/Newsletter";
 import { homeContent } from "@/config/content";
 import { featuredProducts, bestSellerProducts, newArrivalProducts } from "@/data/products";
+import { NEWSLETTER_ENABLED } from "@/config/shop";
 
 export function HomePage() {
   return (
@@ -45,7 +46,7 @@ export function HomePage() {
       <Testimonials />
       <BlogPreview />
       <FinalCta />
-      <Newsletter />
+      {NEWSLETTER_ENABLED ? <Newsletter /> : null}
     </>
   );
 }

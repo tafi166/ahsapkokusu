@@ -253,3 +253,39 @@ model OrderLine {
 
   @@index([orderId])
 }
+
+// ---------------------------------------------------------------------------
+// Messages from the contact and custom-design forms
+// ---------------------------------------------------------------------------
+
+enum MessageKind {
+  /** Contact page, or the "ask about this product" button. */
+  CONTACT
+  /** Custom design page, free-text idea. */
+  DESIGN
+}
+
+enum MessageStatus {
+  NEW
+  ANSWERED
+  CLOSED
+}
+
+model ContactMessage {
+  id           String        @id @default(uuid()) @db.Uuid
+  kind         MessageKind
+  status       MessageStatus @default(NEW)
+  name         String
+  email        String
+  phone        String?
+  message      String
+  /// Product the visitor asked about, if any (kept as text: the product may be deleted later).
+  productId    String?
+  productTitle String?
+  /// Category chosen on the custom-design form.
+  categorySlug String?
+  createdAt    DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime      @updatedAt @db.Timestamptz(3)
+
+  @@index([status, createdAt])
+}

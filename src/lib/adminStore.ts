@@ -37,6 +37,8 @@ export interface AdminOverrides {
   productFaq?: FaqItem[];
   /** Saved translations, per language and block; a missing block uses the built-in draft (`i18n/content`). */
   translations?: { en?: ContentTranslations };
+  /** Server settings (read-only here; set in the server's environment). */
+  settings?: { ordersEnabled?: boolean };
 }
 
 let serverOverrides: AdminOverrides = {};

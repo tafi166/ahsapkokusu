@@ -69,7 +69,7 @@ describe("admin sign-in", () => {
     const user = userEvent.setup();
     const nav = await signIn(user);
     expect(screen.getByText("Ada · Yönetici")).toBeInTheDocument();
-    for (const label of ["Ana Sayfa İçerikleri", "Kategoriler", "Ürünler", "Listeler", "İngilizce", "Siparişler", "Teklif Talepleri", "Kullanıcılar", "Yedekle & Sıfırla"]) {
+    for (const label of ["Ana Sayfa İçerikleri", "Kategoriler", "Ürünler", "Listeler", "İngilizce", "Mesajlar", "Siparişler", "Teklif Talepleri", "Kullanıcılar", "Yedekle & Sıfırla"]) {
       await user.click(within(nav).getByText(label));
       expect(await screen.findByRole("heading", { level: 2, name: label })).toBeInTheDocument();
     }
@@ -238,6 +238,34 @@ describe("English tab", () => {
     expect(saved["wa-2"]).toMatchObject({ title: "Jaguar Wall Panel", slug: "jaguar-wall-panel" });
     expect(saved["wa-1"]?.title).toBe("Parametric Portrait — Silhouette Series");
   }, 30000);
+});
+
+describe("messages tab", () => {
+  it("lists messages with the product asked about and changes their status", async () => {
+    api.state.messages.push({
+      id: "7f0c2f1e-0000-4000-8000-000000000001",
+      kind: "CONTACT",
+      status: "NEW",
+      name: "Bob",
+      email: "bob@example.com",
+      phone: null,
+      message: "120 cm olanı var mı?",
+      productId: "ml-2",
+      productTitle: "5 Katmanlı Orman Silüeti Multilayer Tablo",
+      categorySlug: null,
+      createdAt: "2026-10-21T10:00:00.000Z",
+    });
+    const user = userEvent.setup();
+    const nav = await signIn(user);
+    await user.click(within(nav).getByText("Mesajlar"));
+
+    expect(await screen.findByText("120 cm olanı var mı?")).toBeInTheDocument();
+    expect(screen.getByText("5 Katmanlı Orman Silüeti Multilayer Tablo")).toBeInTheDocument();
+    expect(screen.getByText(/1 yeni mesaj var/)).toBeInTheDocument();
+    await user.selectOptions(screen.getByLabelText("Bob mesajının durumu"), "ANSWERED");
+    expect(await screen.findByDisplayValue("Yanıtlandı")).toBeInTheDocument();
+    expect(api.state.messages[0]!.status).toBe("ANSWERED");
+  }, 15000);
 });
 
 describe("quote requests tab", () => {

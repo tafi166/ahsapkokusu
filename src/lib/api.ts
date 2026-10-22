@@ -14,7 +14,7 @@ import type { Product } from "@/types";
 import { tr, type Dictionary } from "@/i18n/messages";
 import { contentLocale } from "@/i18n/locale";
 
-/** Shown by the forms that are still mocks (contact, free-text design request) — nothing is sent or stored. */
+/** Shown by the newsletter form, still a mock — nothing is sent or stored. */
 export const PROTOTYPE_NOTICE = tr.api.prototypeNotice;
 
 export interface CncQuotePayload {
@@ -22,6 +22,17 @@ export interface CncQuotePayload {
   file: File;
   details: QuoteDetails;
   contact: ContactDetails;
+}
+
+export interface MessagePayload {
+  kind: "CONTACT" | "DESIGN";
+  name: string;
+  email: string;
+  phone?: string;
+  message: string;
+  /** The product asked about; the server looks up its name itself. */
+  productId?: string;
+  categorySlug?: string;
 }
 
 export type CncQuoteResult = { ok: true; reference: string } | { ok: false; message: string };
@@ -45,14 +56,30 @@ export const api = {
     return delay({ ok: true, message: a.prototypeNotice });
   },
 
-  async submitContactForm(
-    payload: { name: string; email: string; message: string },
-    a: Dictionary["api"] = tr.api,
-  ): Promise<{ ok: boolean; message: string }> {
-    if (!payload.name.trim() || !payload.email.trim() || !payload.message.trim()) {
-      return delay({ ok: false, message: a.fillAll }, 300);
+  /** Sends a message from the contact page or the custom-design idea form; staff read it in the admin panel. */
+  async sendMessage(payload: MessagePayload, a: Dictionary["api"] = tr.api): Promise<{ ok: boolean; message: string }> {
+    if (!payload.name.trim() || !payload.email.trim() || !payload.message.trim()) return { ok: false, message: a.fillAll };
+    let res: Response;
+    try {
+      res = await fetch("/api/messages", {
+        method: "POST",
+        // The server answers errors in this language.
+        headers: { "Content-Type": "application/json", "Accept-Language": contentLocale() },
+        body: JSON.stringify({ ...payload, phone: payload.phone?.trim() || undefined }),
+        credentials: "same-origin",
+      });
+    } catch {
+      return { ok: false, message: a.messageUnreachable };
     }
-    return delay({ ok: true, message: a.prototypeNotice });
+    if (res.ok) return { ok: true, message: a.messageSent };
+    if (res.status === 429) return { ok: false, message: a.tooMany };
+    try {
+      const data = (await res.json()) as { message?: unknown };
+      if (typeof data.message === "string" && res.status < 500) return { ok: false, message: data.message };
+    } catch {
+      // not JSON
+    }
+    return { ok: false, message: a.messageFailed };
   },
 
   /**

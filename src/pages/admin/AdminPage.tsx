@@ -12,6 +12,7 @@ import { ProductsTab } from "@/pages/admin/tabs/ProductsTab";
 import { ListsTab } from "@/pages/admin/tabs/ListsTab";
 import { TranslationsTab } from "@/pages/admin/tabs/TranslationsTab";
 import { BackupTab } from "@/pages/admin/tabs/BackupTab";
+import { MessagesTab } from "@/pages/admin/tabs/MessagesTab";
 import { OrdersTab } from "@/pages/admin/tabs/OrdersTab";
 import { QuotesTab } from "@/pages/admin/tabs/QuotesTab";
 import { UsersTab } from "@/pages/admin/tabs/UsersTab";
@@ -23,6 +24,7 @@ const TABS = [
   { id: "products", label: "Ürünler" },
   { id: "lists", label: "Listeler" },
   { id: "translations", label: "İngilizce" },
+  { id: "messages", label: "Mesajlar" },
   { id: "orders", label: "Siparişler" },
   { id: "quotes", label: "Teklif Talepleri" },
   { id: "users", label: "Kullanıcılar", adminOnly: true },
@@ -99,6 +101,7 @@ export function AdminPage() {
           {tab === "products" ? <ProductsTab /> : null}
           {tab === "lists" ? <ListsTab /> : null}
           {tab === "translations" ? <TranslationsTab /> : null}
+          {tab === "messages" ? <MessagesTab /> : null}
           {tab === "orders" ? <OrdersTab /> : null}
           {tab === "quotes" ? <QuotesTab /> : null}
           {tab === "users" && session.user.role === "ADMIN" ? <UsersTab currentUserId={session.user.id} /> : null}

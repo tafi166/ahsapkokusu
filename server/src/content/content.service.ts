@@ -3,6 +3,7 @@ import type { Category, Product } from '@/types';
 import { AuditService } from '../audit/audit.service';
 import { categoryToRow, productToRow, rowToCategory, rowToProduct } from '../catalog/mapping';
 import { Prisma } from '../generated/prisma/client';
+import { APP_CONFIG, type AppConfig } from '../config';
 import { PRISMA, type PrismaClient } from '../prisma/prisma';
 import type { ContentTranslations, TranslationKey } from '@/i18n/content/types';
 import { CONTENT_KEYS, contentSchemas, type ContentKey } from './schemas';
@@ -16,6 +17,8 @@ import {
 
 /** What the storefront loads at start-up: every edited block, keyed like its AdminOverrides. */
 export type SiteSnapshot = { categories: Category[]; products: Product[] } & Partial<Record<ContentKey, unknown>> & {
+  /** Server settings the storefront adapts to. */
+  settings: { ordersEnabled: boolean };
   /** Saved translation blocks only; the storefront fills the rest from its built-in draft. */
   translations?: Partial<Record<TranslationLocale, ContentTranslations>>;
 };
@@ -24,6 +27,7 @@ export type SiteSnapshot = { categories: Category[]; products: Product[] } & Par
 export class ContentService {
   constructor(
     @Inject(PRISMA) private readonly prisma: PrismaClient,
+    @Inject(APP_CONFIG) private readonly config: AppConfig,
     private readonly audit: AuditService,
   ) {}
 
@@ -33,7 +37,11 @@ export class ContentService {
       this.prisma.product.findMany({ orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }] }),
       this.prisma.siteContent.findMany(),
     ]);
-    const site: SiteSnapshot = { categories: categories.map(rowToCategory), products: products.map(rowToProduct) };
+    const site: SiteSnapshot = {
+      categories: categories.map(rowToCategory),
+      products: products.map(rowToProduct),
+      settings: { ordersEnabled: this.config.ORDERS_ENABLED },
+    };
     for (const block of blocks) {
       // Re-validate on the way out too, so a bad row can never reach visitors.
       const translation = parseTranslationRowKey(block.key);

@@ -80,7 +80,10 @@ function IdeaForm() {
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setStatus("loading");
-    const result = await api.submitContactForm({ name: form.name, email: form.email, message: form.message }, t.api);
+    const result = await api.sendMessage(
+      { kind: "DESIGN", name: form.name, email: form.email, message: form.message, categorySlug: form.category },
+      t.api,
+    );
     setStatus(result.ok ? "success" : "error");
     setFeedback(result.message);
     if (result.ok) setForm({ name: "", email: "", category: categories[0].slug, message: "" });

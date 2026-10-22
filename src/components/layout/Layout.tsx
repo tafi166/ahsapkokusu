@@ -6,6 +6,7 @@ import { CartDrawer } from "@/components/layout/CartDrawer";
 import { ScrollToTopButton } from "@/components/layout/ScrollToTopButton";
 import { QuickViewModal } from "@/components/product/QuickViewModal";
 import { useI18n } from "@/i18n/I18nProvider";
+import { ordersEnabled } from "@/config/shop";
 
 /** Shared shell for every route: header, footer, cart drawer, quick view, scroll-to-top. */
 export function Layout() {
@@ -30,7 +31,7 @@ export function Layout() {
         <Outlet />
       </main>
       <Footer />
-      <CartDrawer />
+      {ordersEnabled() ? <CartDrawer /> : null}
       <QuickViewModal />
       <ScrollToTopButton />
     </div>
