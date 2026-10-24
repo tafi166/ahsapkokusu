@@ -1,0 +1,2 @@
+# ahsapkokusu
+Yeni oluşturulan depo
