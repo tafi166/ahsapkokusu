@@ -289,3 +289,38 @@ model ContactMessage {
 
   @@index([status, createdAt])
 }
+
+// Private research records; deliberately unrelated to the public Product catalog.
+model ResearchItem {
+  id          String @id @default(uuid()) @db.Uuid
+  title       String
+  sourceUrl   String?
+  notes       String @default("")
+  archived    Boolean @default(false)
+  version     Int @default(1)
+  createdById String @db.Uuid
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+  collections ResearchCollectionItem[]
+  @@index([archived, updatedAt])
+}
+
+model ResearchCollection {
+  id          String @id @default(uuid()) @db.Uuid
+  name        String
+  description String @default("")
+  version     Int @default(1)
+  createdById String @db.Uuid
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+  items       ResearchCollectionItem[]
+}
+
+model ResearchCollectionItem {
+  collectionId String @db.Uuid
+  itemId       String @db.Uuid
+  collection   ResearchCollection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  item         ResearchItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  @@id([collectionId, itemId])
+  @@index([itemId])
+}

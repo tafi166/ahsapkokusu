@@ -1,3 +1,5 @@
+import { ResearchController } from './research/research.controller';
+import { ResearchService } from './research/research.service';
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
@@ -45,6 +47,7 @@ export function createAppModule(config: AppConfig) {
       ]),
     ],
     controllers: [
+      ResearchController,
       HealthController,
       CatalogController,
       SiteController,
@@ -61,6 +64,7 @@ export function createAppModule(config: AppConfig) {
       { provide: APP_CONFIG, useValue: config },
       prismaProvider,
       PrismaLifecycle,
+      ResearchService,
       AuditService,
       AuthService,
       CatalogService,
