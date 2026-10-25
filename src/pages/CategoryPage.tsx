@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, useParams, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Section } from "@/components/ui/Section";
@@ -104,10 +104,12 @@ function CategoryPageView({ categorySlug }: { categorySlug: string }) {
   const [searchParams] = useSearchParams();
   const category = categoryBySegment(categorySlug);
 
-  const [filters, setFilters] = useState<CollectionFilters>(() => {
-    const alt = searchParams.get("alt");
-    return alt ? { ...emptyFilters, subcategory: [alt] } : emptyFilters;
-  });
+  const alt = searchParams.get("alt");
+  const subcategory = alt ? category?.subcategories.find((s) => s.slug === alt) : undefined;
+
+  const [filters, setFilters] = useState<CollectionFilters>(() =>
+    alt ? { ...emptyFilters, subcategory: [alt] } : emptyFilters,
+  );
   const [sort, setSort] = useState<SortOption>("featured");
   const [filterOpen, setFilterOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
@@ -130,6 +132,24 @@ function CategoryPageView({ categorySlug }: { categorySlug: string }) {
     () => sortProducts(baseProducts.filter((p) => matchesFilters(p, filters)), sort),
     [baseProducts, filters, sort],
   );
+
+  // Opening a subcategory (`?alt=`) would otherwise leave its products below the
+  // category banner, so nothing visibly changes: bring them into view and move focus
+  // there. Deferred a frame so it runs after Layout's scroll-to-top on route change.
+  const resultsRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (!subcategory) return;
+    const frame = requestAnimationFrame(() => {
+      const results = resultsRef.current;
+      if (!results) return;
+      const headerHeight = document.querySelector("header")?.getBoundingClientRect().height ?? 0;
+      const top = results.getBoundingClientRect().top + window.scrollY - headerHeight - 16;
+      const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+      window.scrollTo({ top: Math.max(0, top), behavior: reduceMotion ? "auto" : "smooth" });
+      results.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [subcategory]);
 
   const seoTitle = category?.seoTitle ?? category?.title ?? t.catalog.fallbackTitle;
   const seoDescription = category?.seoDescription ?? category?.description;
@@ -183,54 +203,61 @@ function CategoryPageView({ categorySlug }: { categorySlug: string }) {
           <p className="text-sm text-body/70">{category.description}</p>
         </div>
 
-        <FilterSortBar
-          count={filtered.length}
-          sort={sort}
-          onSortChange={handleSortChange}
-          onOpenFilters={() => setFilterOpen(true)}
-          activeFilterCount={activeFilterCount}
-        />
-        <FilterDrawer
-          open={filterOpen}
-          onClose={() => setFilterOpen(false)}
-          facets={category.facets}
-          availableValues={availableValues}
-          filters={filters}
-          onChange={handleFiltersChange}
-        />
+        <section
+          ref={resultsRef}
+          tabIndex={-1}
+          aria-label={subcategory ? t.catalog.subcategoryProducts(subcategory.title) : undefined}
+          className="outline-none"
+        >
+          <FilterSortBar
+            count={filtered.length}
+            sort={sort}
+            onSortChange={handleSortChange}
+            onOpenFilters={() => setFilterOpen(true)}
+            activeFilterCount={activeFilterCount}
+          />
+          <FilterDrawer
+            open={filterOpen}
+            onClose={() => setFilterOpen(false)}
+            facets={category.facets}
+            availableValues={availableValues}
+            filters={filters}
+            onChange={handleFiltersChange}
+          />
 
-        {filtered.length === 0 ? (
-          <div className="py-16 text-center">
-            <p className="text-body/60">{t.catalog.noMatch}</p>
-            <Button variant="outline" className="mt-4" onClick={() => handleFiltersChange(emptyFilters)}>
-              {t.catalog.clearFilters}
-            </Button>
-          </div>
-        ) : (
-          <>
-            <motion.ul
-              key={`${category.slug}-${sort}-${activeFilterCount}`}
-              initial="hidden"
-              animate="visible"
-              variants={staggerContainer(0.06)}
-              className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 lg:grid-cols-4"
-            >
-              {visible.map((product) => (
-                <motion.li key={product.id} variants={fadeUp}>
-                  <ProductCard product={product} />
-                </motion.li>
-              ))}
-            </motion.ul>
+          {filtered.length === 0 ? (
+            <div className="py-16 text-center">
+              <p className="text-body/60">{t.catalog.noMatch}</p>
+              <Button variant="outline" className="mt-4" onClick={() => handleFiltersChange(emptyFilters)}>
+                {t.catalog.clearFilters}
+              </Button>
+            </div>
+          ) : (
+            <>
+              <motion.ul
+                key={`${category.slug}-${sort}-${activeFilterCount}`}
+                initial="hidden"
+                animate="visible"
+                variants={staggerContainer(0.06)}
+                className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 lg:grid-cols-4"
+              >
+                {visible.map((product) => (
+                  <motion.li key={product.id} variants={fadeUp}>
+                    <ProductCard product={product} />
+                  </motion.li>
+                ))}
+              </motion.ul>
 
-            {visibleCount < filtered.length ? (
-              <div className="mt-10 text-center">
-                <Button variant="outline" onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}>
-                  {t.catalog.showMore}
-                </Button>
-              </div>
-            ) : null}
-          </>
-        )}
+              {visibleCount < filtered.length ? (
+                <div className="mt-10 text-center">
+                  <Button variant="outline" onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}>
+                    {t.catalog.showMore}
+                  </Button>
+                </div>
+              ) : null}
+            </>
+          )}
+        </section>
 
         {category.faq.length > 0 ? (
           <div className="mx-auto mt-20 max-w-2xl border-t border-line pt-14">

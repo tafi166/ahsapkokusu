@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import App from "@/App";
 import { CartProvider } from "@/hooks/useCart";
@@ -188,6 +188,33 @@ describe("routing smoke test — every nav/footer destination renders without th
     expect(await screen.findByRole("heading", { level: 1, name: "Duvar Tabloları" })).toBeInTheDocument();
     expect(screen.getByText("Jaguar Parametrik Duvar Tablosu")).toBeInTheDocument();
     expect(screen.queryByText("Parametrik Portre Tablosu — Silüet Serisi")).not.toBeInTheDocument();
+  });
+
+  it("opening a subcategory scrolls to its products and moves focus there", async () => {
+    const { default: userEvent } = await import("@testing-library/user-event");
+    const user = userEvent.setup();
+    const scrollTo = vi.spyOn(window, "scrollTo");
+    renderAt("/");
+
+    const nav = screen.getByRole("navigation", { name: "Ana menü" });
+    await user.hover(within(nav).getByText("Duvar Tabloları").closest("li")!);
+    await user.click(await screen.findByRole("menuitem", { name: "Hayvan Figürleri" }));
+
+    const results = await screen.findByRole("region", { name: "Hayvan Figürleri ürünleri" });
+    await waitFor(() => expect(results).toHaveFocus());
+    // After the route change's reset to the top, a second scroll brings the products into view.
+    expect(scrollTo).toHaveBeenLastCalledWith(expect.objectContaining({ top: expect.any(Number) }));
+    expect(within(results).getByText("Jaguar Parametrik Duvar Tablosu")).toBeInTheDocument();
+    scrollTo.mockRestore();
+  });
+
+  it("opening a category without a subcategory doesn't scroll past its banner", async () => {
+    const scrollTo = vi.spyOn(window, "scrollTo");
+    renderAt("/duvar-tablolari");
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    expect(scrollTo).not.toHaveBeenCalledWith(expect.objectContaining({ behavior: expect.anything() }));
+    expect(screen.queryByRole("region", { name: /ürünleri$/ })).not.toBeInTheDocument();
+    scrollTo.mockRestore();
   });
 
   it("navigating from one category to another resets filters/sort instead of leaking them", async () => {
