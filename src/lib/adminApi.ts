@@ -27,7 +27,7 @@ export class ApiError extends Error {
 
 let csrfToken: string | null = null;
 
-async function request<T>(method: string, url: string, body?: unknown): Promise<T> {
+export async function request<T>(method: string, url: string, body?: unknown): Promise<T> {
   const headers: Record<string, string> = {};
   let payload: BodyInit | undefined;
   if (body instanceof Blob) {

@@ -1,5 +1,6 @@
+import { ResearchStudio } from "@/pages/admin/research/ResearchStudio";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { brand } from "@/config/brand";
 import { AdminLoginGate } from "@/pages/admin/AdminLoginGate";
 import { useAdminSession } from "@/pages/admin/useAdminSession";
@@ -43,6 +44,9 @@ type TabId = (typeof TABS)[number]["id"];
 export function AdminPage() {
   useSeo({ title: "Yönetim Paneli", noindex: true });
   const { session, login, logout } = useAdminSession();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const research = location.pathname.startsWith("/admin/research");
   const [tab, setTab] = useState<TabId>("brand");
 
   if (session.status === "loading") {
@@ -79,12 +83,13 @@ export function AdminPage() {
 
       <div className="mx-auto flex max-w-[1400px] flex-col gap-6 px-4 py-6 md:flex-row md:px-6">
         <nav aria-label="Yönetim Paneli Bölümleri" className="flex shrink-0 flex-row gap-2 overflow-x-auto md:w-56 md:flex-col">
+          {session.user.role === "ADMIN" && <Link to="/admin/research" className="min-h-11 rounded-md bg-warm px-3 py-3 text-sm text-wood-deep" aria-current={research ? "page" : undefined}>Araştırma Stüdyosu</Link>}
           {TABS.filter((t) => !("adminOnly" in t) || session.user.role === "ADMIN").map((t) => (
             <button
               key={t.id}
-              onClick={() => setTab(t.id)}
+              onClick={() => { setTab(t.id); navigate("/admin"); }}
               className={
-                t.id === tab
+                !research && t.id === tab
                   ? "whitespace-nowrap rounded-md bg-black px-3 py-2 text-left text-sm font-medium text-white"
                   : "whitespace-nowrap rounded-md px-3 py-2 text-left text-sm font-medium text-black/70 hover:bg-black/5"
               }
@@ -94,11 +99,12 @@ export function AdminPage() {
           ))}
         </nav>
 
-        <main className="flex-1">
+        <main className="min-w-0 flex-1">
+          {research ? (session.user.role === "ADMIN" ? <ResearchStudio /> : <p role="alert">Bu alan yalnızca yöneticilere açıktır.</p>) : <>
           {tab === "brand" ? <BrandTab /> : null}
           {tab === "home" ? <HomeContentTab /> : null}
           {tab === "categories" ? <CategoriesTab /> : null}
-          {tab === "products" ? <ProductsTab /> : null}
+          {tab === "products" ? <ProductsTab canImport={session.user.role === "ADMIN"} /> : null}
           {tab === "lists" ? <ListsTab /> : null}
           {tab === "translations" ? <TranslationsTab /> : null}
           {tab === "messages" ? <MessagesTab /> : null}
@@ -106,6 +112,7 @@ export function AdminPage() {
           {tab === "quotes" ? <QuotesTab /> : null}
           {tab === "users" && session.user.role === "ADMIN" ? <UsersTab currentUserId={session.user.id} /> : null}
           {tab === "backup" ? <BackupTab /> : null}
+          </>}
         </main>
       </div>
     </div>

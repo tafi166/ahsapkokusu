@@ -1,57 +1,46 @@
-/**
- * Single source of truth for PARAMETRIKSANAT design tokens.
- *
- * Kept in sync with the `@theme` block in styles/globals.css. Tokens are
- * defined here (TypeScript) and mirrored in CSS so component styles and
- * Framer Motion variants share one canonical set of values.
- *
- * Visual direction (approved): white / warm-neutral foundation, controlled
- * black and gold accents, subtle wood-inspired tones, premium editorial feel.
- * Treat the initial palette as a starting point — validate against real
- * product imagery before treating any value as immutable.
- */
+/** Ahşap Kokusu brand palette, mirrored in styles/globals.css. */
 export const tokens = {
   // ---------------------------------------------------------------------------
   // Color
   // ---------------------------------------------------------------------------
   color: {
     // Foundation
-    paper: "#ffffff",        // pure white surface
-    paperSoft: "#f8f8f8",    // off-white panel
-    ink: "#000000",          // black — headings, primary buttons
-    body: "#282828",         // body text
-    line: "#f1f1f1",         // hairlines
-    divider: "#cccccc",      // stronger divider
-    mist: "#f1f1f1",         // placeholder media background
+    paper: "#FFFCF7",
+    paperSoft: "#F6F2EA",
+    ink: "#24231F",
+    body: "#49443C",
+    line: "#E5DDD0",
+    divider: "#A69A8A",
+    mist: "#EDE5D9",
 
     // Brand accent
-    accent: "#ffc400",       // gold
-    accentDeep: "#5c0000",   // maroon — accent hover
+    accent: "#BC8658",
+    accentDeep: "#5A341D",
 
     // Warm-neutral & wood-inspired tones (subtle, editorial)
-    warm: "#f5f1ea",         // warm paper
-    warmSoft: "#eae4d8",     // warm panel
-    woodLight: "#d8c3a5",    // oak
-    wood: "#a67c52",         // walnut
-    woodDeep: "#5c4632",     // deep walnut
+    warm: "#F6F2EA",
+    warmSoft: "#EAE1D3",
+    woodLight: "#D8B38A",
+    wood: "#BC8658",
+    woodDeep: "#5A341D",
 
     // Buttons
-    btnBg: "#000000",
-    btnText: "#ffffff",
-    btnBgHover: "#dfdfdf",
-    btnTextHover: "#000000",
+    btnBg: "#5A341D",
+    btnText: "#FFFFFF",
+    btnBgHover: "#434C2C",
+    btnTextHover: "#FFFFFF",
 
     // Footer
-    footerBg: "#000000",
-    footerInk: "#ffffff",
-    footerLink: "#cfd0d4",
-    footerLinkHover: "#cccccc",
-    footerBorder: "#0e0f15",
+    footerBg: "#24231F",
+    footerInk: "#F6F2EA",
+    footerLink: "#D9CEBE",
+    footerLinkHover: "#FFFFFF",
+    footerBorder: "#504B40",
 
     // Semantic
-    success: "#126e00",
-    danger: "#ec7979",
-    badgeCustom: "#6ea1f5",
+    success: "#626C41",
+    danger: "#AF3838",
+    badgeCustom: "#626C41",
   },
 
   // ---------------------------------------------------------------------------

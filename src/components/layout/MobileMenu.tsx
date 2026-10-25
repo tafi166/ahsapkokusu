@@ -3,7 +3,7 @@ import { ChevronDown, X } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { primaryNav } from "@/config/navigation";
-import { brand } from "@/config/brand";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import { useScrollLock } from "@/hooks/useScrollLock";
 import { useI18n } from "@/i18n/I18nProvider";
 import { alternatePath, localePath } from "@/i18n/paths";
@@ -29,14 +29,16 @@ export function MobileMenu({ open, onClose }: { open: boolean; onClose: () => vo
           />
           <motion.nav
             aria-label={t.header.mobileNav}
-            className="fixed inset-y-0 left-0 z-50 flex w-full max-w-sm flex-col bg-white shadow-2xl xl:hidden"
+            className="fixed inset-y-0 left-0 z-50 flex w-full max-w-sm flex-col bg-paper shadow-2xl xl:hidden"
             initial={{ x: "-100%" }}
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "tween", duration: 0.3, ease: [0.455, 0.03, 0.515, 0.955] }}
           >
             <div className="flex items-center justify-between border-b border-line px-6 py-5">
-              <span className="font-heading text-lg">{brand.name}</span>
+              <Link to={localePath("/")} onClick={onClose} className="brand-home-link rounded-sm">
+                <BrandLogo className="w-[148px]" />
+              </Link>
               <button onClick={onClose} aria-label={t.header.closeMenu} className="p-1">
                 <X size={22} />
               </button>
