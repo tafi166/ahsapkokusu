@@ -1,4 +1,4 @@
-# Product Research Studio — initial private library
+# Product Research Studio — private library and cost scenarios
 
 ## Scope
 
@@ -48,17 +48,43 @@ private research notes. No filesystem storage is added in this phase.
 ## Remaining phases
 
 Official Etsy access and terms verification; private media and purpose-specific
-rights records; permission-checked exports; cost and price comparisons; evidence-
+rights records; permission-checked exports; competitor price comparisons; evidence-
 based AI analysis with budgets; original concepts; private product drafts. None
 is implied to exist in this initial library. Additional credentials must be entered
 securely in environment settings, never chat or repository files.
 
-## Validation at implementation time
+## Manufacturing cost scenarios
 
-Frontend production build and 157 tests passed. The new research migration SQL
-was executed inside a rolled-back transaction on a separate PostgreSQL test
-instance. Full Prisma generation, server typecheck and API integration tests
-remain blocked by HTTP 403 from binaries.prisma.sh; integrity verification was
-not disabled. Six API integration scenarios are committed but not yet executed.
-GitHub API requests also receive Forbidden, so automatic PR creation may need
-restored API access. No production migrations or deployments were run.
+The Maliyet & Kârlılık view stores named, version-checked scenarios independently
+of public products. All computations run on the server with Decimal arithmetic;
+client totals are rejected. Each result records formulaVersion=1. The last 100
+scenarios are listed. No live exchange rate, tax engine or AI estimate is used.
+
+Inputs: production quantity; batch material cost plus a material-only waste
+markup; batch labor and machine minutes multiplied by hourly rates; batch
+finishing and overhead; per-unit packaging and shipping; unit selling price;
+percentage commission, fixed fee and desired contribution margin. Enter all
+amounts in one currency, excluding tax, and assume one unit per order. A currency
+change only changes the unit label, not the numeric amounts.
+
+Unit cost = batch production cost / quantity + packaging + shipping.
+Contribution = sale price * (1 - commission fraction) - fixed fee - unit cost.
+Target price = (unit cost + fixed fee) / (1 - commission fraction - target margin).
+The denominator must be positive. Suggested prices round UP to two decimals;
+other displayed money rounds half up. Full precision is retained until display.
+Contribution is not company net profit. Machine time must be entered by a human.
+
+## Validation
+
+Prisma generation, server typecheck, all eight migrations on the dedicated test
+PostgreSQL, and 174 server tests passed. In this cloud machine native SWC cannot
+materialize its binding in the runtime cache. The checked-in optional
+SWC_USE_WASM=1 test mode runs the same tests with matching @swc/wasm 1.16.18 and
+the same decorator metadata options. Native SWC remains the default elsewhere.
+Codex operates this mode; the tablet owner does not need a local terminal.
+
+No production migration, merge or deployment has been performed.
+
+Touch-enabled Chromium checks passed for login, cost scenario save/reload/edit and
+375/768/1280px document overflow. This is browser emulation, not a physical Android
+device test. Frontend production build and 159 tests passed; lint has existing warnings.

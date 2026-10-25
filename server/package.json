@@ -40,6 +40,7 @@
     "@nestjs/testing": "11.2.7",
     "@swc/cli": "0.8.1",
     "@swc/core": "1.16.18",
+    "@swc/wasm": "1.16.18",
     "@types/cookie-parser": "1.4.10",
     "@types/express": "5.0.6",
     "@types/node": "24.19.2",

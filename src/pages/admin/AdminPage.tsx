@@ -89,7 +89,7 @@ export function AdminPage() {
               key={t.id}
               onClick={() => { setTab(t.id); navigate("/admin"); }}
               className={
-                t.id === tab
+                !research && t.id === tab
                   ? "whitespace-nowrap rounded-md bg-black px-3 py-2 text-left text-sm font-medium text-white"
                   : "whitespace-nowrap rounded-md px-3 py-2 text-left text-sm font-medium text-black/70 hover:bg-black/5"
               }

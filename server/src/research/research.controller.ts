@@ -1,3 +1,4 @@
+import { calculateCost, costInput, costSave, costUpdate } from './costs';
 import { Body, Controller, Get, Inject, NotFoundException, Param, Post, Put, Query, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import type { AuthContext } from '../auth/auth-context';
@@ -45,4 +46,22 @@ export class ResearchController {
     this.enabled(); const { version, ...data } = parseOrThrow(collectionUpdate, body);
     return this.service.saveCollection(auth.userId, data, parseOrThrow(researchId, id), version);
   }
+  @Post('costs/calculate')
+  calculate(@Body() body: unknown) {
+    this.enabled(); return calculateCost(parseOrThrow(costInput, body));
+  }
+  @Get('costs')
+  costs(@Res({ passthrough: true }) res: Response) {
+    this.enabled(); res.setHeader('Cache-Control', 'no-store'); return this.service.costs();
+  }
+  @Post('costs')
+  createCost(@CurrentAuth() auth: AuthContext, @Body() body: unknown) {
+    this.enabled(); return this.service.saveCost(auth.userId, parseOrThrow(costSave, body));
+  }
+  @Put('costs/:id')
+  updateCost(@CurrentAuth() auth: AuthContext, @Param('id') id: string, @Body() body: unknown) {
+    this.enabled(); const { version, ...data } = parseOrThrow(costUpdate, body);
+    return this.service.saveCost(auth.userId, data, parseOrThrow(researchId, id), version);
+  }
+
 }

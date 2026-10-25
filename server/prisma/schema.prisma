@@ -324,3 +324,15 @@ model ResearchCollectionItem {
   @@id([collectionId, itemId])
   @@index([itemId])
 }
+
+model ResearchCostEstimate {
+  id          String @id @default(uuid()) @db.Uuid
+  name        String
+  input       Json
+  result      Json
+  version     Int @default(1)
+  createdById String @db.Uuid
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+  @@index([updatedAt])
+}

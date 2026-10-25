@@ -1,3 +1,4 @@
+import { CostCalculator } from './CostCalculator';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { errorMessage } from '@/lib/adminApi';
@@ -22,6 +23,7 @@ export function ResearchStudio() {
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
   const [refresh, setRefresh] = useState(0);
+  const isCosts = params.get('view') === 'costs';
   const isCollections = params.get('view') === 'collections';
   const q = params.get('q') ?? '';
   const page = Math.max(1, Number(params.get('page')) || 1);
@@ -68,11 +70,12 @@ export function ResearchStudio() {
     {message && <p role="status" className="text-sm text-success">{message}</p>}
     {enabled === false ? <p role="status">Bu ortamda Araştırma Stüdyosu kapalı. Sunucu ortam ayarlarında RESEARCH_ENABLED etkinleştirilmelidir.</p> : enabled === null ? <p role="status">Erişim kontrol ediliyor…</p> : <>
       <div className="flex flex-wrap gap-2" role="group" aria-label="Araştırma bölümleri">
-        <button className={button} aria-pressed={!isCollections} onClick={() => param('view', '')}>Kütüphane</button>
+        <button className={button} aria-pressed={!isCollections && !isCosts} onClick={() => param('view', '')}>Kütüphane</button>
         <button className={button} aria-pressed={isCollections} onClick={() => param('view', 'collections')}>Koleksiyonlar</button>
+        <button className={button} aria-pressed={isCosts} onClick={() => param('view', 'costs')}>Maliyet & Kârlılık</button>
         <button className={button} disabled={busy} onClick={() => { setError(''); setRefresh((n) => n + 1); }}>Yenile</button>
       </div>
-      {isCollections ? <>
+      {isCosts ? <CostCalculator /> : isCollections ? <>
         <form className="space-y-3 rounded-lg bg-paper p-4" onSubmit={(e) => { e.preventDefault(); void save(() => researchApi.saveCollection({ name, description }, collection), () => { setName(''); setDescription(''); setCollection(undefined); }); }}>
           <h3 className="text-lg">{collection ? 'Koleksiyonu düzenle' : 'Yeni koleksiyon'}</h3>
           <Field label="Koleksiyon adı"><TextInput required maxLength={120} value={name} onChange={(e) => setName(e.target.value)} disabled={busy} /></Field>

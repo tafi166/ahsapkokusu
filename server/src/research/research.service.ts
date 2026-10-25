@@ -1,3 +1,4 @@
+import { calculateCost, costSave } from './costs';
 import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { z } from 'zod';
 import { AuditService } from '../audit/audit.service';
@@ -51,6 +52,22 @@ export class ResearchService {
       }
       const row = id ? await tx.researchCollection.findUniqueOrThrow({ where: { id } }) : await tx.researchCollection.create({ data: { ...data, createdById: actor } });
       await this.record(tx, actor, id ? 'research.collection.updated' : 'research.collection.created', 'ResearchCollection', row.id);
+      return row;
+    });
+  }
+
+  costs() { return this.db.researchCostEstimate.findMany({ orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }], take: 100 }); }
+
+  async saveCost(actor: string, data: z.infer<typeof costSave>, id?: string, version?: number) {
+    const result = calculateCost(data.input);
+    return this.db.$transaction(async (tx) => {
+      const values = { name: data.name, input: data.input, result: { ...result } };
+      if (id) {
+        if (!await tx.researchCostEstimate.findUnique({ where: { id } })) throw new NotFoundException();
+        if (!(await tx.researchCostEstimate.updateMany({ where: { id, version }, data: { ...values, version: { increment: 1 } } })).count) throw new ConflictException('Senaryo değişti. Yenileyip yeniden açın.');
+      }
+      const row = id ? await tx.researchCostEstimate.findUniqueOrThrow({ where: { id } }) : await tx.researchCostEstimate.create({ data: { ...values, createdById: actor } });
+      await this.record(tx, actor, id ? 'research.cost.updated' : 'research.cost.created', 'ResearchCostEstimate', row.id);
       return row;
     });
   }
