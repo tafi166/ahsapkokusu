@@ -104,7 +104,7 @@ export function AdminPage() {
           {tab === "brand" ? <BrandTab /> : null}
           {tab === "home" ? <HomeContentTab /> : null}
           {tab === "categories" ? <CategoriesTab /> : null}
-          {tab === "products" ? <ProductsTab /> : null}
+          {tab === "products" ? <ProductsTab canImport={session.user.role === "ADMIN"} /> : null}
           {tab === "lists" ? <ListsTab /> : null}
           {tab === "translations" ? <TranslationsTab /> : null}
           {tab === "messages" ? <MessagesTab /> : null}

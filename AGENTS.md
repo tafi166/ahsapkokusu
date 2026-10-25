@@ -5,7 +5,7 @@
 - Develop on dedicated feature branches. Never push directly to main/master, merge, or deploy without explicit approval.
 - Keep changes reviewable through pull requests. State when PR creation or verification is blocked.
 - Preserve existing storefront, branding, sessions and CSRF protections. No secrets in Git, logs, chat or browser bundles.
-- Research is private and ADMIN-only. Never include it in public site snapshots, catalog, sitemap or public media.
+- Research is private and ADMIN-only. Never expose private research URLs or records in public site snapshots, catalog or sitemap. The approved product-image workflow may copy selected files to separate public Media records only after an ADMIN records a reviewed, permanent commercial-publication permission; preserve private provenance.
 - External platform access must follow current terms and permissions. No scraping bypasses. Viewing, storage, AI transfer, export and commercial use require separate consideration.
 - Research must not write to the existing full-catalog replacement endpoint. Unpublished drafts require private storage.
 - Use the brand tokens in src/config/tokens.ts and src/styles/globals.css; preserve their parity.

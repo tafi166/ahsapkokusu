@@ -379,3 +379,18 @@ model ResearchImageExport {
   @@index([status, createdAt])
   @@index([expiresAt])
 }
+
+/// ADMIN-reviewed publication permission. Snapshots survive private-gallery expiry.
+model ResearchProductImageGrant {
+  id             String @id @default(uuid()) @db.Uuid
+  productId      String
+  mediaId        String @db.Uuid
+  sourceImageId  String @db.Uuid
+  sourceUrl      String
+  sha256         String
+  evidence       String
+  reviewedById   String @db.Uuid
+  createdAt      DateTime @default(now()) @db.Timestamptz(3)
+  @@index([productId])
+  @@index([mediaId])
+}

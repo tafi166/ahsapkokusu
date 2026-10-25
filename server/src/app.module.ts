@@ -1,3 +1,4 @@
+import { ProductImagesService } from './research/images/product-images.service';
 import { ResearchImagesController } from './research/images/images.controller';
 import { ResearchImagesService } from './research/images/images.service';
 import { ResearchController } from './research/research.controller';
@@ -67,6 +68,7 @@ export function createAppModule(config: AppConfig) {
       { provide: APP_CONFIG, useValue: config },
       prismaProvider,
       PrismaLifecycle,
+      ProductImagesService,
       ResearchImagesService,
       ResearchService,
       AuditService,

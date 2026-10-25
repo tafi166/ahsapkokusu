@@ -1,3 +1,4 @@
+import { ProductImagesService, attachImagesInput, catalogProductId } from './product-images.service';
 import {
   Body,
   Controller,
@@ -31,6 +32,7 @@ import { ResearchImagesService } from "./images.service";
 export class ResearchImagesController {
   constructor(
     private readonly images: ResearchImagesService,
+    private readonly productImages: ProductImagesService,
     @Inject(APP_CONFIG) private readonly config: AppConfig,
   ) {}
   private enabled() {
@@ -133,4 +135,13 @@ export class ResearchImagesController {
       if (err && !res.headersSent) res.status(404).end();
     });
   }
+  @Get('products/:id/state')
+  productState(@Param('id') id:string,@Res({passthrough:true}) res:Response){
+    this.enabled();res.setHeader('Cache-Control','no-store');return this.productImages.state(parseOrThrow(catalogProductId,id));
+  }
+  @Post('products/:id/attach')
+  attach(@CurrentAuth() auth:AuthContext,@Param('id') id:string,@Body() body:unknown){
+    this.enabled();return this.productImages.attach(auth.userId,parseOrThrow(catalogProductId,id),parseOrThrow(attachImagesInput,body));
+  }
+
 }
