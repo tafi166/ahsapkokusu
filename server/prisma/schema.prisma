@@ -73,6 +73,8 @@ model Product {
   details        Json
   /// True for the hand-written demo catalog.
   isSample       Boolean      @default(false)
+  /// A draft kept in the admin panel: never served by public endpoints, the sitemap or orders.
+  isHidden       Boolean      @default(false)
   /// Catalog dates shown in the storefront (date-only in the source data).
   publishedAt    DateTime     @db.Timestamptz(3)
   contentUpdatedAt DateTime   @db.Timestamptz(3)

@@ -1,6 +1,5 @@
 import { ProductImageImport, type ProductImageState } from "@/pages/admin/products/ProductImageImport";
-import { useMemo, useState } from "react";
-import { allProducts as currentProducts } from "@/data/products";
+import { useEffect, useMemo, useState } from "react";
 import { categories } from "@/data/categories";
 import { adminApi } from "@/lib/adminApi";
 import { runSave } from "@/pages/admin/saving";
@@ -17,6 +16,12 @@ function slugify(text: string): string {
     .replace(combiningDiacritics, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+/** Drafts carry `hidden: true`; published products leave the field out. */
+function withHidden(product: Product, hidden: boolean): Product {
+  const { hidden: _previous, ...rest } = product;
+  return hidden ? { ...rest, hidden: true } : rest;
 }
 
 function toCsv(arr?: string[]): string {
@@ -62,7 +67,11 @@ const PRODUCT_TYPE_OPTIONS: ProductType[] = ["wall-art", "multilayer-art", "furn
 export function ProductsTab({ canImport = false }: { canImport?: boolean }) {
   const [importTarget, setImportTarget] = useState<Product | null>(null);
   const [importMessage, setImportMessage] = useState("");
-  const [products, setProducts] = useState<Product[]>(() => structuredClone(currentProducts));
+  // Loaded from the admin endpoint, not the public catalog: that one leaves hidden drafts
+  // out, and saving the full list without them would delete them.
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
   const [draft, setDraft] = useState<Product | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [jsonText, setJsonText] = useState("");
@@ -71,6 +80,25 @@ export function ProductsTab({ canImport = false }: { canImport?: boolean }) {
   const [search, setSearch] = useState("");
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    adminApi
+      .listProducts()
+      .then((list) => {
+        if (cancelled) return;
+        setProducts(list);
+        setLoaded(true);
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) setLoadError(err instanceof Error ? err.message : "Ürünler yüklenemedi.");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const hiddenCount = products.filter((p) => p.hidden).length;
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -119,6 +147,12 @@ export function ProductsTab({ canImport = false }: { canImport?: boolean }) {
     setSaveError(null);
   }
 
+  function toggleHidden(id: string) {
+    setProducts((prev) => prev.map((p) => (p.id === id ? withHidden(p, !p.hidden) : p)));
+    setSaved(false);
+    setSaveError(null);
+  }
+
   function handleSaveAll() {
     void runSave(() => adminApi.saveProducts(products), setSaved, setSaveError);
   }
@@ -151,13 +185,17 @@ export function ProductsTab({ canImport = false }: { canImport?: boolean }) {
       <div>
         <h2 className="text-lg font-semibold">Ürünler</h2>
         <p className="text-sm text-black/55">
-          {products.length} ürün. Sık kullanılan alanlar aşağıdaki formda; şema genelindeki tüm alanlar (varyantlar, dosya
+          {products.length} ürün{hiddenCount > 0 ? `, ${hiddenCount} taslak (sitede görünmüyor)` : ""}. Sık kullanılan alanlar aşağıdaki formda; şema genelindeki tüm alanlar (varyantlar, dosya
           türleri, kişiselleştirme vb.) için "Gelişmiş: JSON olarak düzenle" seçeneğini kullanın.
         </p>
       </div>
 
       {importMessage && <p role="status" className="text-sm text-success">{importMessage}</p>}
-      {importTarget ? <ProductImageImport key={importTarget.id} product={importTarget} onAttached={attached} onClose={() => setImportTarget(null)} /> : !draft ? (
+      {!loaded ? (
+        <p role={loadError ? "alert" : "status"} className={loadError ? "text-sm text-red-600" : "text-sm text-black/55"}>
+          {loadError ? `Ürünler yüklenemedi: ${loadError}` : "Ürünler yükleniyor…"}
+        </p>
+      ) : importTarget ? <ProductImageImport key={importTarget.id} product={importTarget} onAttached={attached} onClose={() => setImportTarget(null)} /> : !draft ? (
         <>
           <div className="flex flex-wrap items-center gap-3">
             <TextInput
@@ -184,11 +222,16 @@ export function ProductsTab({ canImport = false }: { canImport?: boolean }) {
               </thead>
               <tbody>
                 {filtered.map((p) => (
-                  <tr key={p.id} className="border-b border-black/5">
+                  <tr key={p.id} className={p.hidden ? "border-b border-black/5 bg-black/[0.02]" : "border-b border-black/5"}>
                     <td className="px-3 py-2">
-                      <ProductMedia src={p.thumbnail} ratio="square" className="h-10 w-10 rounded" />
+                      <ProductMedia src={p.thumbnail} ratio="square" className={p.hidden ? "h-10 w-10 rounded opacity-50" : "h-10 w-10 rounded"} />
                     </td>
-                    <td className="px-3 py-2">{p.title || <em className="text-black/40">(başlıksız)</em>}</td>
+                    <td className="px-3 py-2">
+                      <span className={p.hidden ? "text-black/50" : undefined}>{p.title || <em className="text-black/40">(başlıksız)</em>}</span>
+                      {p.hidden ? (
+                        <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">Taslak</span>
+                      ) : null}
+                    </td>
                     <td className="px-3 py-2 text-black/60">{p.category}</td>
                     <td className="px-3 py-2">
                       {p.priceDisplay === "quote" ? (
@@ -205,6 +248,13 @@ export function ProductsTab({ canImport = false }: { canImport?: boolean }) {
                       <div className="inline-flex gap-2">
                         <AdminButton variant="outline" onClick={() => openEdit(p)}>
                           Düzenle
+                        </AdminButton>
+                        <AdminButton
+                          variant="outline"
+                          onClick={() => toggleHidden(p.id)}
+                          aria-label={p.hidden ? `${p.title} ürününü yayınla` : `${p.title} ürününü gizle`}
+                        >
+                          {p.hidden ? "Yayınla" : "Gizle"}
                         </AdminButton>
                         {canImport && <AdminButton variant="outline" onClick={() => { setImportTarget(p); setImportMessage(""); }}>Etsy / Galeriden görsel ekle</AdminButton>}
                         <AdminButton variant="danger" onClick={() => handleDelete(p.id)}>
@@ -226,7 +276,9 @@ export function ProductsTab({ canImport = false }: { canImport?: boolean }) {
           </div>
 
           <div className="flex flex-wrap items-center gap-3 border-t border-black/10 pt-4">
-            <AdminButton onClick={handleSaveAll}>Tüm Değişiklikleri Kaydet</AdminButton>
+            <AdminButton onClick={handleSaveAll} disabled={!loaded}>
+              Tüm Değişiklikleri Kaydet
+            </AdminButton>
             <SavedBanner show={saved} error={saveError} onReload={() => window.location.reload()} />
             {saveError ? <p className="text-sm text-red-600">{saveError}</p> : null}
           </div>
@@ -404,6 +456,14 @@ export function ProductsTab({ canImport = false }: { canImport?: boolean }) {
                 ))}
               </select>
             </Field>
+          </SectionCard>
+
+          <SectionCard title="Yayın Durumu">
+            <Checkbox
+              label="Taslak — sitede gösterme (panelde kalır, silinmez)"
+              checked={!!draft.hidden}
+              onChange={(v) => setDraft(withHidden(draft, v))}
+            />
           </SectionCard>
 
           <SectionCard title="Vitrin Etiketleri">

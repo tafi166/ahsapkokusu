@@ -261,6 +261,7 @@ export const productSchema: z.ZodType<Product> = z
     seoTitle: text(200).optional(),
     seoDescription: text(500).optional(),
     seoKeywords: options(30),
+    hidden: z.boolean().optional(),
     createdAt: isoDate,
     updatedAt: isoDate,
   })

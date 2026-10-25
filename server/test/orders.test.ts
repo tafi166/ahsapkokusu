@@ -161,6 +161,13 @@ describe('orders API', () => {
     expect((await place({ lines: [{ productId: soldOut.id, quantity: 1 }], customer, address }).expect(400)).body.message).toMatch(/tükendi\.$/);
   });
 
+  it('treats a hidden (draft) product as unavailable', async () => {
+    await prisma.product.update({ where: { id: 'ml-2' }, data: { isHidden: true } });
+    const res = await place({ lines: [mlLine], customer, address }).expect(400);
+    expect(res.body.message).toBe('Sepetteki bir ürün artık satışta değil (ml-2).');
+    expect(await prisma.order.count()).toBe(0);
+  });
+
   it('needs an address only when something ships', async () => {
     await place({ lines: [mlLine], customer }).expect(400);
     const res = await place({ lines: [{ productId: digital.id, quantity: 1 }], customer }).expect(201);

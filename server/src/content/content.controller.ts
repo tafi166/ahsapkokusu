@@ -59,6 +59,12 @@ export class ContentAdminController {
     await this.content.resetTranslation(auth.userId, parseOrThrow(localeSchema, rawLocale), parseOrThrow(translationKeySchema, rawKey));
   }
 
+  /** The full list the products tab edits, drafts included. */
+  @Get('products')
+  products() {
+    return this.content.adminProducts();
+  }
+
   @Put('products')
   @HttpCode(204)
   async replaceProducts(@CurrentAuth() auth: AuthContext, @Body() body: unknown) {

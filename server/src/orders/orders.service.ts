@@ -100,7 +100,7 @@ export class OrdersService {
   async place(input: OrderInput, lang: Lang = 'tr'): Promise<OrderView> {
     const ids = [...new Set(input.lines.map((l) => l.productId))];
     const [rows, en] = await Promise.all([
-      this.prisma.product.findMany({ where: { id: { in: ids } } }),
+      this.prisma.product.findMany({ where: { id: { in: ids }, isHidden: false } }),
       lang === 'en' ? this.content.translations('en') : undefined,
     ]);
     const products = new Map(rows.map((r) => [r.id, rowToProduct(r)]));

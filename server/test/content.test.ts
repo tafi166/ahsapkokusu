@@ -220,6 +220,33 @@ describe('content API', () => {
       expect((await prisma.product.findUniqueOrThrow({ where: { id: added.id } })).isSample).toBe(false);
     });
 
+    it('keeps a hidden product as a draft: in the admin list, absent everywhere public', async () => {
+      const { put, agent } = await editor();
+      const list = edit(defaultProducts);
+      const draft = { ...list[0]!, hidden: true };
+      list[0] = draft;
+      await put('/api/admin/products', { products: list }).expect(204);
+
+      // The panel still gets it, flagged, so the next full-list save keeps it.
+      const adminList = (await agent.get('/api/admin/products').expect(200)).body as Product[];
+      expect(adminList).toEqual(list);
+
+      const pub = request(app.getHttpServer());
+      expect((await site()).products.some((p: Product) => p.id === draft.id)).toBe(false);
+      expect(((await pub.get('/api/products').expect(200)).body as Product[]).some((p) => p.id === draft.id)).toBe(false);
+      expect(((await pub.get(`/api/products?category=${draft.category}`).expect(200)).body as Product[]).some((p) => p.id === draft.id)).toBe(false);
+      await pub.get(`/api/products/${draft.slug}`).expect(404);
+      expect((await pub.get('/api/sitemap.xml').expect(200)).text).not.toContain(draft.slug);
+
+      // Publishing it again brings it back.
+      await put('/api/admin/products', { products: list.map((p) => (p.id === draft.id ? { ...p, hidden: false } : p)) }).expect(204);
+      await pub.get(`/api/products/${draft.slug}`).expect(200);
+    });
+
+    it('serves the admin list only to signed-in staff', async () => {
+      await request(app.getHttpServer()).get('/api/admin/products').expect(401);
+    });
+
     it('lets two products swap slugs in one save', async () => {
       const { put } = await editor();
       const list = edit(defaultProducts);

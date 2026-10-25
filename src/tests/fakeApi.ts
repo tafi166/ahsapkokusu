@@ -1,4 +1,5 @@
 import { vi } from "vitest";
+import { defaultProducts } from "@/data/products/defaults";
 
 export interface FakeRequest {
   method: string;
@@ -74,6 +75,9 @@ export function installFakeApi(options: { password?: string; role?: "ADMIN" | "E
     if (translation && method === "DELETE") {
       delete state.translations[`${translation[1]}:${translation[2]}`];
       return json(204);
+    }
+    if (url === "/api/admin/products" && method === "GET") {
+      return json(200, state.content.products ?? defaultProducts);
     }
     if (url === "/api/admin/products" && method === "PUT") {
       state.content.products = (body as { products: unknown }).products;

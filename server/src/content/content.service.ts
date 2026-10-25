@@ -34,7 +34,7 @@ export class ContentService {
   async snapshot(): Promise<SiteSnapshot> {
     const [categories, products, blocks] = await Promise.all([
       this.prisma.category.findMany({ orderBy: { sortOrder: 'asc' } }),
-      this.prisma.product.findMany({ orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }] }),
+      this.prisma.product.findMany({ where: { isHidden: false }, orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }] }),
       this.prisma.siteContent.findMany(),
     ]);
     const site: SiteSnapshot = {
@@ -114,6 +114,12 @@ export class ContentService {
    * Replaces the whole catalog with `products` (the admin panel always saves the full
    * list): missing products are deleted, the rest upserted in list order.
    */
+  /** Every product, drafts included — the admin panel edits and saves this full list. */
+  async adminProducts(): Promise<Product[]> {
+    const rows = await this.prisma.product.findMany({ orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }] });
+    return rows.map(rowToProduct);
+  }
+
   async replaceProducts(actorId: string, products: Product[]) {
     const ids = products.map((p) => p.id);
     try {

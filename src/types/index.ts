@@ -227,6 +227,9 @@ export interface Product {
   seoDescription?: string;
   seoKeywords?: string[];
 
+  /** A draft: kept in the admin panel, never shown on the storefront. */
+  hidden?: boolean;
+
   createdAt: string;
   updatedAt: string;
 }

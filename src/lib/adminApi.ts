@@ -182,6 +182,11 @@ export const adminApi = {
     return request("DELETE", `/api/admin/translations/${locale}/${key}`);
   },
 
+  /** Every product including hidden drafts — the public catalog leaves those out. */
+  listProducts(): Promise<Product[]> {
+    return request("GET", "/api/admin/products");
+  },
+
   saveProducts(products: Product[]): Promise<void> {
     return request("PUT", "/api/admin/products", { products });
   },
