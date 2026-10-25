@@ -1,3 +1,4 @@
+import { ProductImageImport, type ProductImageState } from "@/pages/admin/products/ProductImageImport";
 import { useMemo, useState } from "react";
 import { allProducts as currentProducts } from "@/data/products";
 import { categories } from "@/data/categories";
@@ -53,7 +54,9 @@ const AVAILABILITY_OPTIONS: Availability[] = ["in-stock", "made-to-order", "sold
 const DELIVERY_OPTIONS: ProductDeliveryType[] = ["PHYSICAL", "DIGITAL", "BOTH"];
 const PRODUCT_TYPE_OPTIONS: ProductType[] = ["wall-art", "multilayer-art", "furniture", "wall-clock", "decor"];
 
-export function ProductsTab() {
+export function ProductsTab({ canImport = false }: { canImport?: boolean }) {
+  const [importTarget, setImportTarget] = useState<Product | null>(null);
+  const [importMessage, setImportMessage] = useState("");
   const [products, setProducts] = useState<Product[]>(() => structuredClone(currentProducts));
   const [draft, setDraft] = useState<Product | null>(null);
   const [isNew, setIsNew] = useState(false);
@@ -69,6 +72,13 @@ export function ProductsTab() {
     if (!q) return products;
     return products.filter((p) => p.title.toLowerCase().includes(q) || p.slug.includes(q) || p.category.includes(q));
   }, [products, search]);
+
+  function attached(state: ProductImageState) {
+    if (!importTarget) return;
+    setProducts((prev) => prev.map((p) => p.id === importTarget.id ? { ...p, images: state.images, thumbnail: state.thumbnail, updatedAt: state.updatedAt } : p));
+    setImportMessage(`${importTarget.title}: görseller ürüne kaydedildi.`);
+    setImportTarget(null);
+  }
 
   function openEdit(product: Product) {
     setDraft(structuredClone(product));
@@ -141,7 +151,8 @@ export function ProductsTab() {
         </p>
       </div>
 
-      {!draft ? (
+      {importMessage && <p role="status" className="text-sm text-success">{importMessage}</p>}
+      {importTarget ? <ProductImageImport key={importTarget.id} product={importTarget} onAttached={attached} onClose={() => setImportTarget(null)} /> : !draft ? (
         <>
           <div className="flex flex-wrap items-center gap-3">
             <TextInput
@@ -183,6 +194,7 @@ export function ProductsTab() {
                         <AdminButton variant="outline" onClick={() => openEdit(p)}>
                           Düzenle
                         </AdminButton>
+                        {canImport && <AdminButton variant="outline" onClick={() => { setImportTarget(p); setImportMessage(""); }}>Etsy / Galeriden görsel ekle</AdminButton>}
                         <AdminButton variant="danger" onClick={() => handleDelete(p.id)}>
                           Sil
                         </AdminButton>

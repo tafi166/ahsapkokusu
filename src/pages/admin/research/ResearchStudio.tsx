@@ -1,3 +1,4 @@
+import { ImageDownloads } from './ImageDownloads';
 import { CostCalculator } from './CostCalculator';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -23,6 +24,7 @@ export function ResearchStudio() {
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
   const [refresh, setRefresh] = useState(0);
+  const isImages = params.get('view') === 'images';
   const isCosts = params.get('view') === 'costs';
   const isCollections = params.get('view') === 'collections';
   const q = params.get('q') ?? '';
@@ -65,17 +67,18 @@ export function ResearchStudio() {
   }
 
   return <section className="min-w-0 space-y-5 rounded-xl border border-line bg-paper-soft p-4 text-body md:p-6" aria-label="Araştırma Stüdyosu">
-    <div><p className="text-xs uppercase tracking-widest text-success">Ahşap Kokusu · Özel çalışma alanı</p><h2 className="mt-2 text-2xl">Araştırma Stüdyosu</h2><p className="mt-2 text-sm">Manuel araştırmalarınızı ve koleksiyonlarınızı saklayın. Etsy, AI, görsel indirme ve otomatik yayın kapalıdır.</p></div>
+    <div><p className="text-xs uppercase tracking-widest text-success">Ahşap Kokusu · Özel çalışma alanı</p><h2 className="mt-2 text-2xl">Araştırma Stüdyosu</h2><p className="mt-2 text-sm">Manuel araştırmalarınızı ve koleksiyonlarınızı saklayın. Etsy bağlantısından otomatik alma, AI ve otomatik yayın kapalıdır. Yetkili görselleri Görsel İndir bölümünden yükleyebilirsiniz.</p></div>
     {error && <div role="alert" className="rounded border border-danger p-3 text-sm">{error} Oturumunuz sona erdiyse yeniden giriş yapın. Çakışma varsa kaydı yenileyip yeniden açın; formunuz korunur.</div>}
     {message && <p role="status" className="text-sm text-success">{message}</p>}
     {enabled === false ? <p role="status">Bu ortamda Araştırma Stüdyosu kapalı. Sunucu ortam ayarlarında RESEARCH_ENABLED etkinleştirilmelidir.</p> : enabled === null ? <p role="status">Erişim kontrol ediliyor…</p> : <>
       <div className="flex flex-wrap gap-2" role="group" aria-label="Araştırma bölümleri">
-        <button className={button} aria-pressed={!isCollections && !isCosts} onClick={() => param('view', '')}>Kütüphane</button>
+        <button className={button} aria-pressed={!isCollections && !isCosts && !isImages} onClick={() => param('view', '')}>Kütüphane</button>
         <button className={button} aria-pressed={isCollections} onClick={() => param('view', 'collections')}>Koleksiyonlar</button>
         <button className={button} aria-pressed={isCosts} onClick={() => param('view', 'costs')}>Maliyet & Kârlılık</button>
+        <button className={button} aria-pressed={isImages} onClick={() => param('view', 'images')}>Görsel İndir</button>
         <button className={button} disabled={busy} onClick={() => { setError(''); setRefresh((n) => n + 1); }}>Yenile</button>
       </div>
-      {isCosts ? <CostCalculator /> : isCollections ? <>
+      {isImages ? <ImageDownloads /> : isCosts ? <CostCalculator /> : isCollections ? <>
         <form className="space-y-3 rounded-lg bg-paper p-4" onSubmit={(e) => { e.preventDefault(); void save(() => researchApi.saveCollection({ name, description }, collection), () => { setName(''); setDescription(''); setCollection(undefined); }); }}>
           <h3 className="text-lg">{collection ? 'Koleksiyonu düzenle' : 'Yeni koleksiyon'}</h3>
           <Field label="Koleksiyon adı"><TextInput required maxLength={120} value={name} onChange={(e) => setName(e.target.value)} disabled={busy} /></Field>
