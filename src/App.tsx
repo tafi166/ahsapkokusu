@@ -47,7 +47,7 @@ export default function App() {
           header/footer/cart here, this is a tool, not a marketing page.
           Turkish addresses only: it edits the Turkish source content, so it
           must never load the English-localized data. See src/pages/admin/AdminPage.tsx. */}
-      {locale === "tr" ? <Route path="admin" element={<Loading><AdminPage /></Loading>} /> : null}
+      {locale === "tr" ? <Route path="admin/*" element={<Loading><AdminPage /></Loading>} /> : null}
 
       <Route element={<Layout />}>
         <Route index element={<HomePage />} />
