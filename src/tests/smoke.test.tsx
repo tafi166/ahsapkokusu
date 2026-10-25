@@ -34,7 +34,7 @@ describe("routing smoke test — every nav/footer destination renders without th
 
   it("renders the homepage with hero, header and footer content", () => {
     renderAt("/");
-    expect(screen.getAllByText(brand.name).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("img", { name: brand.name }).length).toBeGreaterThan(0);
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(homeContent.hero.title.replace("\n", " "));
     expect(screen.getByText(/all rights reserved|tüm hakları saklıdır/i)).toBeInTheDocument();
   });

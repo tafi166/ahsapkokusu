@@ -37,7 +37,7 @@ export const enDefaults: ContentTranslations = {
     bestSellers: { title: "Best Sellers", subtitle: "Our customers' favourite designs." },
     newArrivals: { title: "New Arrivals", subtitle: "Fresh from the studio." },
     partnerLogos: { title: "Chosen by Leading Brands in Türkiye" }, // verify
-    trustSignals: { title: "Why Parametrika" },
+    trustSignals: { title: "Why Ahşap Kokusu" },
     testimonials: { title: "What Our Customers Say", subtitle: "500+ verified reviews and counting." }, // verify
     parametricStory: {
       eyebrow: "What Is Parametric Design?",

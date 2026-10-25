@@ -19,7 +19,7 @@ const { hero } = homeContent;
 // written before this field existed) rather than crashing the whole app at
 // import time — see `mergeShallowNested` in `lib/adminStore.ts` for the fix
 // that keeps this from happening in the first place.
-const slides = Array.isArray(hero.images) && hero.images.length > 0 ? hero.images : ["#2b2b2b"];
+const slides = Array.isArray(hero.images) && hero.images.length > 0 ? hero.images : ["#5A341D"];
 
 /** How far (px) a drag has to travel before it counts as a slide change. */
 const DRAG_THRESHOLD = 80;
@@ -76,6 +76,11 @@ export function Hero() {
       </div>
       {/* Left-to-right gradient (not a flat tint) keeps the photo's own detail visible on the right while the text stays legible on the left. */}
       <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/25 to-transparent" aria-hidden="true" />
+
+      {(!Array.isArray(hero.images) || hero.images.length === 0) ? (
+        <img src="/brand/monogram.svg" alt="" aria-hidden="true" width="685" height="500"
+          className="brand-hero-mark pointer-events-none absolute right-[5%] top-1/2 hidden w-[38%] max-w-[560px] -translate-y-1/2 opacity-70 lg:block" />
+      ) : null}
 
       <Container size="lg" className="relative z-10">
         <motion.div

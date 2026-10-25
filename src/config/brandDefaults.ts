@@ -1,13 +1,13 @@
 /** Default brand identity — kept free of side effects so the API server can read it too. */
 export const defaultBrand = {
-  name: "Parametrika",
-  shortName: "PK",
-  tagline: "Parametrik Sanat. Mekanları Dönüştürür.",
+  name: "Ahşap Kokusu",
+  shortName: "AK",
+  tagline: "Doğadan Tasarıma.",
   description:
     "Parametrik duvar tabloları, katmanlı multilayer eserler, mobilyalar, duvar saatleri ve dekoratif objeler — CNC ve lazer kesimle üretilir.",
 
   contact: {
-    email: "merhaba@parametrika.example",
+    email: "merhaba@ahsapkokusu.example",
     phone: "+90 (5xx) xxx xx xx",
     address: "İstanbul, Türkiye",
   },
@@ -19,7 +19,7 @@ export const defaultBrand = {
     tiktok: "https://tiktok.com/",
   },
 
-  legalName: "Parametrika Tasarım Atölyesi",
+  legalName: "Ahşap Kokusu Tasarım Atölyesi",
   copyrightYear: new Date().getFullYear(),
 };
 

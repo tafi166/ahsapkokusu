@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { brand } from "@/config/brand";
 import { footerColumns } from "@/config/navigation";
+import { BrandLogo } from "@/components/ui/BrandLogo";
+import { localePath } from "@/i18n/paths";
 import { Container } from "@/components/ui/Container";
 import { useI18n } from "@/i18n/I18nProvider";
 
@@ -18,8 +20,8 @@ export function Footer() {
       <Container size="lg" className="py-14 md:py-20">
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.2fr_1fr_1fr_1fr]">
           <div>
-            <Link to="/" className="font-heading text-2xl">
-              {brand.name}
+            <Link to={localePath("/")} className="brand-home-link inline-block rounded-sm">
+              <BrandLogo inverse className="w-[220px]" />
             </Link>
             <p className="mt-4 max-w-xs text-sm text-footer-link">{brand.description}</p>
             <div className="mt-5 flex gap-3">

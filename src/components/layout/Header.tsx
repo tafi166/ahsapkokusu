@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { ChevronDown, Heart, Menu, Search, ShoppingBag, User } from "lucide-react";
 import { useState } from "react";
-import { brand } from "@/config/brand";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import { primaryNav } from "@/config/navigation";
 import { useStickyHeader } from "@/hooks/useStickyHeader";
 import { useCart } from "@/hooks/useCart";
@@ -83,7 +83,7 @@ export function Header() {
             isScrolled && "shadow-sm",
           )}
         >
-          <div className="mx-auto grid h-16 max-w-[1760px] grid-cols-[1fr_auto_1fr] items-center px-4 md:h-[76px] md:px-8">
+          <div className="mx-auto grid h-20 max-w-[1760px] grid-cols-[1fr_auto_1fr] items-center px-4 md:h-[96px] md:px-8">
             <div className="flex items-center">
               <button className={cn(iconButton, "-ml-2 mr-1 inline-flex xl:hidden")} aria-label={t.header.openMenu} onClick={() => setMobileOpen(true)}>
                 <Menu size={22} />
@@ -91,8 +91,8 @@ export function Header() {
               <LanguageSwitcher />
             </div>
 
-            <Link to="/" className="font-heading text-[1.35rem] tracking-[0.1em] sm:text-2xl md:text-[1.75rem]">
-              {brand.name}
+            <Link to={localePath("/")} className="brand-home-link rounded-sm p-1">
+              <BrandLogo className="w-[168px] sm:w-[208px] md:w-[248px]" />
             </Link>
 
             <div className="flex items-center justify-end gap-0.5">

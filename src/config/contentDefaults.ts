@@ -51,7 +51,7 @@ export const defaultHomeContent = {
   },
 
   trustSignals: {
-    title: "Neden Parametrika",
+    title: "Neden Ahşap Kokusu",
   },
 
   testimonials: {
