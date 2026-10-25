@@ -25,7 +25,7 @@ export function Gallery({ images, title }: { images: string[]; title: string }) 
       </div>
 
       {images.length > 1 ? (
-        <div className="mt-3 flex gap-3" role="tablist" aria-label={t.gallery.thumbnails(title)}>
+        <div className="mt-3 flex flex-wrap gap-3" role="tablist" aria-label={t.gallery.thumbnails(title)}>
           {images.map((image, i) => (
             <button
               key={i}
