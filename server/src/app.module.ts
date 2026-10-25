@@ -1,3 +1,5 @@
+import { ResearchImagesController } from './research/images/images.controller';
+import { ResearchImagesService } from './research/images/images.service';
 import { ResearchController } from './research/research.controller';
 import { ResearchService } from './research/research.service';
 import { Module } from '@nestjs/common';
@@ -47,6 +49,7 @@ export function createAppModule(config: AppConfig) {
       ]),
     ],
     controllers: [
+      ResearchImagesController,
       ResearchController,
       HealthController,
       CatalogController,
@@ -64,6 +67,7 @@ export function createAppModule(config: AppConfig) {
       { provide: APP_CONFIG, useValue: config },
       prismaProvider,
       PrismaLifecycle,
+      ResearchImagesService,
       ResearchService,
       AuditService,
       AuthService,

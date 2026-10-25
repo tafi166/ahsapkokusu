@@ -336,3 +336,46 @@ model ResearchCostEstimate {
   updatedAt   DateTime @updatedAt @db.Timestamptz(3)
   @@index([updatedAt])
 }
+
+model ResearchImageBatch {
+  id              String @id @default(uuid()) @db.Uuid
+  title           String
+  sourceUrl       String
+  permissionBasis String
+  permissionNote  String
+  permissionUntil DateTime? @db.Timestamptz(3)
+  revoked         Boolean @default(false)
+  createdById     String @db.Uuid
+  createdAt       DateTime @default(now()) @db.Timestamptz(3)
+  expiresAt       DateTime @db.Timestamptz(3)
+  images          ResearchImage[]
+  @@index([expiresAt])
+}
+model ResearchImage {
+  id          String @id @default(uuid()) @db.Uuid
+  batchId     String @db.Uuid
+  batch       ResearchImageBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  productName String
+  fileName    String
+  contentType String
+  extension   String
+  sizeBytes   Int
+  sha256      String
+  width       Int
+  height      Int
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  @@unique([batchId, sha256])
+}
+model ResearchImageExport {
+  id           String @id @default(uuid()) @db.Uuid
+  imageIds     Json
+  status       String @default("QUEUED")
+  error        String?
+  sizeBytes    Int?
+  createdById  String @db.Uuid
+  createdAt    DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @db.Timestamptz(3)
+  expiresAt    DateTime @db.Timestamptz(3)
+  @@index([status, createdAt])
+  @@index([expiresAt])
+}
