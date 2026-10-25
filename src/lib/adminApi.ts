@@ -51,7 +51,6 @@ export async function request<T>(method: string, url: string, body?: unknown): P
 }
 
 async function readError(res: Response): Promise<string> {
-  if (res.status === 429) return "Çok fazla deneme yapıldı. Bir dakika sonra tekrar deneyin.";
   if (res.status === 413) return "Dosya çok büyük.";
   try {
     const data = (await res.json()) as { message?: unknown; issues?: { path: string; message: string }[] };
@@ -61,6 +60,7 @@ async function readError(res: Response): Promise<string> {
   } catch {
     // not JSON
   }
+  if (res.status === 429) return "Çok fazla deneme yapıldı. Biraz sonra tekrar deneyin.";
   if (res.status >= 500) return "Sunucu hatası. Biraz sonra tekrar deneyin.";
   return `İstek başarısız (${res.status}).`;
 }

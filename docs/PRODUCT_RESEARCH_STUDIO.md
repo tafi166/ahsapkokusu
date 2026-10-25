@@ -5,8 +5,10 @@
 ADMIN-only manual research records and collections, notes, optional HTTPS source
 links, search, pagination, archive/restore and optimistic concurrency. All admins
 share this business library; it is not a per-user vault. Source URLs are references
-only: the server never fetches them. There are no Etsy calls, AI calls, image
-imports, ZIP exports or product publication in this phase.
+only: the server never fetches them. The initial manual library has no external dependencies. Optional Etsy listing
+retrieval is now documented in ETSY_IMPORT.md; private galleries/ZIP and reviewed
+product attachments have separate documentation. AI and automatic publication
+remain disabled.
 
 The feature branch is based on `feat/ahsap-kokusu-brand-identity`, not master,
 so its branding commits are a prerequisite. Review against that branch; no merge

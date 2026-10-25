@@ -1,7 +1,7 @@
 # Private image gallery and ZIP downloads
 
 This feature extends Product Research Studio (base: feat/product-research-studio).
-It does not activate Etsy, scrape shop pages, bypass CAPTCHA, or publish media.
+It does not scrape shop pages or bypass CAPTCHA. The optional official Etsy listing adapter is documented in ETSY_IMPORT.md; publication requires the separate product-image workflow.
 
 ## What works
 
@@ -10,10 +10,11 @@ record ownership/authorization and an optional permission end date, and explicit
 confirm permission to upload and download. These are USER DECLARATIONS, not
 independently verified rights or commercial publication licenses.
 
-The Etsy link checker parses supported shop/listing URLs locally. It reports that
-remote acquisition is unavailable because an approved, terms-compliant provider
-has not been connected. No network request is made to the source URL. A future
-provider must separately establish platform access and permitted retention/export.
+The generic Etsy link checker parses shop/listing URLs locally. When the optional
+official listing adapter is configured, it directs users to the product-row Etsy
+picker; otherwise it reports missing setup. See ETSY_IMPORT.md for credentials,
+app approval, permitted uses and short-lived private originals. No HTML shop page
+is downloaded or scraped. Whole-shop crawling is not implemented.
 
 Users can upload authorized original JPEG/PNG/WebP files from Android's file picker,
 group them by product name, preview, select and prepare a ZIP. Files with duplicate

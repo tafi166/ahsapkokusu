@@ -1,3 +1,4 @@
+import { EtsyListingPicker } from "./EtsyListingPicker";
 import { useEffect, useRef, useState } from "react";
 import { request, errorMessage } from "@/lib/adminApi";
 import type { Product } from "@/types";
@@ -135,9 +136,7 @@ export function ProductImageImport({
         bilgileri değiştirilmez.
       </p>
       <p className="text-sm">
-        Etsy bağlantısından yeni görsel alma henüz bağlı değil. Kayıtlı özel
-        galeriyi kullanabilirsiniz; yalnızca Etsy linki vererek yeni görseller
-        şu anda alınamaz.
+        Etsy API erişimi yapılandırılmışsa bağlantıdan yeni görselleri getirebilir veya kayıtlı özel galeriyi kullanabilirsiniz.
       </p>
       {error && (
         <p role="alert" className="text-sm text-danger">
@@ -171,6 +170,11 @@ export function ProductImageImport({
           Bağlantıyı kontrol et / kayıtlı galeriyi bul
         </AdminButton>
       </form>
+      <EtsyListingPicker url={url} onBusy={setBusy} onImported={(batch) => {
+        setGroups((prev) => [batch, ...prev.filter((g) => g.id !== batch.id)]);
+        setGroupId(batch.id); setSelected(batch.images.map((image) => image.id));
+        setUrl(batch.sourceUrl); setMessage("Yeni Etsy görselleri alındı. Yayın hakkını doğrulayıp aşağıdaki düğmeyle doğrudan ürüne kaydedin.");
+      }} />
       <Field label="Mevcut özel galeriden seç">
         <select
           className="min-h-11 w-full rounded-md border border-divider bg-paper px-3"

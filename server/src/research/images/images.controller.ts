@@ -1,3 +1,4 @@
+import { EtsyService } from '../etsy/etsy.service';
 import { ProductImagesService, attachImagesInput, catalogProductId } from './product-images.service';
 import {
   Body,
@@ -32,6 +33,7 @@ import { ResearchImagesService } from "./images.service";
 export class ResearchImagesController {
   constructor(
     private readonly images: ResearchImagesService,
+    private readonly etsy: EtsyService,
     private readonly productImages: ProductImagesService,
     @Inject(APP_CONFIG) private readonly config: AppConfig,
   ) {}
@@ -41,7 +43,12 @@ export class ResearchImagesController {
   @Post("inspect")
   inspect(@Body() body: unknown) {
     this.enabled();
-    return inspectEtsyUrl(parseOrThrow(inspectInput, body).url);
+    const result = inspectEtsyUrl(parseOrThrow(inspectInput, body).url);
+    if (result.kind === 'listing') {
+      const state = this.etsy.status();
+      return { ...result, available: state.configured, message: state.configured ? 'Ürün bağlantısı doğrulandı. Ürünler bölümündeki Etsy’den yeni görselleri getir düğmesiyle devam edin.' : state.message };
+    }
+    return result;
   }
   @Get("batches")
   batches(@Res({ passthrough: true }) res: Response) {

@@ -143,3 +143,90 @@ describe("product-row image import", () => {
     expect(screen.queryByRole("img")).not.toBeInTheDocument();
   });
 });
+
+describe("new Etsy originals to product", () => {
+  it("maps selected remote images to new private IDs before attaching them to this product", async () => {
+    const importedId = "00000000-0000-4000-8000-000000000001";
+    vi.mocked(request).mockImplementation(async (_method, path) => {
+      if (path.endsWith("/state")) return state;
+      if (path.endsWith("/batches")) return [];
+      if (path.endsWith("/status")) return { configured: true };
+      if (path.endsWith("/preview"))
+        return {
+          ticket: "fixture-ticket",
+          title: "Panel",
+          message: "Galeri alındı.",
+          images: [
+            {
+              id: "456",
+              previewUrl:
+                "/api/admin/research/images/etsy/previews/fixture/456",
+            },
+          ],
+        };
+      if (path.endsWith("/import"))
+        return {
+          ...group,
+          images: [
+            { id: importedId, productName: "Panel", fileName: "new.png" },
+          ],
+        };
+      return {
+        ...state,
+        images: ["/api/media/copied.png"],
+        thumbnail: "/api/media/copied.png",
+      };
+    });
+    const attached = vi.fn();
+    render(
+      <ProductImageImport
+        product={product}
+        onAttached={attached}
+        onClose={vi.fn()}
+      />,
+    );
+    const u = userEvent.setup();
+    await screen.findByText(/API erişimi ilk ürün isteğinde/);
+    await u.type(
+      screen.getByLabelText("Bu ürünün Etsy bağlantısı"),
+      group.sourceUrl,
+    );
+    await u.click(
+      screen.getByRole("checkbox", { name: /Bu kaynağın görsellerini/ }),
+    );
+    await u.click(
+      screen.getByRole("button", { name: "Etsy’den yeni görselleri getir" }),
+    );
+    await screen.findByRole("img", { name: "Etsy görsel 1" });
+    await u.click(screen.getByRole("checkbox", { name: "Görsel 1" }));
+    await u.click(
+      screen.getByRole("button", {
+        name: "Seçilen 1 Etsy görselini özel alana al",
+      }),
+    );
+    await screen.findByText(/Yeni Etsy görselleri alındı/);
+    expect(screen.getByRole("checkbox", { name: "Panel" })).toBeChecked();
+    await u.type(
+      screen.getByLabelText(/Ticari yayın hakkının doğrulama kaydı/),
+      "Hak sahibi olarak süresiz ticari kullanım doğrulandı.",
+    );
+    await u.click(
+      screen.getByRole("checkbox", { name: /ticari yayın hakkını inceleyip/ }),
+    );
+    await u.click(
+      screen.getByRole("checkbox", { name: /Bu kullanım hakkı süresizdir/ }),
+    );
+    await u.click(
+      screen.getByRole("button", { name: "Seçilen 1 görseli bu ürüne kaydet" }),
+    );
+    expect(request).toHaveBeenLastCalledWith(
+      "POST",
+      `/api/admin/research/images/products/${product.id}/attach`,
+      expect.objectContaining({
+        imageIds: [importedId],
+        expectedRevision: state.revision,
+      }),
+    );
+    expect(attached).toHaveBeenCalled();
+  });
+});

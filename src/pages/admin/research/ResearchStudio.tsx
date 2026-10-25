@@ -67,7 +67,7 @@ export function ResearchStudio() {
   }
 
   return <section className="min-w-0 space-y-5 rounded-xl border border-line bg-paper-soft p-4 text-body md:p-6" aria-label="Araştırma Stüdyosu">
-    <div><p className="text-xs uppercase tracking-widest text-success">Ahşap Kokusu · Özel çalışma alanı</p><h2 className="mt-2 text-2xl">Araştırma Stüdyosu</h2><p className="mt-2 text-sm">Manuel araştırmalarınızı ve koleksiyonlarınızı saklayın. Etsy bağlantısından otomatik alma, AI ve otomatik yayın kapalıdır. Yetkili görselleri Görsel İndir bölümünden yükleyebilirsiniz.</p></div>
+    <div><p className="text-xs uppercase tracking-widest text-success">Ahşap Kokusu · Özel çalışma alanı</p><h2 className="mt-2 text-2xl">Araştırma Stüdyosu</h2><p className="mt-2 text-sm">Manuel araştırmalarınızı ve koleksiyonlarınızı saklayın. Etsy ürün bağlantısından alma, Ürünler bölümünde sunucu yapılandırmasına bağlıdır. AI ve otomatik yayın kapalıdır.</p></div>
     {error && <div role="alert" className="rounded border border-danger p-3 text-sm">{error} Oturumunuz sona erdiyse yeniden giriş yapın. Çakışma varsa kaydı yenileyip yeniden açın; formunuz korunur.</div>}
     {message && <p role="status" className="text-sm text-success">{message}</p>}
     {enabled === false ? <p role="status">Bu ortamda Araştırma Stüdyosu kapalı. Sunucu ortam ayarlarında RESEARCH_ENABLED etkinleştirilmelidir.</p> : enabled === null ? <p role="status">Erişim kontrol ediliyor…</p> : <>

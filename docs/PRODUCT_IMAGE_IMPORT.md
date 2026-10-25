@@ -6,13 +6,14 @@ URL. Alternatively select a gallery directly. Selected originals are copied by t
 server into public Media and attached to that single saved product. No ZIP download
 or browser re-upload is needed. Editor accounts retain the original image uploader.
 
-## Important availability boundary
+## Etsy provider availability
 
-New image acquisition directly from Etsy is still unavailable. The link checker
-never fetches a shop page or circumvents platform controls. The panel states this
-before the link field and reports unavailable access for URLs without a stored
-gallery. This PR implements the direct product-attachment path, not an Etsy scraper
-or a claim that pending API approval has been resolved.
+The official API listing-image adapter is now implemented; see ETSY_IMPORT.md.
+It requires approved Etsy app access, a server-only combined API credential,
+reviewed platform terms and an explicit shop-ID allowlist. No HTML scraping is
+used. The product panel previews images, imports selected originals privately,
+and then applies the existing separate publication-rights review. Existing
+private galleries remain usable when Etsy is disabled or unavailable.
 
 ## Explicit publication review
 
