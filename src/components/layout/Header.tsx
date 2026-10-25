@@ -83,7 +83,7 @@ export function Header() {
             isScrolled && "shadow-sm",
           )}
         >
-          <div className="mx-auto grid h-20 max-w-[1760px] grid-cols-[1fr_auto_1fr] items-center px-4 md:h-[96px] md:px-8">
+          <div className="mx-auto grid h-[112px] max-w-[1760px] grid-cols-[1fr_auto_1fr] items-center px-4 md:h-[136px] md:px-8">
             <div className="flex items-center">
               <button className={cn(iconButton, "-ml-2 mr-1 inline-flex xl:hidden")} aria-label={t.header.openMenu} onClick={() => setMobileOpen(true)}>
                 <Menu size={22} />
@@ -92,7 +92,7 @@ export function Header() {
             </div>
 
             <Link to={localePath("/")} className="brand-home-link rounded-sm p-1">
-              <BrandLogo className="w-[168px] sm:w-[208px] md:w-[248px]" />
+              <BrandLogo className="w-[132px] sm:w-[148px] md:w-[176px]" />
             </Link>
 
             <div className="flex items-center justify-end gap-0.5">

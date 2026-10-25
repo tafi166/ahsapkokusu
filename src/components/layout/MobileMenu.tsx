@@ -37,7 +37,7 @@ export function MobileMenu({ open, onClose }: { open: boolean; onClose: () => vo
           >
             <div className="flex items-center justify-between border-b border-line px-6 py-5">
               <Link to={localePath("/")} onClick={onClose} className="brand-home-link rounded-sm">
-                <BrandLogo className="w-[190px]" />
+                <BrandLogo className="w-[148px]" />
               </Link>
               <button onClick={onClose} aria-label={t.header.closeMenu} className="p-1">
                 <X size={22} />
