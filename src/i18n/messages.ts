@@ -143,6 +143,9 @@ const trMessages = {
     thumbnails: (title: string) => `${title} küçük görselleri`,
     show: (n: number) => `${n}. görseli göster`,
     placeholder: "Yer tutucu görsel",
+    carousel: "fotoğraf geçişi",
+    previous: "Önceki görsel",
+    next: "Sonraki görsel",
   },
   priceBreakdown: {
     label: "Fiyat dökümü",
@@ -526,6 +529,9 @@ export const en: Dictionary = {
     thumbnails: (title) => `${title} thumbnails`,
     show: (n) => `Show image ${n}`,
     placeholder: "Placeholder image",
+    carousel: "photo carousel",
+    previous: "Previous image",
+    next: "Next image",
   },
   priceBreakdown: {
     label: "Price breakdown",

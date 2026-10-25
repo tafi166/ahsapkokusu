@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useI18n } from "@/i18n/I18nProvider";
 import { Heart, Eye } from "lucide-react";
-import { ProductMedia } from "@/lib/placeholder";
+import { ImageCarousel } from "@/components/product/ImageCarousel";
 import { Badge } from "@/components/ui/Badge";
 import { PriceTag } from "@/components/ui/PriceTag";
 import { StarRating } from "@/components/ui/StarRating";
@@ -9,9 +9,13 @@ import { getProductBadge } from "@/lib/productBadge";
 import { getCategory } from "@/data/categories";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useQuickView } from "@/hooks/useQuickView";
-import { cn } from "@/lib/cn";
 import type { Product } from "@/types";
 import { productPath } from "@/i18n/paths";
+
+/** The cover photo first, then the rest of the gallery without repeating it. */
+function cardImages(product: Product): string[] {
+  return [product.thumbnail, ...product.images.filter((src) => src !== product.thumbnail)];
+}
 
 export function ProductCard({ product }: { product: Product }) {
   const { isWishlisted, toggle } = useWishlist();
@@ -20,28 +24,18 @@ export function ProductCard({ product }: { product: Product }) {
   const soldOut = product.availability === "sold-out";
   const badge = getProductBadge(product);
   const wishlisted = isWishlisted(product.id);
-  const hoverImage = product.images[1];
 
   return (
     <div className="group relative">
       <Link to={productPath(product)} aria-label={t.product.view(product.title)} className="block">
         <div className="relative overflow-hidden rounded-card">
-          <ProductMedia
-            src={product.thumbnail}
-            ratio="square"
-            className={cn(
-              "transition-opacity duration-500",
-              !soldOut && hoverImage && "group-hover:opacity-0",
-              soldOut && "grayscale",
-            )}
+          <ImageCarousel
+            images={cardImages(product)}
+            label={(n) => t.gallery.image(product.title, n)}
+            imageClassName={soldOut ? "grayscale" : undefined}
+            // Make room for the quick-view button that slides up on hover.
+            dotsClassName="group-hover:-translate-y-11"
           />
-          {hoverImage ? (
-            <ProductMedia
-              src={hoverImage}
-              ratio="square"
-              className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-            />
-          ) : null}
 
           {badge && !soldOut ? <Badge kind={badge} /> : null}
           {soldOut ? (

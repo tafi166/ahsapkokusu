@@ -5,9 +5,9 @@ import { Link } from "react-router-dom";
 import { useQuickView } from "@/hooks/useQuickView";
 import { useCart } from "@/hooks/useCart";
 import { useScrollLock } from "@/hooks/useScrollLock";
-import { ProductMedia } from "@/lib/placeholder";
 import { StarRating } from "@/components/ui/StarRating";
 import { PriceTag } from "@/components/ui/PriceTag";
+import { ImageCarousel } from "@/components/product/ImageCarousel";
 import { isQuoteOnly } from "@/lib/price";
 import { Button } from "@/components/ui/Button";
 import { productPath } from "@/i18n/paths";
@@ -45,7 +45,12 @@ export function QuickViewModal() {
               <X size={18} />
             </button>
 
-            <ProductMedia src={product.thumbnail} ratio="square" className="rounded-card" />
+            <ImageCarousel
+              images={[product.thumbnail, ...product.images.filter((src) => src !== product.thumbnail)]}
+              label={(n) => t.gallery.image(product.title, n)}
+              variant="gallery"
+              className="rounded-card"
+            />
 
             <div>
               <p className="text-xs uppercase tracking-wide text-body/50">{product.subcategory ?? product.category}</p>
