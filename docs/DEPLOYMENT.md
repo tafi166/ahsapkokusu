@@ -55,7 +55,7 @@ hashed `/assets/*` cached for good, every other page path answered with
 security headers (same CSP as the snippet — checked in Chrome with no
 violations). Requirements on the host:
 
-- Node.js 20 or newer ("Setup Node.js App"), application startup file
+- Node.js 24 LTS (minimum 22.19) ("Setup Node.js App"), application startup file
   `dist/main.js`, application root `server/`.
 - PostgreSQL — on the host ("PostgreSQL Databases") or a managed one reachable
   from it. MySQL won't do.

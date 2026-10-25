@@ -4,6 +4,11 @@ import { z } from 'zod';
 const bool = z.enum(['true', 'false']).transform((v) => v === 'true');
 
 const schema = z.object({
+  ETSY_IMPORT_ENABLED: bool.default(false),
+  ETSY_TERMS_REVIEWED: bool.default(false),
+  ETSY_API_KEY: z.string().min(1).max(1024).refine((s) => !/[\r\n]/.test(s)).optional(),
+  ETSY_ALLOWED_SHOP_IDS: z.string().default('').transform((s) => s.split(',').map((id) => id.trim()).filter(Boolean)).refine((ids) => ids.every((id) => /^[1-9]\d{0,15}$/.test(id))),
+  ETSY_IMPORT_RETENTION_HOURS: z.coerce.number().int().min(1).max(6).default(6),
   RESEARCH_ENABLED: bool.default(false),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   DATABASE_URL: z.string().min(1),

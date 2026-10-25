@@ -183,7 +183,7 @@ export function ImageDownloads() {
     <div className="space-y-5">
       <h3 className="text-xl">Görsel İndir</h3>
       <p className="text-sm">
-        Etsy bağlantısından otomatik alma henüz bağlı değil. İzinli olarak elde
+        Etsy ürün bağlantısından alma için Ürünler → Etsy / Galeriden görsel ekle bölümünü kullanın. İzinli olarak elde
         ettiğiniz görselleri tabletinizden yükleyip seçerek ZIP
         indirebilirsiniz. Görseller mağazada yayımlanmaz.
       </p>
@@ -480,7 +480,7 @@ export function ImageDownloads() {
       <h4 className="text-lg">ZIP paketleri</h4>
       <p className="text-sm">
         Hazır paketler 24 saat saklanır. Her indirmede izin ve oturum yeniden
-        kontrol edilir. Görseller 7 gün sonra temizlenir.
+        kontrol edilir. Elle yüklenen görseller 7 gün, Etsy’den alınanlar yapılandırılmış kısa saklama süresi sonunda temizlenir.
       </p>
       <ul className="space-y-3">
         {jobs.map((job) => (

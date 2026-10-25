@@ -17,7 +17,7 @@ export class ResearchController {
   @Get('status')
   status(@Res({ passthrough: true }) res: Response) {
     res.setHeader('Cache-Control', 'no-store');
-    return { enabled: this.config.RESEARCH_ENABLED, etsyEnabled: false, aiEnabled: false };
+    return { enabled: this.config.RESEARCH_ENABLED, etsyEnabled: this.config.RESEARCH_ENABLED && this.config.ETSY_IMPORT_ENABLED && this.config.ETSY_TERMS_REVIEWED && Boolean(this.config.ETSY_API_KEY), aiEnabled: false };
   }
   @Get('items')
   list(@Query() query: unknown, @Res({ passthrough: true }) res: Response) {

@@ -80,7 +80,7 @@ export class ResearchImagesService implements OnModuleInit, OnModuleDestroy {
       include: { images: { orderBy: [{ createdAt: "asc" }, { id: "asc" }] } },
     });
   }
-  async createBatch(actor: string, input: z.infer<typeof batchInput>) {
+  async createBatch(actor: string, input: z.infer<typeof batchInput>, retentionHours = 168) {
     const { confirmed: _confirmed, ...data } = input;
     return this.db.$transaction(async (tx) => {
       await tx.$executeRaw`SELECT pg_advisory_xact_lock(925421)`;
@@ -95,7 +95,7 @@ export class ResearchImagesService implements OnModuleInit, OnModuleDestroy {
             ? new Date(data.permissionUntil)
             : null,
           createdById: actor,
-          expiresAt: new Date(Date.now() + 7 * DAY),
+          expiresAt: new Date(Date.now() + retentionHours * 3600000),
         },
       });
       await this.audit.record(

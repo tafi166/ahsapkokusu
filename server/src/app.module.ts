@@ -1,3 +1,6 @@
+import { EtsyController } from './research/etsy/etsy.controller';
+import { EtsyService } from './research/etsy/etsy.service';
+import { EtsyTransport } from './research/etsy/etsy.transport';
 import { ProductImagesService } from './research/images/product-images.service';
 import { ResearchImagesController } from './research/images/images.controller';
 import { ResearchImagesService } from './research/images/images.service';
@@ -50,6 +53,7 @@ export function createAppModule(config: AppConfig) {
       ]),
     ],
     controllers: [
+      EtsyController,
       ResearchImagesController,
       ResearchController,
       HealthController,
@@ -68,6 +72,8 @@ export function createAppModule(config: AppConfig) {
       { provide: APP_CONFIG, useValue: config },
       prismaProvider,
       PrismaLifecycle,
+      EtsyService,
+      EtsyTransport,
       ProductImagesService,
       ResearchImagesService,
       ResearchService,
