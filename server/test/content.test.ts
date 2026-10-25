@@ -43,7 +43,7 @@ describe('content schemas', () => {
     ['an image on a product', 'products', { 'wa-1': { images: ['#000'] } }],
     ['an address with spaces', 'products', { 'wa-1': { slug: 'Bad Slug' } }],
     ['two products with one address', 'products', { 'wa-1': { slug: 'same' }, 'wa-2': { slug: 'same' } }],
-    ['a category at a page address', 'categories', { dekorlar: { slug: 'contact' } }],
+    ['a category at a page address', 'categories', { 'dekor-objeleri': { slug: 'contact' } }],
     ['a brand name', 'brand', { name: 'Other' }],
   ] as const)('reject %s in translations', (_label, key, value) => {
     expect(translationSchemas[key].safeParse(value).success).toBe(false);
@@ -82,7 +82,7 @@ describe('content schemas', () => {
 
   it('accept partial homeContent with safe links and uploaded images', () => {
     const value = {
-      hero: { title: 'Yeni başlık', primaryCtaHref: '/dekorlar', images: ['/api/media/0b9c5c62-1c5f-4c1e-9f5e-6b1f3f6f6a10.jpg'] },
+      hero: { title: 'Yeni başlık', primaryCtaHref: '/dekor-objeleri', images: ['/api/media/0b9c5c62-1c5f-4c1e-9f5e-6b1f3f6f6a10.jpg'] },
       finalCta: { ctaHref: 'https://example.com/iletisim' },
     };
     expect(contentSchemas.homeContent.safeParse(value).error).toBeUndefined();

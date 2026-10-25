@@ -1,7 +1,7 @@
 import { formatMoney } from "@/i18n/money";
 import { contentLocale } from "@/i18n/locale";
 import { en, tr, type Dictionary } from "@/i18n/messages";
-import type { ConfiguredOptions, PricedAxis, Product, VariantSelection } from "@/types";
+import type { ConfiguredOptions, PriceDisplay, PricedAxis, Product, VariantSelection } from "@/types";
 
 /**
  * Single source of truth for product configuration and pricing — the
@@ -12,6 +12,16 @@ import type { ConfiguredOptions, PricedAxis, Product, VariantSelection } from "@
  * selected option. No seed product defines one, and nothing here invents
  * amounts or formulas (height in particular has no pricing rule).
  */
+
+/** How the product's price is shown; products without a setting show a fixed price. */
+export function priceDisplay(product: Pick<Product, "priceDisplay">): PriceDisplay {
+  return product.priceDisplay ?? "fixed";
+}
+
+/** Quote-only products show no price and can't be added to the cart. */
+export function isQuoteOnly(product: Pick<Product, "priceDisplay">): boolean {
+  return priceDisplay(product) === "quote";
+}
 
 const OPTION_KEYS = ["size", "width", "layerCount", "color", "finish", "frame", "height"] as const;
 type OptionKey = (typeof OPTION_KEYS)[number];

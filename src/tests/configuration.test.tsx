@@ -17,7 +17,7 @@ function makeProduct(overrides: Partial<Product> = {}): Product {
     id: "test-1",
     slug: "test-1",
     title: "Test Ürün",
-    category: "parametrik-duvar-tablolari",
+    category: "duvar-tablolari",
     description: "Test",
     price: 1000,
     currency: "TRY",
@@ -180,6 +180,16 @@ describe("cart", () => {
       result = cart().addItem(framed, 0, { size: "50x70 cm", color: "Doğal" });
     });
     expect(result.ok).toBe(false);
+    expect(cart().lines).toHaveLength(0);
+  });
+
+  it("refuses a quote-only product", () => {
+    const cart = renderCart();
+    let result!: ReturnType<ReturnType<typeof useCart>["addItem"]>;
+    act(() => {
+      result = cart().addItem({ ...framed, priceDisplay: "quote" }, 1, { size: "50x70 cm", color: "Doğal" });
+    });
+    expect(result).toEqual({ ok: false, errors: ["Bu ürün teklif ile satılıyor; sepete eklenemez."] });
     expect(cart().lines).toHaveLength(0);
   });
 

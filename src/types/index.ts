@@ -49,13 +49,14 @@ export interface FaqItem {
 // Category schema
 // ---------------------------------------------------------------------------
 
-/** The 5 top-level categories — slugs double as the SEO-friendly route segment. */
+/** The 6 top-level categories — slugs double as the SEO-friendly route segment. */
 export type CategorySlug =
-  | "parametrik-duvar-tablolari"
-  | "katmanli-multilayer-tablolar"
-  | "parametrik-mobilyalar"
+  | "duvar-tablolari"
   | "duvar-saatleri"
-  | "dekorlar";
+  | "bebek-cocuk-odasi"
+  | "kisiye-ozel-hediyelik"
+  | "ahsap-aydinlatma"
+  | "dekor-objeleri";
 
 /**
  * Declares which filter facets a category page should render — keeps
@@ -102,6 +103,13 @@ export type ProductType = "wall-art" | "multilayer-art" | "furniture" | "wall-cl
 export type ProductDeliveryType = "DIGITAL" | "PHYSICAL" | "BOTH";
 
 export type Availability = "in-stock" | "made-to-order" | "sold-out" | "digital";
+
+/**
+ * How a product's price is shown. `fixed` (the default) shows the price;
+ * `from` shows it as a starting price and offers a quote for custom sizes;
+ * `quote` hides it — the product can't go in the cart and is quoted on request.
+ */
+export type PriceDisplay = "fixed" | "from" | "quote";
 
 export interface Dimensions {
   width?: number;
@@ -168,6 +176,8 @@ export interface Product {
   price: number;
   compareAtPrice?: number;
   currency: "TRY" | "USD";
+  /** Omitted means `fixed`. With `quote` the price is never shown, though the API still serves it. */
+  priceDisplay?: PriceDisplay;
 
   /** Placeholder swatch colors standing in for real photography (see lib/placeholder.ts) — first is the card thumbnail. */
   images: string[];

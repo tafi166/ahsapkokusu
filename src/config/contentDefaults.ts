@@ -10,11 +10,11 @@ export const defaultHomeContent = {
     eyebrow: "Parametrik Tasarım Atölyesi",
     title: "Parametrik Sanat.\nMekanları Dönüştürür.",
     subtitle:
-      "Algoritmik desenlerle CNC ve lazer kesim tekniğiyle üretilen duvar tabloları, mobilyalar ve dekoratif objeler.",
+      "Algoritmik desenlerle CNC ve lazer kesimle üretilen duvar tabloları, saatler, bebek odası süsleri ve kişiye özel hediyeler.",
     primaryCtaLabel: "Ürünleri Keşfet",
-    primaryCtaHref: "/parametrik-duvar-tablolari",
-    secondaryCtaLabel: "Koleksiyonu İncele",
-    secondaryCtaHref: "/katmanli-multilayer-tablolar",
+    primaryCtaHref: "/duvar-tablolari",
+    secondaryCtaLabel: "Bebek Odası Koleksiyonu",
+    secondaryCtaHref: "/bebek-cocuk-odasi",
     trustBadge: "500+ mutlu müşteri",
     /**
      * Real photos uploaded from the admin panel (`/admin` → Ana Sayfa →
@@ -26,14 +26,14 @@ export const defaultHomeContent = {
 
   categoryShowcase: {
     title: "Kategoriler",
-    subtitle: "Beş ana koleksiyon, tek bir tasarım felsefesi.",
+    subtitle: "Altı koleksiyon, tek bir tasarım felsefesi.",
   },
 
   featuredProducts: {
     title: "Öne Çıkan Ürünler",
     subtitle: "Atölyemizin imza parçaları.",
     ctaLabel: "Tümünü Gör",
-    ctaHref: "/parametrik-duvar-tablolari",
+    ctaHref: "/duvar-tablolari",
   },
 
   bestSellers: {

@@ -78,10 +78,33 @@ describe("routing smoke test — every nav/footer destination renders without th
     renderAt("/");
 
     const nav = screen.getByRole("navigation", { name: "Ana menü" });
-    const trigger = within(nav).getByText("Parametrik Mobilyalar");
+    const trigger = within(nav).getByText("Dekor Objeleri");
     await user.hover(trigger.closest("li")!);
 
-    expect(await screen.findByRole("menuitem", { name: "Sandalye & Tabure" })).toBeInTheDocument();
+    expect(await screen.findByRole("menuitem", { name: "Küçük Mobilya & Raflar" })).toBeInTheDocument();
+  });
+
+  it("a quote-only product shows no price and asks for a quote instead", async () => {
+    const { default: userEvent } = await import("@testing-library/user-event");
+    const user = userEvent.setup();
+    renderAt("/urun/logolu-masaustu-plaket");
+    expect(screen.getAllByText("Fiyat için teklif alın").length).toBeGreaterThan(0);
+    expect(screen.queryByText(/390/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /sepete ekle/i })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("link", { name: "Teklif İste" }));
+    expect(await screen.findByLabelText(/mesaj/i)).toHaveValue(
+      'Merhaba, "Logolu Masaüstü Plaket" için fiyat teklifi almak istiyorum.\nÖlçü: \nAdet: \nKişiselleştirme / not: ',
+    );
+  });
+
+  it("a starting-price product shows its price as a starting price with a custom-size quote link", () => {
+    renderAt("/urun/jaguar-parametrik-duvar-tablosu");
+    expect(screen.getAllByText(/^Başlangıç fiyatı/).length).toBeGreaterThan(0);
+    expect(screen.getByRole("link", { name: "Özel ölçü için teklif al" })).toHaveAttribute(
+      "href",
+      "/iletisim?urun=wa-2&teklif=1",
+    );
   });
 
   it("sold-out product disables the buy button and shows Tükendi", () => {
@@ -104,7 +127,7 @@ describe("routing smoke test — every nav/footer destination renders without th
   it("category page filters, sorts and paginates the catalog", async () => {
     const { default: userEvent } = await import("@testing-library/user-event");
     const user = userEvent.setup();
-    renderAt("/parametrik-duvar-tablolari");
+    renderAt("/duvar-tablolari");
 
     const initialCards = screen.getAllByRole("link", { name: /ürününü görüntüle/i });
     expect(initialCards.length).toBeLessThanOrEqual(8);
@@ -120,7 +143,7 @@ describe("routing smoke test — every nav/footer destination renders without th
   it("wishlist: favoriting a product from its card surfaces it on the Favoriler page", async () => {
     const { default: userEvent } = await import("@testing-library/user-event");
     const user = userEvent.setup();
-    renderAt("/parametrik-duvar-tablolari");
+    renderAt("/duvar-tablolari");
 
     const favButtons = screen.getAllByRole("button", { name: /favorilere ekle/i });
     await user.click(favButtons[0]);
@@ -129,10 +152,17 @@ describe("routing smoke test — every nav/footer destination renders without th
     expect(screen.getByText(/1 ürün/)).toBeInTheDocument();
   });
 
+  it("retired category addresses lead to where their products now live", async () => {
+    renderAt("/parametrik-mobilyalar");
+    expect(await screen.findByRole("heading", { level: 1, name: "Dekor Objeleri" })).toBeInTheDocument();
+    expect(screen.getByText("Parametrik Yan Sehpa — Nova")).toBeInTheDocument();
+    expect(screen.queryByText("Parametrik Kalemlik — Voronoi")).not.toBeInTheDocument();
+  });
+
   it("quick view modal opens from a product card and can add to cart", async () => {
     const { default: userEvent } = await import("@testing-library/user-event");
     const user = userEvent.setup();
-    renderAt("/parametrik-mobilyalar");
+    renderAt("/dekor-objeleri");
 
     const quickViewButtons = screen.getAllByRole("button", { name: /hızlı bakış/i });
     await user.click(quickViewButtons[0]);
@@ -143,19 +173,19 @@ describe("routing smoke test — every nav/footer destination renders without th
   it("clicking a mega-menu subcategory link while already on that category actually changes the grid (regression: URL changed but content stayed the same)", async () => {
     const { default: userEvent } = await import("@testing-library/user-event");
     const user = userEvent.setup();
-    renderAt("/parametrik-duvar-tablolari");
+    renderAt("/duvar-tablolari");
 
-    // All 7 seed wall-art products are visible with no filter applied.
+    // The seed wall-art products are visible with no filter applied.
     expect(screen.getByText("Parametrik Portre Tablosu — Silüet Serisi")).toBeInTheDocument();
     expect(screen.getByText("Jaguar Parametrik Duvar Tablosu")).toBeInTheDocument();
 
     const nav = screen.getByRole("navigation", { name: "Ana menü" });
-    const trigger = within(nav).getByText("Parametrik Duvar Tabloları");
+    const trigger = within(nav).getByText("Duvar Tabloları");
     await user.hover(trigger.closest("li")!);
     await user.click(await screen.findByRole("menuitem", { name: "Hayvan Figürleri" }));
 
     // Same route (:categorySlug unchanged, only ?alt= changed) — must still re-filter, not stay stuck.
-    expect(await screen.findByRole("heading", { level: 1, name: "Parametrik Duvar Tabloları" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { level: 1, name: "Duvar Tabloları" })).toBeInTheDocument();
     expect(screen.getByText("Jaguar Parametrik Duvar Tablosu")).toBeInTheDocument();
     expect(screen.queryByText("Parametrik Portre Tablosu — Silüet Serisi")).not.toBeInTheDocument();
   });
@@ -163,7 +193,7 @@ describe("routing smoke test — every nav/footer destination renders without th
   it("navigating from one category to another resets filters/sort instead of leaking them", async () => {
     const { default: userEvent } = await import("@testing-library/user-event");
     const user = userEvent.setup();
-    renderAt("/parametrik-mobilyalar");
+    renderAt("/ahsap-aydinlatma");
 
     await user.click(screen.getByRole("button", { name: /filtrele ve sırala/i }));
     await user.click(screen.getByRole("checkbox", { name: /tükendi/i }));

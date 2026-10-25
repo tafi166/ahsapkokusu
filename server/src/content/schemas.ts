@@ -122,11 +122,12 @@ export const contentKeySchema = z.enum(CONTENT_KEYS as [ContentKey, ...ContentKe
 // ---------------------------------------------------------------------------
 
 const categorySlugSchema = z.enum([
-  'parametrik-duvar-tablolari',
-  'katmanli-multilayer-tablolar',
-  'parametrik-mobilyalar',
+  'duvar-tablolari',
   'duvar-saatleri',
-  'dekorlar',
+  'bebek-cocuk-odasi',
+  'kisiye-ozel-hediyelik',
+  'ahsap-aydinlatma',
+  'dekor-objeleri',
 ]);
 
 export const categorySchema: z.ZodType<Category> = z
@@ -215,6 +216,7 @@ export const productSchema: z.ZodType<Product> = z
     description: text(5000),
     shortDescription: text(500).optional(),
     price: money,
+    priceDisplay: z.enum(['fixed', 'from', 'quote']).optional(),
     compareAtPrice: money.optional(),
     currency: z.enum(['TRY', 'USD']),
     images: z.array(imageSrcSchema).min(1).max(12),

@@ -1,3 +1,8 @@
+> **Superseded (2026-10-25):** the range was narrowed to shippable sizes and six
+> categories — Duvar Tabloları, Duvar Saatleri, Bebek & Çocuk Odası, Kişiye Özel &
+> Hediyelik, Ahşap Aydınlatma, Dekor Objeleri. See `README.md` → "The 6 categories".
+> The mapping below records the original five-category design.
+
 # Category Mapping — Etsy Product Types → Our 5 Categories
 
 `etsy.com/shop/ParametricArtWood` blocks all automated access (DataDome/CAPTCHA

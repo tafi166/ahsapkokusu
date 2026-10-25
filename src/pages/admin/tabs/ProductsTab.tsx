@@ -5,7 +5,7 @@ import { categories } from "@/data/categories";
 import { adminApi } from "@/lib/adminApi";
 import { runSave } from "@/pages/admin/saving";
 import { ProductMedia } from "@/lib/placeholder";
-import type { Availability, Product, ProductDeliveryType, ProductType } from "@/types";
+import type { Availability, PriceDisplay, Product, ProductDeliveryType, ProductType } from "@/types";
 import { AdminButton, Checkbox, Field, ImageGalleryField, SavedBanner, SectionCard, TextArea, TextInput } from "@/pages/admin/controls";
 
 function slugify(text: string): string {
@@ -35,7 +35,7 @@ function blankProduct(): Product {
     id: `p-${Date.now()}`,
     slug: "",
     title: "",
-    category: categories[0]?.slug ?? "parametrik-duvar-tablolari",
+    category: categories[0]?.slug ?? "duvar-tablolari",
     description: "",
     price: 0,
     currency: "TRY",
@@ -52,6 +52,11 @@ function blankProduct(): Product {
 
 const AVAILABILITY_OPTIONS: Availability[] = ["in-stock", "made-to-order", "sold-out", "digital"];
 const DELIVERY_OPTIONS: ProductDeliveryType[] = ["PHYSICAL", "DIGITAL", "BOTH"];
+const PRICE_DISPLAY_LABELS: Record<PriceDisplay, string> = {
+  fixed: "Sabit fiyat",
+  from: "Başlangıç fiyatı (+ özel ölçü teklifi)",
+  quote: "Teklif ile (fiyat gösterilmez)",
+};
 const PRODUCT_TYPE_OPTIONS: ProductType[] = ["wall-art", "multilayer-art", "furniture", "wall-clock", "decor"];
 
 export function ProductsTab({ canImport = false }: { canImport?: boolean }) {
@@ -186,7 +191,14 @@ export function ProductsTab({ canImport = false }: { canImport?: boolean }) {
                     <td className="px-3 py-2">{p.title || <em className="text-black/40">(başlıksız)</em>}</td>
                     <td className="px-3 py-2 text-black/60">{p.category}</td>
                     <td className="px-3 py-2">
-                      {p.price} {p.currency}
+                      {p.priceDisplay === "quote" ? (
+                        <span className="text-black/60">Teklif ile</span>
+                      ) : (
+                        <>
+                          {p.priceDisplay === "from" ? "+" : ""}
+                          {p.price} {p.currency}
+                        </>
+                      )}
                     </td>
                     <td className="px-3 py-2 text-black/60">{p.availability}</td>
                     <td className="px-3 py-2 text-right">
@@ -292,7 +304,26 @@ export function ProductsTab({ canImport = false }: { canImport?: boolean }) {
           </SectionCard>
 
           <SectionCard title="Fiyat & Stok">
-            <Field label="Fiyat">
+            <Field
+              label="Fiyat Gösterimi"
+              hint="Teklif ile: fiyat sitede gösterilmez, ürün sepete eklenemez, “Teklif İste” düğmesi çıkar. Fiyat alanı yine de herkese açık katalog verisinde bulunur; gizli kalması gereken bir tutar girmeyin."
+            >
+              <select
+                className="w-full rounded-md border border-black/15 bg-white px-3 py-2 text-sm"
+                value={draft.priceDisplay ?? "fixed"}
+                onChange={(e) => {
+                  const value = e.target.value as PriceDisplay;
+                  setDraft({ ...draft, priceDisplay: value === "fixed" ? undefined : value });
+                }}
+              >
+                {(Object.keys(PRICE_DISPLAY_LABELS) as PriceDisplay[]).map((d) => (
+                  <option key={d} value={d}>
+                    {PRICE_DISPLAY_LABELS[d]}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label={draft.priceDisplay === "from" ? "Başlangıç Fiyatı" : "Fiyat"}>
               <TextInput type="number" value={draft.price} onChange={(e) => setDraft({ ...draft, price: Number(e.target.value) })} />
             </Field>
             <Field label="İndirim Öncesi Fiyat" hint="Opsiyonel — girilirse üstü çizili gösterilir.">

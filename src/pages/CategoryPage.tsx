@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { Navigate, useParams, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Section } from "@/components/ui/Section";
 import { Button } from "@/components/ui/Button";
@@ -17,18 +17,36 @@ import {
 import { categories } from "@/data/categories";
 import { getProductsByCategory } from "@/data/products";
 import { staggerContainer, fadeUp } from "@/lib/motion";
+import { isQuoteOnly } from "@/lib/price";
 import { useSeo, breadcrumbJsonLd } from "@/lib/seo";
 import { ProductMedia } from "@/lib/placeholder";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import type { Category, Product } from "@/types";
 import { useI18n } from "@/i18n/I18nProvider";
-import { categoryBySegment, categoryPath } from "@/i18n/paths";
+import { categoryBySegment, categoryPath, localePath } from "@/i18n/paths";
 
 const PAGE_SIZE = 8;
+
+/**
+ * Category addresses retired when the range was narrowed to shippable sizes
+ * (Turkish and English segments), sent on to where their products now live.
+ */
+const RETIRED_CATEGORIES: Record<string, string> = {
+  "parametrik-duvar-tablolari": "/duvar-tablolari",
+  "parametric-wall-art": "/duvar-tablolari",
+  "katmanli-multilayer-tablolar": "/duvar-tablolari?alt=katmanli-tablolar",
+  "multilayer-wall-art": "/duvar-tablolari?alt=katmanli-tablolar",
+  "parametrik-mobilyalar": "/dekor-objeleri?alt=kucuk-mobilya",
+  "parametric-furniture": "/dekor-objeleri?alt=kucuk-mobilya",
+  dekorlar: "/dekor-objeleri",
+  decor: "/dekor-objeleri",
+};
 
 function matchesFilters(product: Product, filters: CollectionFilters): boolean {
   if (filters.availability.length > 0 && !filters.availability.includes(product.availability)) return false;
   if (filters.price.length > 0) {
+    // A quote-only product has no public price to filter on.
+    if (isQuoteOnly(product)) return false;
     const bucket = product.price < 500 ? "under-500" : product.price <= 2000 ? "500-2000" : "over-2000";
     if (!filters.price.includes(bucket)) return false;
   }
@@ -44,10 +62,11 @@ function matchesFilters(product: Product, filters: CollectionFilters): boolean {
 function sortProducts(products: Product[], sort: SortOption): Product[] {
   const copy = [...products];
   switch (sort) {
+    // Quote-only products have no public price, so they go last either way.
     case "price-asc":
-      return copy.sort((a, b) => a.price - b.price);
+      return copy.sort((a, b) => Number(isQuoteOnly(a)) - Number(isQuoteOnly(b)) || a.price - b.price);
     case "price-desc":
-      return copy.sort((a, b) => b.price - a.price);
+      return copy.sort((a, b) => Number(isQuoteOnly(a)) - Number(isQuoteOnly(b)) || b.price - a.price);
     case "newest":
       return copy.sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
     case "best-selling":
@@ -63,8 +82,8 @@ function sortProducts(products: Product[], sort: SortOption): Product[] {
  * Thin wrapper: reads the route param + `?alt=` query param and remounts
  * `CategoryPageView` (via `key`) whenever either changes.
  *
- * This matters because `/parametrik-duvar-tablolari` and
- * `/parametrik-duvar-tablolari?alt=hayvan-figurleri` — or two different
+ * This matters because `/duvar-tablolari` and
+ * `/duvar-tablolari?alt=hayvan-figurleri` — or two different
  * category slugs — match the *same* route element, so React Router
  * re-renders the existing CategoryPageView instance instead of mounting a
  * new one. Without the key, its filter/sort/pagination state (seeded once
@@ -75,6 +94,8 @@ function sortProducts(products: Product[], sort: SortOption): Product[] {
 export function CategoryPage() {
   const { categorySlug = "" } = useParams<{ categorySlug: string }>();
   const [searchParams] = useSearchParams();
+  const retired = RETIRED_CATEGORIES[categorySlug];
+  if (retired) return <Navigate to={localePath(retired)} replace />;
   return <CategoryPageView key={`${categorySlug}?${searchParams.get("alt") ?? ""}`} categorySlug={categorySlug} />;
 }
 

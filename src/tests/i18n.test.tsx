@@ -74,7 +74,7 @@ describe("addresses", () => {
     }
     expect(localePath("/ozel-tasarim?sekme=dosya", "en")).toBe("/custom-design?sekme=dosya");
     expect(localePath("/sayfa/hakkimizda", "en")).toBe("/page/about");
-    expect(localePath("/parametrik-duvar-tablolari", "en")).toBe("/parametric-wall-art");
+    expect(localePath("/duvar-tablolari", "en")).toBe("/wall-art");
     expect(localePath("https://example.com/x", "en")).toBe("https://example.com/x");
     expect(localePath("/iletisim", "tr")).toBe("/iletisim");
   });

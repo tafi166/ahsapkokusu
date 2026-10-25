@@ -4,7 +4,7 @@ export const defaultBrand = {
   shortName: "AK",
   tagline: "Doğadan Tasarıma.",
   description:
-    "Parametrik duvar tabloları, katmanlı multilayer eserler, mobilyalar, duvar saatleri ve dekoratif objeler — CNC ve lazer kesimle üretilir.",
+    "Parametrik ve katmanlı duvar tabloları, duvar saatleri, bebek kapı süsleri, kişiye özel hediyeler, ahşap aydınlatma ve dekor objeleri — CNC ve lazer kesimle üretilir.",
 
   contact: {
     email: "merhaba@ahsapkokusu.example",

@@ -2,10 +2,10 @@
 
 Phase 1 built the homepage/core layout against a reverse-engineered Shopify
 reference site. **Phase 3 replaced the entire category/product domain** with
-an original parametric-wood-art / CNC-design catalog (5 categories, a
+an original parametric-wood-art / CNC-design catalog (now 6 categories, a
 comprehensive Product schema, wishlist/quick-view/compare) — see
 `CATEGORY_MAPPING.md` for how the Etsy-shop product-type brief was mapped to
-the 5 categories, and `README.md`'s "Known limitations" for what's still
+the original 5 categories (since narrowed to 6 shippable ones — see `README.md`), and `README.md`'s "Known limitations" for what's still
 mock/demo-scale.
 
 Status legend: **Built** = implemented and working against mock data/services
@@ -20,7 +20,7 @@ explicitly out of scope for now.
 | Digital + physical delivery | Built | `deliveryType: DIGITAL/PHYSICAL/BOTH` drives UI branching (file formats & software compatibility vs. quantity/shipping copy) | `types/index.ts` `Product.deliveryType`, `wallArt.ts` (has DIGITAL and BOTH examples) |
 | Wishlist | Built | Heart toggle on every product card + product page, persisted to localStorage, dedicated `/favoriler` page | `hooks/useWishlist.tsx`, `WishlistPage.tsx` |
 | Quick View | Built | Centered animated modal from any product card, add-to-cart without leaving the grid | `hooks/useQuickView.tsx`, `QuickViewModal.tsx` |
-| Product comparison | Built (furniture only) | Add up to 4 furniture items via a product-page button, compare price/material/dimensions/finish/assembly in a table at `/karsilastir` | `hooks/useCompare.tsx`, `ComparePage.tsx` |
+| Product comparison | Built (small furniture only) | Add up to 4 small-furniture items via a product-page button, compare price/material/dimensions/finish/assembly in a table at `/karsilastir` | `hooks/useCompare.tsx`, `ComparePage.tsx` |
 | Global search | Built | Full-screen overlay, debounced, matches title/category/subcategory/tags/description, shows thumbnail+category+price per result | `SearchOverlay.tsx`, `lib/api.ts` |
 | Cart | Built | Add/remove/adjust qty, subtotal, persists to localStorage, slide-in drawer | `hooks/useCart.tsx`, `CartDrawer.tsx` |
 | Checkout / payment | **Not built** | N/A | Needs a real backend — the cart drawer says so explicitly instead of faking it |

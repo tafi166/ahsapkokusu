@@ -105,11 +105,11 @@ describe('sitemap and robots.txt', () => {
     const locs = [...res.text.matchAll(/<loc>(.*?)<\/loc>/g)].map((m) => m[1]);
     expect(locs).toContain('http://localhost:5173/en');
     expect(locs).toContain('http://localhost:5173/en/custom-design');
-    expect(locs).toContain('http://localhost:5173/en/parametric-wall-art');
+    expect(locs).toContain('http://localhost:5173/en/wall-art');
     expect(locs).toContain('http://localhost:5173/en/product/parametric-portrait-silhouette-series');
     expect(locs.filter((l) => l?.includes('/en/product/'))).toHaveLength(defaultProducts.length);
     expect(res.text).toContain(
-      '<xhtml:link rel="alternate" hreflang="en" href="http://localhost:5173/en/parametric-wall-art"/>',
+      '<xhtml:link rel="alternate" hreflang="en" href="http://localhost:5173/en/wall-art"/>',
     );
     expect(res.text).toContain('xmlns:xhtml="http://www.w3.org/1999/xhtml"');
   });

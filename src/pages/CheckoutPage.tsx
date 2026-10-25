@@ -139,7 +139,7 @@ function OpenCheckout() {
         <div className="mx-auto max-w-xl text-center">
           <h1>{t.checkout.emptyTitle}</h1>
           <p className="mt-3 text-body/60">{t.checkout.emptyBody}</p>
-          <Button href={localePath("/parametrik-duvar-tablolari")} className="mt-6">
+          <Button href={localePath("/duvar-tablolari")} className="mt-6">
             {t.product.browse}
           </Button>
         </div>

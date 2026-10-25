@@ -10,6 +10,7 @@
     "db:deploy": "prisma migrate deploy",
     "db:test:migrate": "node scripts/migrate-test-db.mjs",
     "db:seed": "tsx prisma/seed.ts",
+    "db:refresh-samples": "tsx scripts/refresh-sample-catalog.ts",
     "dev": "nest start --watch",
     "build": "nest build",
     "start": "node dist/main.js",

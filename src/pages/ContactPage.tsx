@@ -14,10 +14,17 @@ type Status = "idle" | "loading" | "success" | "error";
 
 export function ContactPage() {
   const { t } = useI18n();
-  // `?urun=<product id>` — set by a product's "ask about this product" button.
+  // `?urun=<product id>` — set by a product's "ask about this product" button;
+  // `&teklif=1` when it asks for a quote (quote-only price or a custom size).
   const [params] = useSearchParams();
   const product = allProducts.find((p) => p.id === params.get("urun"));
-  const empty = { name: "", email: "", phone: "", message: product ? t.contact.productMessage(product.title) : "" };
+  const wantsQuote = params.get("teklif") === "1";
+  const empty = {
+    name: "",
+    email: "",
+    phone: "",
+    message: product ? (wantsQuote ? t.contact.quoteMessage(product.title) : t.contact.productMessage(product.title)) : "",
+  };
   const [form, setForm] = useState(empty);
   const [status, setStatus] = useState<Status>("idle");
   const [feedback, setFeedback] = useState<string | null>(null);

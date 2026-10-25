@@ -8,6 +8,7 @@ import { useScrollLock } from "@/hooks/useScrollLock";
 import { ProductMedia } from "@/lib/placeholder";
 import { StarRating } from "@/components/ui/StarRating";
 import { PriceTag } from "@/components/ui/PriceTag";
+import { isQuoteOnly } from "@/lib/price";
 import { Button } from "@/components/ui/Button";
 import { productPath } from "@/i18n/paths";
 import { ordersEnabled } from "@/config/shop";
@@ -59,7 +60,7 @@ export function QuickViewModal() {
               <p className="mt-4 text-sm text-body/70">{product.shortDescription ?? product.description}</p>
 
               <div className="mt-6 flex flex-col gap-3">
-                {!ordersEnabled() ? (
+                {!ordersEnabled() || isQuoteOnly(product) ? (
                   <Link
                     to={productPath(product)}
                     onClick={close}

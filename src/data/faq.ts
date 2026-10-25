@@ -15,7 +15,7 @@ const defaultProductFaq: FaqItem[] = [
   {
     question: "Ölçüleri özelleştirebilir miyim?",
     answer:
-      "Çoğu ürün için özel ölçü mümkündür. En yakın hazır seçeneği seçip sipariş notuna istediğiniz ölçüyü yazabilirsiniz; onay için sizinle iletişime geçeriz.",
+      "Çoğu ürün için en fazla 50×70 cm olmak üzere özel ölçü mümkündür. En yakın hazır seçeneği seçip sipariş notuna istediğiniz ölçüyü yazabilirsiniz; onay için sizinle iletişime geçeriz.",
   },
   {
     question: "İade politikanız nedir?",
