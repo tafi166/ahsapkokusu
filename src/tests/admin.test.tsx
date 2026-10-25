@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import App from "@/App";
@@ -13,6 +13,8 @@ import { enDefaults } from "@/i18n/content/en";
 import { TRANSLATION_KEYS } from "@/i18n/content/types";
 import { buildBlock, rowValues, TRANSLATION_BLOCKS } from "@/pages/admin/translationRows";
 import { installFakeApi } from "./fakeApi";
+import { defaultProducts } from "@/data/products/defaults";
+import type { Product } from "@/types";
 
 // jsdom has no canvas to resize photos with; uploads just pass a fixed data URL through.
 vi.mock("@/lib/imageResize", () => ({
@@ -114,7 +116,7 @@ describe("admin saves", () => {
     const user = userEvent.setup();
     const nav = await signIn(user);
     await user.click(within(nav).getByText("Ürünler"));
-    await user.click(screen.getByRole("button", { name: "+ Yeni Ürün" }));
+    await user.click(await screen.findByRole("button", { name: "+ Yeni Ürün" }));
     await user.type(screen.getByLabelText("Başlık"), "Test Ürünü");
     await user.click(screen.getByRole("button", { name: "Ürünü Uygula" }));
     await user.click(screen.getByRole("button", { name: "Tüm Değişiklikleri Kaydet" }));
@@ -122,6 +124,26 @@ describe("admin saves", () => {
     expect(await screen.findByRole("status")).toHaveTextContent(/kaydedildi/i);
     expect((api.state.content.products as { title: string }[]).some((p) => p.title === "Test Ürünü")).toBe(true);
   });
+
+  it("hides a product as a draft instead of deleting it, and publishes it again", async () => {
+    const user = userEvent.setup();
+    const nav = await signIn(user);
+    await user.click(within(nav).getByText("Ürünler"));
+    const jaguar = "Jaguar Parametrik Duvar Tablosu";
+    await user.click(await screen.findByRole("button", { name: `${jaguar} ürününü gizle` }));
+    expect(screen.getByText("Taslak")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Tüm Değişiklikleri Kaydet" }));
+    expect(await screen.findByRole("status")).toHaveTextContent(/kaydedildi/i);
+
+    const saved = api.state.content.products as Product[];
+    expect(saved).toHaveLength(defaultProducts.length);
+    expect(saved.find((p) => p.title === jaguar)?.hidden).toBe(true);
+
+    // The draft comes back from the server flagged, and can be published again.
+    await user.click(screen.getByRole("button", { name: `${jaguar} ürününü yayınla` }));
+    await user.click(screen.getByRole("button", { name: "Tüm Değişiklikleri Kaydet" }));
+    await waitFor(() => expect((api.state.content.products as Product[]).find((p) => p.title === jaguar)).not.toHaveProperty("hidden"));
+  }, 15000);
 
   it("shows the server's error when a save is rejected", async () => {
     const user = userEvent.setup();
@@ -135,7 +157,7 @@ describe("admin saves", () => {
     const user = userEvent.setup();
     const nav = await signIn(user);
     await user.click(within(nav).getByText("Ürünler"));
-    await user.click(screen.getByRole("button", { name: "+ Yeni Ürün" }));
+    await user.click(await screen.findByRole("button", { name: "+ Yeni Ürün" }));
     const productPicker = screen.getByLabelText(/fotoğraf ekle/i);
     expect(productPicker).toHaveAttribute("accept", "image/*");
     expect(productPicker).toHaveAttribute("multiple");

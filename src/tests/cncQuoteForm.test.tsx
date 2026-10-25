@@ -218,7 +218,7 @@ describe("CNC quote submission (prototype)", () => {
       name: "Ada Lovelace",
       email: "ada@example.com",
       message: "Logo panosu",
-      categorySlug: "parametrik-duvar-tablolari",
+      categorySlug: "duvar-tablolari",
     });
   }, 15000);
 });

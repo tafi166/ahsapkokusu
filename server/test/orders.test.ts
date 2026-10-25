@@ -89,6 +89,7 @@ describe('orders API', () => {
   const multilayer = defaultProducts.find((p) => p.id === 'ml-2')!; // configurable, 1980 TRY
   const digital = defaultProducts.find((p) => p.deliveryType === 'DIGITAL')!;
   const soldOut = defaultProducts.find((p) => p.availability === 'sold-out')!;
+  const quoteOnly = defaultProducts.find((p) => p.priceDisplay === 'quote')!;
   const customer = { name: 'Ada Lovelace', email: 'Ada@Example.com', phone: '+90 532 000 00 00' };
   const address = { line: 'Moda Cad. No: 1', district: 'Kadıköy', city: 'İstanbul', postalCode: '34710' };
   const mlLine = { productId: 'ml-2', quantity: 2, selection: { layerCount: 5, color: 'Siyah', frame: 'Metal Çerçeve' } };
@@ -138,6 +139,7 @@ describe('orders API', () => {
     ['an option not offered', { lines: [{ ...mlLine, selection: { ...mlLine.selection, color: 'Mor' } }] }],
     ['options on a plain product', { lines: [{ productId: digital.id, quantity: 1, selection: { color: 'Siyah' } }] }],
     ['a sold-out product', { lines: [{ productId: soldOut.id, quantity: 1, selection: undefined }] }],
+    ['a quote-only product', { lines: [{ productId: quoteOnly.id, quantity: 1, selection: undefined }] }],
     ['an unknown product', { lines: [{ productId: 'yok-boyle-urun', quantity: 1 }] }],
     ['an invalid phone', { customer: { ...customer, phone: 'abc' } }],
   ])('rejects %s and records nothing', async (_label, patch) => {
@@ -149,12 +151,21 @@ describe('orders API', () => {
     const english = (body: object) => place(body).set('Accept-Language', 'en');
     const soldOutRes = await english({ lines: [{ productId: soldOut.id, quantity: 1 }], customer, address }).expect(400);
     expect(soldOutRes.body.message).toBe('Small Decorative Object — Cell is sold out.');
+    const quoteRes = await english({ lines: [{ productId: quoteOnly.id, quantity: 1 }], customer, address }).expect(400);
+    expect(quoteRes.body.message).toMatch(/is sold on quotation; please request a quote instead\.$/);
     const optionRes = await english({ lines: [{ ...mlLine, selection: { ...mlLine.selection, color: 'Mor' } }], customer, address }).expect(400);
     expect(optionRes.body.message).toContain('Invalid colour: Mor');
     const invalid = await english({ lines: [mlLine], customer: { ...customer, phone: 'abc' }, address }).expect(400);
     expect(invalid.body.message).toBe('The information sent is not valid.');
     // Without the header (or with any other language) the answer stays Turkish.
     expect((await place({ lines: [{ productId: soldOut.id, quantity: 1 }], customer, address }).expect(400)).body.message).toMatch(/tükendi\.$/);
+  });
+
+  it('treats a hidden (draft) product as unavailable', async () => {
+    await prisma.product.update({ where: { id: 'ml-2' }, data: { isHidden: true } });
+    const res = await place({ lines: [mlLine], customer, address }).expect(400);
+    expect(res.body.message).toBe('Sepetteki bir ürün artık satışta değil (ml-2).');
+    expect(await prisma.order.count()).toBe(0);
   });
 
   it('needs an address only when something ships', async () => {

@@ -79,7 +79,8 @@ export function Header() {
         <AnnouncementBar />
         <div
           className={cn(
-            "w-full border-b border-line bg-paper/95 backdrop-blur-sm transition-shadow duration-300",
+            // Opaque: a see-through bar let the page scrolling underneath show as faint text.
+            "w-full border-b border-line bg-paper transition-shadow duration-300",
             isScrolled && "shadow-sm",
           )}
         >
@@ -152,7 +153,14 @@ export function Header() {
                         )}
                       />
                     </Link>
-                    {item.children ? <MegaMenu open={openMenu === item.label} links={item.children} id={`nav-menu-${index}`} /> : null}
+                    {item.children ? (
+                      <MegaMenu
+                        open={openMenu === item.label}
+                        links={item.children}
+                        id={`nav-menu-${index}`}
+                        onNavigate={() => setOpenMenu(null)}
+                      />
+                    ) : null}
                   </li>
                 );
               })}

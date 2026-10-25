@@ -11,7 +11,7 @@ export interface ProductFilter {
   newProduct?: boolean;
 }
 
-/** Read-only catalog queries. Ordering follows the catalog's own sortOrder. */
+/** Read-only public catalog queries; hidden (draft) products are left out. Ordering follows the catalog's own sortOrder. */
 @Injectable()
 export class CatalogService {
   constructor(@Inject(PRISMA) private readonly prisma: PrismaClient) {}
@@ -33,6 +33,7 @@ export class CatalogService {
       featured: filter.featured,
       bestSeller: filter.bestSeller,
       newProduct: filter.newProduct,
+      isHidden: false,
     };
     const rows = await this.prisma.product.findMany({ where, orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }] });
     return rows.map(rowToProduct);
@@ -40,7 +41,7 @@ export class CatalogService {
 
   async getProduct(slug: string): Promise<Product> {
     const row = await this.prisma.product.findUnique({ where: { slug } });
-    if (!row) throw new NotFoundException({ message: 'Product not found' });
+    if (!row || row.isHidden) throw new NotFoundException({ message: 'Product not found' });
     return rowToProduct(row);
   }
 }

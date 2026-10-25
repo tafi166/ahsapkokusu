@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { useI18n } from "@/i18n/I18nProvider";
 import type { Dictionary } from "@/i18n/messages";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { Minus, Plus, Link2, Mail, Heart, Scale } from "lucide-react";
 import { Section } from "@/components/ui/Section";
 import { Button } from "@/components/ui/Button";
@@ -22,6 +22,7 @@ import { useWishlist } from "@/hooks/useWishlist";
 import { useCompare } from "@/hooks/useCompare";
 import { useSeo, productJsonLd, breadcrumbJsonLd } from "@/lib/seo";
 import { cn } from "@/lib/cn";
+import { priceDisplay } from "@/lib/price";
 import { categoryPath, localePath, productBySegment, productPath } from "@/i18n/paths";
 import { optionLabel } from "@/i18n/content";
 import { ordersEnabled } from "@/config/shop";
@@ -79,7 +80,7 @@ export function ProductPage() {
         <div className="text-center">
           <h1>{t.product.notFoundTitle}</h1>
           <p className="mt-3 text-body/60">{t.product.notFoundBody(slug ?? "")}</p>
-          <Button href={localePath("/parametrik-duvar-tablolari")} className="mt-6">
+          <Button href={localePath("/duvar-tablolari")} className="mt-6">
             {t.product.browse}
           </Button>
         </div>
@@ -89,7 +90,10 @@ export function ProductPage() {
 
   const isDigital = product.deliveryType === "DIGITAL";
   const isSoldOut = product.availability === "sold-out";
-  const canAddToCart = !isSoldOut && selection.isComplete;
+  const display = priceDisplay(product);
+  const quoteOnly = display === "quote";
+  const quoteHref = localePath(`/iletisim?urun=${encodeURIComponent(product.id)}&teklif=1`);
+  const canAddToCart = !isSoldOut && !quoteOnly && selection.isComplete;
   const wishlisted = isWishlisted(product.id);
   const comparing = isComparing(product.id);
   const dimensionsText = formatDimensions(product, t.product.dims);
@@ -161,11 +165,18 @@ export function ProductPage() {
               <VariantSelectors variants={product.variants} onChange={handleSelectionChange} />
             </div>
           ) : null}
-          {product.variants && !isSoldOut ? (
+          {product.variants && !isSoldOut && !quoteOnly ? (
             <PriceBreakdown product={product} selection={selection} quantity={quantity} />
           ) : null}
 
-          {!ordersEnabled() ? (
+          {quoteOnly ? (
+            <div className="mt-8">
+              <Button size="lg" href={quoteHref}>
+                {t.product.requestQuote}
+              </Button>
+              <p className="mt-3 max-w-md text-xs text-body/60">{t.product.quoteNote}</p>
+            </div>
+          ) : !ordersEnabled() ? (
             <div className="mt-8">
               <Button size="lg" href={localePath(`/iletisim?urun=${encodeURIComponent(product.id)}`)}>
                 {t.product.askAbout}
@@ -203,7 +214,15 @@ export function ProductPage() {
               </Button>
             </div>
           )}
-          {ordersEnabled() && !canAddToCart && !isSoldOut ? (
+          {display === "from" ? (
+            <p className="mt-4 max-w-md text-xs text-body/60">
+              {t.product.fromNote}{" "}
+              <Link to={quoteHref} className="font-medium text-body underline">
+                {t.product.customSizeQuote}
+              </Link>
+            </p>
+          ) : null}
+          {ordersEnabled() && !quoteOnly && !canAddToCart && !isSoldOut ? (
             <p className="mt-2 text-xs text-body/50">{t.product.selectAllOptions}</p>
           ) : null}
           {addErrors.length > 0 ? (

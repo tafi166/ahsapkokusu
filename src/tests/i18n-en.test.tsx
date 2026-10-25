@@ -45,9 +45,9 @@ describe("English content", () => {
     expect(forest.slug).toBe(original.slug);
     expect(forest.price).toBe(original.price);
     expect(forest.images).toEqual(original.images);
-    expect(categories[0]!.title).toBe("Parametric Wall Art");
+    expect(categories[0]!.title).toBe("Wall Art");
     expect(homeContent.hero.title).toBe("Parametric Art.\nTransforming Spaces.");
-    expect(homeContent.hero.primaryCtaHref).toBe("/parametrik-duvar-tablolari");
+    expect(homeContent.hero.primaryCtaHref).toBe("/duvar-tablolari");
   });
 
   it("shows the home page in English with English links", () => {
@@ -55,9 +55,9 @@ describe("English content", () => {
     expect(document.documentElement.lang).toBe("en");
     expect(screen.getByRole("navigation", { name: "Main menu" })).toBeInTheDocument();
     const nav = screen.getByRole("navigation", { name: "Main menu" });
-    expect(nav.querySelector('a[href="/en/parametric-wall-art"]')).toHaveTextContent("Parametric Wall Art");
+    expect(nav.querySelector('a[href="/en/wall-art"]')).toHaveTextContent("Wall Art");
     expect(nav.querySelector('a[href="/en/custom-design"]')).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Explore the Collection" })).toHaveAttribute("href", "/en/parametric-wall-art");
+    expect(screen.getByRole("link", { name: "Explore the Collection" })).toHaveAttribute("href", "/en/wall-art");
     expect(screen.getByRole("link", { name: "Türkçe" })).toHaveAttribute("href", "/");
     expect(screen.getByRole("link", { name: "English" })).toHaveAttribute("aria-current", "true");
   });
@@ -105,9 +105,9 @@ describe("catalog pages in English", () => {
 
   it("translates sorting, filters and counts", async () => {
     const user = userEvent.setup();
-    renderEn("/parametric-wall-art");
+    renderEn("/wall-art");
 
-    expect(screen.getByRole("heading", { level: 1, name: "Parametric Wall Art" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "Wall Art" })).toBeInTheDocument();
     expect(screen.getByRole("option", { name: "Price: Low to High" })).toBeInTheDocument();
     expect(screen.getByText(/^\d+ products?$/)).toBeInTheDocument();
 

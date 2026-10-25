@@ -4,8 +4,8 @@ import { applyOverride, loadOverrides } from "@/lib/adminStore";
 import { localizeProducts } from "@/i18n/content";
 
 /**
- * Central product catalog. This is a representative seed (~28 items across
- * the 5 categories) demonstrating every schema field and interaction the
+ * Central product catalog. This is a representative seed (~39 items across
+ * the 6 categories) demonstrating every schema field and interaction the
  * architecture supports — filtering, sorting, pagination, wishlist, quick
  * view, comparison — at a manageable size for a hand-written demo dataset.
  *

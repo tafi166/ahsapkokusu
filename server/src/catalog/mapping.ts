@@ -78,6 +78,7 @@ export function productToRow(p: Product, sortOrder: number, isSample: boolean): 
     newProduct,
     rating,
     reviewCount,
+    hidden,
     createdAt,
     updatedAt,
     ...details
@@ -103,6 +104,7 @@ export function productToRow(p: Product, sortOrder: number, isSample: boolean): 
     sortOrder,
     details: toJson(details),
     isSample,
+    isHidden: hidden ?? false,
     publishedAt: parseDate(createdAt),
     contentUpdatedAt: parseDate(updatedAt),
   };
@@ -129,6 +131,7 @@ export function rowToProduct(row: ProductRow): Product {
     ...(row.newProduct && { newProduct: true }),
     ...(row.rating !== null && { rating: row.rating.toNumber() }),
     ...(row.reviewCount !== null && { reviewCount: row.reviewCount }),
+    ...(row.isHidden && { hidden: true }),
     createdAt: formatDate(row.publishedAt),
     updatedAt: formatDate(row.contentUpdatedAt),
   };
@@ -154,6 +157,7 @@ type ProductCore = Pick<
   | 'newProduct'
   | 'rating'
   | 'reviewCount'
+  | 'hidden'
   | 'createdAt'
   | 'updatedAt'
 >;

@@ -31,7 +31,7 @@ export class SeoController {
   async sitemap(): Promise<string> {
     const [categories, products, en] = await Promise.all([
       this.prisma.category.findMany({ orderBy: { sortOrder: 'asc' }, select: { slug: true, updatedAt: true } }),
-      this.prisma.product.findMany({ orderBy: { sortOrder: 'asc' }, select: { id: true, slug: true, contentUpdatedAt: true } }),
+      this.prisma.product.findMany({ where: { isHidden: false }, orderBy: { sortOrder: 'asc' }, select: { id: true, slug: true, contentUpdatedAt: true } }),
       this.content.translations('en'),
     ]);
     // Each page in both languages; English addresses use the translated slug when there is one.

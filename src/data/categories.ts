@@ -4,8 +4,8 @@ import { defaultCategories } from "@/data/categoryDefaults";
 import { localizeCategories } from "@/i18n/content";
 
 /**
- * The 5 top-level categories. Each `slug` is also the SEO-friendly route
- * segment (e.g. `/parametrik-duvar-tablolari`). `facets` declares which
+ * The 6 top-level categories. Each `slug` is also the SEO-friendly route
+ * segment (e.g. `/duvar-tablolari`). `facets` declares which
  * filters CategoryPage should render for that category — see
  * components/collection/FilterDrawer.tsx, which reads this config instead
  * of hardcoding filters per page.

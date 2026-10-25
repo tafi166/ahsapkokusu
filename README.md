@@ -10,14 +10,23 @@ Tailwind CSS v4 + React Router 7 + Framer Motion, data-driven throughout so
 the catalog scales to hundreds of real products without touching component
 code.
 
-## The 5 categories
+## The 6 categories
 
-`/parametrik-duvar-tablolari` · `/katmanli-multilayer-tablolar` ·
-`/parametrik-mobilyalar` · `/duvar-saatleri` · `/dekorlar` — defined once in
+`/duvar-tablolari` · `/duvar-saatleri` · `/bebek-cocuk-odasi` ·
+`/kisiye-ozel-hediyelik` · `/ahsap-aydinlatma` · `/dekor-objeleri` — defined once in
 `src/data/categories.ts` (title, description, subcategories, which filters
 apply, SEO copy, FAQ) and consumed everywhere: header mega-menu, footer,
-homepage showcase, category pages. See `CATEGORY_MAPPING.md` for how Etsy's
-product types map onto these 5.
+homepage showcase, category pages. The range is kept to shippable sizes: wall
+pieces are at most 50×70 cm, and only small flat-packed furniture is sold (under
+Dekor Objeleri). The retired category addresses (`/parametrik-duvar-tablolari`,
+`/katmanli-multilayer-tablolar`, `/parametrik-mobilyalar`, `/dekorlar` and their
+English forms) redirect to where their products moved, in `CategoryPage.tsx`.
+
+Each product has a price display (`Product.priceDisplay`, set in the admin
+panel): `fixed` (default) shows the price; `from` shows it as a starting price
+with a "custom size quote" link; `quote` hides the price, keeps the product out
+of the cart (the API refuses such order lines too) and shows a "Teklif İste"
+button that opens the contact form with a quote request prefilled.
 
 ## Stack
 
@@ -78,16 +87,17 @@ to the server (embedded photos are uploaded on the way).
 | `src/config/theme.ts` + `src/styles/globals.css` `@theme` block | Colors, fonts, radii, breakpoints |
 | `src/config/navigation.ts` | Generated from `data/categories.ts` — usually you edit categories instead |
 | `src/config/content.ts` | All homepage section copy |
-| `src/data/categories.ts` | The 5 categories: titles, descriptions, subcategories, filters, SEO, FAQ |
+| `src/data/categories.ts` | The 6 categories: titles, descriptions, subcategories, filters, SEO, FAQ |
 | `src/data/products/*.ts` | The product catalog, one file per category + `index.ts` aggregator |
 | `src/lib/api.ts` | Swap mock async functions (search, contact, newsletter) for real API calls |
 | `src/lib/placeholder.tsx` | Swap the gradient placeholder for real `<img>`/`<picture>` once you have licensed photography |
-| `public/` + `Product.images`/`thumbnail` | Point these at real asset paths, e.g. `/assets/products/parametrik-duvar-tablolari/urun-001.webp` |
+| `public/` + `Product.images`/`thumbnail` | Point these at real asset paths, e.g. `/assets/products/duvar-tablolari/urun-001.webp` |
 
 ### Adding a product
 
 Add one object to the matching file in `src/data/products/` (`wallArt.ts`,
-`multilayer.ts`, `furniture.ts`, `clocks.ts`, `decor.ts`) following the
+`multilayer.ts`, `clocks.ts`, `babyRoom.ts`, `gifts.ts`, `lighting.ts`,
+`decor.ts`, `furniture.ts`) following the
 `Product` type in `src/types/index.ts` — no component changes needed. Every
 page (category grid, search, featured/best-seller/new-arrival homepage
 sections, related products) reads from the same `allProducts` array in
@@ -193,6 +203,7 @@ npm run db:local       # PostgreSQL on :5433 via embedded-postgres (no Docker); 
 npm run db:migrate     # apply migrations to the dev database
 npm run db:test:migrate
 npm run db:seed        # insert the demo catalog (isSample = true); never overwrites existing rows
+npm run db:refresh-samples  # replace the demo products with the current defaults; admin-created products are kept
 npm run admin:create   # first ADMIN user; the password is asked at a hidden prompt
 npm run dev            # http://localhost:3000/api
 npm run typecheck && npm test

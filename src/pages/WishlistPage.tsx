@@ -19,7 +19,7 @@ export function WishlistPage() {
       {products.length === 0 ? (
         <div className="py-16 text-center">
           <p className="text-body/60">{t.pages.wishlistEmpty}</p>
-          <Button href={localePath("/parametrik-duvar-tablolari")} className="mt-4">
+          <Button href={localePath("/duvar-tablolari")} className="mt-4">
             {t.product.browse}
           </Button>
         </div>

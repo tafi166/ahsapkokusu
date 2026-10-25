@@ -12,7 +12,7 @@ export const enDefaults: ContentTranslations = {
   brand: {
     tagline: "Parametric Art. Transforming Spaces.",
     description:
-      "Parametric wall art, multilayer pieces, furniture, wall clocks and decorative objects — made with CNC and laser cutting.",
+      "Parametric and multilayer wall art, wall clocks, baby door signs, personalised gifts, wooden lighting and decor objects — made with CNC and laser cutting.",
     contact: { address: "Istanbul, Türkiye" },
   },
 
@@ -27,12 +27,12 @@ export const enDefaults: ContentTranslations = {
       eyebrow: "Parametric Design Studio",
       title: "Parametric Art.\nTransforming Spaces.",
       subtitle:
-        "Wall art, furniture and decorative objects built from algorithmic patterns and made with CNC and laser cutting.",
+        "Wall art, clocks, nursery decor and personalised gifts built from algorithmic patterns and made with CNC and laser cutting.",
       primaryCtaLabel: "Explore the Collection",
-      secondaryCtaLabel: "View Multilayer Art",
+      secondaryCtaLabel: "Baby Room Collection",
       trustBadge: "500+ happy customers", // verify
     },
-    categoryShowcase: { title: "Categories", subtitle: "Five collections, one design philosophy." },
+    categoryShowcase: { title: "Categories", subtitle: "Six collections, one design philosophy." },
     featuredProducts: { title: "Featured Pieces", subtitle: "Signature pieces from our studio.", ctaLabel: "View All" },
     bestSellers: { title: "Best Sellers", subtitle: "Our customers' favourite designs." },
     newArrivals: { title: "New Arrivals", subtitle: "Fresh from the studio." },
@@ -79,7 +79,7 @@ export const enDefaults: ContentTranslations = {
     {
       question: "Can I customise the size?",
       answer:
-        "Most products can be made to a custom size. Choose the closest standard option and add the size you want in the order note; we'll contact you to confirm.",
+        "Most products can be made to a custom size of up to 50×70 cm. Choose the closest standard option and add the size you want in the order note; we'll contact you to confirm.",
     },
     {
       question: "What is your returns policy?",
@@ -99,13 +99,13 @@ export const enDefaults: ContentTranslations = {
       quote: "The multilayer piece became the focal point of our living room. Delivery was quick and the packaging was perfect.",
     },
     t2: {
-      role: "Interior Architect",
+      role: "Mother, İzmir",
       quote:
-        "I've ordered parametric furniture for three different projects. The quality is consistent and custom sizes are never a problem.",
+        "Our daughter's name sign caught everyone's eye at the hospital, and now it hangs on her bedroom door. I loved that they didn't start production until we'd approved the preview.",
     },
     t3: {
       role: "Café Owner",
-      quote: "The reception desk is the first thing our customers ask about. Production was quicker than I expected.",
+      quote: "We had a logo door sign and two wall clocks made for our café. Production was quicker than I expected.",
     },
     t4: {
       role: "Homeowner, Ankara",
@@ -136,21 +136,21 @@ export const enDefaults: ContentTranslations = {
   },
 
   categories: {
-    "parametrik-duvar-tablolari": {
-      slug: "parametric-wall-art",
-      title: "Parametric Wall Art",
-      shortDescription: "CNC and laser-cut wall art built from algorithmic patterns.",
+    "duvar-tablolari": {
+      slug: "wall-art",
+      title: "Wall Art",
+      shortDescription: "Parametric and multilayer wood art, up to 50×70 cm.",
       description:
-        "Wall art with geometric and organic patterns, created with parametric design software. Each design is tuned to give the wood a texture that comes alive with light and shadow.",
-      seoTitle: "Parametric Wall Art | Modern CNC Wood Art",
+        "Wall art with geometric and organic patterns created with parametric design software, alongside multilayer compositions with a real sense of depth. Every piece is made at up to 50×70 cm, so it can be packed securely and shipped safely.",
+      seoTitle: "Parametric & Multilayer Wall Art | CNC Wood Art",
       seoDescription:
-        "CNC and laser-cut parametric wall art with algorithmic patterns. Portraits, animals, cars and abstract designs — in sizes and materials made for your space.",
+        "Parametric and multilayer wooden wall art up to 50×70 cm. Abstract, animal, portrait and layered designs — CNC and laser cut, packed for safe shipping.",
       subcategories: {
-        "portre-ve-figur": "Portraits & Figures",
-        "hayvan-figurleri": "Animals",
-        "arac-ve-motor": "Cars & Motorsport",
         "soyut-ve-geometrik": "Abstract & Geometric",
-        "ozel-tasarimlar": "Custom Designs",
+        "hayvan-figurleri": "Animals",
+        "portre-ve-figur": "Portraits & Figures",
+        "arac-ve-motor": "Cars & Motorsport",
+        "katmanli-tablolar": "Multilayer Art",
       },
       faq: [
         {
@@ -158,59 +158,14 @@ export const enDefaults: ContentTranslations = {
           answer: "We work in MDF, plywood and solid wood; each product page lists the materials available.",
         },
         {
-          question: "Can I have a piece made from my own image?",
-          answer: "Yes — send us your photo or pattern through the Custom Designs subcategory or the contact form.",
+          question: "Why 50×70 cm at most?",
+          answer:
+            "Parametric pieces are built from thin wooden parts. Keeping to this size lets us pack every piece securely in standard boxes so it arrives undamaged.",
         },
-      ],
-    },
-    "katmanli-multilayer-tablolar": {
-      slug: "multilayer-wall-art",
-      title: "Multilayer Wall Art",
-      shortDescription: "Layered wood compositions with a real sense of depth.",
-      description:
-        "Multilayer pieces built from several wooden layers set at different depths, available with 3 to 11 layers. The way light passes through and shadows play across them sets them apart from ordinary wall art.",
-      seoTitle: "Multilayer Wall Art | Layered Wooden Wall Art",
-      seoDescription:
-        "Multilayer wood art in 3, 5, 7, 9 and 11 layers. Designs with real depth, with frame and mounting options.",
-      subcategories: {
-        "3-katman": "3 Layers",
-        "5-katman": "5 Layers",
-        "7-katman": "7 Layers",
-        "9-katman": "9 Layers",
-        "11-katman": "11 Layers",
-      },
-      faq: [
         {
           question: "How does the number of layers affect the price?",
           answer:
-            "More layers mean more material and more work, so the price goes up — each product page updates the price for the layer count you choose.",
-        },
-        {
-          question: "Is a frame included?",
-          answer: "The frame is a separate option on the product page; you can order without a frame or with a wooden or metal one.",
-        },
-      ],
-    },
-    "parametrik-mobilyalar": {
-      slug: "parametric-furniture",
-      title: "Parametric Furniture",
-      shortDescription: "CNC furniture that combines function with sculptural form.",
-      description:
-        "From chairs to reception desks: furniture designed with parametric algorithms and structurally optimised. Made for homes and commercial projects alike.",
-      seoTitle: "Parametric Furniture | Design-Led CNC Furniture",
-      seoDescription:
-        "Parametric furniture including chairs, coffee tables, TV units and reception desks. Customisable in material, size and colour.",
-      subcategories: {
-        "sandalye-ve-tabure": "Chairs & Stools",
-        "sehpa-ve-masa": "Coffee & Dining Tables",
-        "raf-ve-tv-unitesi": "Shelving & TV Units",
-        "resepsiyon-ve-ofis": "Reception & Office",
-        "bench-ve-oturma": "Benches & Seating",
-      },
-      faq: [
-        {
-          question: "Does the furniture need assembly?",
-          answer: "Most pieces need simple assembly; each product page gives the assembly time and difficulty.",
+            "More layers mean more material and more work, so the price goes up — the product page updates the price for the layer count you choose.",
         },
       ],
     },
@@ -219,42 +174,133 @@ export const enDefaults: ContentTranslations = {
       title: "Wall Clocks",
       shortDescription: "Wall clocks with parametric patterns and silent movements.",
       description:
-        "Wall clocks with geometric and organic patterns, made in a range of diameters and materials. A silent movement makes them at home in any room.",
+        "Wall clocks with geometric and organic patterns, made in diameters from 25 to 50 cm. A silent movement makes them at home in any room.",
       seoTitle: "Parametric Wall Clocks | Designer Clock Collection",
       seoDescription:
-        "Parametric-pattern wall clocks in a range of diameters and materials. Silent movement, personalisation options.",
+        "Parametric-pattern wooden wall clocks from 25 to 50 cm. Silent movement, with name and date personalisation.",
       subcategories: {
         "geometrik-desenler": "Geometric Patterns",
         "minimal-saatler": "Minimal Clocks",
-        "buyuk-boy-saatler": "Oversized Clocks",
+        "kisiye-ozel-saatler": "Personalised Clocks",
       },
       faq: [
         { question: "Is the clock movement silent?", answer: "Yes, every clock uses a silent sweep movement." },
         {
           question: "Can I add a name or date?",
-          answer: "On models with a personalisation option, you can add text from the product page.",
+          answer:
+            "On the models in Personalised Clocks, send the text you want in your order note or through the \"Ask About This Product\" form.",
         },
       ],
     },
-    dekorlar: {
-      slug: "decor",
-      title: "Decor",
-      shortDescription: "Sculptural objects and small-scale parametric decor.",
+    "bebek-cocuk-odasi": {
+      slug: "baby-and-kids-room",
+      title: "Baby & Kids' Room",
+      shortDescription: "Personalised baby door signs, name boards and birth keepsakes.",
       description:
-        "Sculptural and decorative parametric objects that don't fit the other collections — from shelf pieces to lighting accessories.",
-      seoTitle: "Parametric Decor Objects | Designer Accessories",
+        "Door decorations personalised with your baby's name, layered name boards, keepsake boards with birth details and kids' room decor. Wooden pieces that keep the first days, from the hospital door to the nursery wall.",
+      seoTitle: "Baby Door Signs & Nursery Decor | Personalised Wooden Designs",
       seoDescription:
-        "Sculptural objects, small decor pieces and lighting accessories — made with a parametric design approach.",
+        "Personalised baby door signs, birth keepsake boards and kids' room decor. Made from wood and laser cut to order.",
+      subcategories: {
+        "kapi-susleri": "Baby Door Signs",
+        "isim-panolari": "Name Boards",
+        "dogum-hatirasi": "Birth Keepsakes",
+        "cocuk-odasi-dekoru": "Kids' Room Decor",
+      },
+      faq: [
+        {
+          question: "How do I choose the name and colour?",
+          answer:
+            "Write your baby's name and colour choice in your order or in the \"Ask About This Product\" form; we send you a design preview to approve before production starts.",
+        },
+        {
+          question: "Will the door sign be ready in time for the birth?",
+          answer:
+            "Production usually takes 3–5 working days after you approve the preview. If the due date is close, get in touch and we'll plan it together.",
+        },
+        {
+          question: "Can it hang within a baby's reach?",
+          answer:
+            "No. These are decorative pieces that may contain small parts, not toys; hang them out of children's reach.",
+        },
+      ],
+    },
+    "kisiye-ozel-hediyelik": {
+      slug: "personalised-gifts",
+      title: "Personalised Gifts",
+      shortDescription: "Door name plates, keepsake plaques and named gifts.",
+      description:
+        "Door name plates for homes and offices, keepsake plaques that hold a special day or place, monogram art and corporate gifts. Every piece is made for you, with your own text.",
+      seoTitle: "Personalised Wooden Gifts | Door Name Plates & Keepsake Plaques",
+      seoDescription:
+        "Name plates, map-coordinate keepsake plaques, monogram art and logo corporate gifts — made from wood, personalised to order.",
+      subcategories: {
+        "kapi-isimlikleri": "Door Name Plates & Signs",
+        "isimli-tablolar": "Name & Monogram Art",
+        "ani-plaketleri": "Keepsake Plaques",
+        "kurumsal-hediyeler": "Corporate Gifts",
+      },
+      faq: [
+        {
+          question: "Can I change the text after ordering?",
+          answer: "You can change the text until you approve the design preview; production starts after approval.",
+        },
+        {
+          question: "Do you take bulk corporate orders?",
+          answer:
+            "Yes — for logo plaques and signs, send the quantity and delivery date through the contact form and we'll prepare a quote.",
+        },
+      ],
+    },
+    "ahsap-aydinlatma": {
+      slug: "wooden-lighting",
+      title: "Wooden Lighting",
+      shortDescription: "Table lamps and night lights that turn light into pattern.",
+      description:
+        "Table lamps, layered night lights and lampshades in which parametric patterns come alive with light. Compact sizes designed for desks, bedside tables and shelves.",
+      seoTitle: "Wooden Table Lamps & Night Lights | Parametric Lighting",
+      seoDescription:
+        "Parametric wooden table lamps, layered night lights and lampshades — compact designs that turn light into pattern.",
+      subcategories: {
+        "masa-lambalari": "Table Lamps",
+        "gece-lambalari": "Night Lights",
+        abajurlar: "Lampshades",
+      },
+      faq: [
+        {
+          question: "Is a bulb included?",
+          answer: "Each product page says whether the light source is included and which bulb type to use.",
+        },
+        {
+          question: "Does the wood get hot?",
+          answer: "We design our lamps for low-heat LED light sources; don't use incandescent bulbs.",
+        },
+      ],
+    },
+    "dekor-objeleri": {
+      slug: "decor-objects",
+      title: "Decor Objects",
+      shortDescription: "Sculptural objects, desk organisers and small furniture.",
+      description:
+        "Sculptural pieces for shelves and consoles, desk organisers, decorative panels, and small furniture that ships safely — stools, side tables and wall shelves.",
+      seoTitle: "Parametric Decor Objects | Sculptures, Organisers & Small Furniture",
+      seoDescription:
+        "Sculptural objects, desk organisers, decorative panels and small furniture that ships flat — made with a parametric design approach.",
       subcategories: {
         heykeller: "Sculptures",
         "kucuk-obje": "Small Objects",
-        "aydinlatma-aksesuari": "Lighting Accessories",
+        "masaustu-duzenleyiciler": "Desk Organisers",
         "dekoratif-panel": "Decorative Panels",
+        "kucuk-mobilya": "Small Furniture & Shelves",
       },
       faq: [
         {
           question: "Can decor items be gift-wrapped?",
           answer: "We offer gift wrapping on request — just add a note in your basket.",
+        },
+        {
+          question: "Does the small furniture arrive assembled?",
+          answer: "It ships flat-packed so it travels safely; the product page gives the assembly time and difficulty.",
         },
       ],
     },
@@ -314,7 +360,7 @@ export const enDefaults: ContentTranslations = {
       slug: "organic-flow-pattern-art",
       title: "Organic Flow Pattern Art",
       shortDescription: "Minimal art with a flowing organic pattern.",
-      description: "A parametric texture of flowing, organic curves — designed for minimal interiors.",
+      description: "A parametric texture of flowing, organic curves — designed in a square format for minimal interiors.",
       tags: ["abstract", "organic", "minimal"],
     },
     "ml-1": {
@@ -347,7 +393,7 @@ export const enDefaults: ContentTranslations = {
       slug: "9-layer-deep-ocean-multilayer-art",
       title: "9-Layer Deep Ocean Multilayer Art",
       shortDescription: "A 9-layer wave and ocean composition.",
-      description: "A large piece whose nine layers give the movement of the waves a three-dimensional feel.",
+      description: "A deep composition in a compact 70×45 cm, whose nine layers give the movement of the waves a three-dimensional feel.",
       assemblyTime: "25 min",
       tags: ["multilayer", "ocean", "9 layers"],
     },
@@ -359,62 +405,32 @@ export const enDefaults: ContentTranslations = {
       assemblyTime: "30 min",
       tags: ["multilayer", "galaxy", "11 layers", "premium"],
     },
-    "fu-1": {
-      slug: "parametric-chair-voro-series",
-      title: "Parametric Chair — Voro Series",
-      shortDescription: "A lightweight chair with a Voronoi pattern.",
-      description: "A chair whose seat is optimised with a Voronoi algorithm — structurally light, yet strong.",
-      assemblyTime: "30 min",
-      tags: ["furniture", "chair", "voronoi"],
-    },
     "fu-2": {
-      slug: "parametric-bar-stool-lamella",
-      title: "Parametric Bar Stool — Lamella",
-      shortDescription: "A bar stool built from wooden slats.",
-      description: "A stool made from thin wooden slats stacked in a circle, designed for kitchen islands and bars.",
-      assemblyTime: "20 min",
-      tags: ["furniture", "stool", "bar"],
+      slug: "parametric-stool-lamella",
+      title: "Parametric Stool — Lamella",
+      shortDescription: "A low slatted stool that ships flat.",
+      description:
+        "A low stool of thin wooden slats stacked in a circle — for sitting, resting your feet or using as a side table. Ships flat-packed.",
+      assemblyTime: "15 min",
+      tags: ["small furniture", "stool"],
     },
     "fu-3": {
-      slug: "parametric-coffee-table-nova",
-      title: "Parametric Coffee Table — Nova",
-      shortDescription: "A coffee table with a sculptural base.",
-      description: "A sculptural coffee table with a base inspired by a starburst.",
-      assemblyTime: "15 min",
-      tags: ["furniture", "coffee table"],
-    },
-    "fu-4": {
-      slug: "parametric-dining-table-terra",
-      title: "Parametric Dining Table — Terra",
-      shortDescription: "A six-seat dining table with a sculptural base.",
-      description: "A six-seat dining table with a base inspired by the rings of a tree trunk.",
-      assemblyTime: "60 min",
-      tags: ["furniture", "dining table", "premium"],
-    },
-    "fu-5": {
-      slug: "parametric-tv-unit-lineo",
-      title: "Parametric TV Unit — Lineo",
-      shortDescription: "A slatted TV unit with hidden cable management.",
-      description: "A TV unit for modern living rooms, with horizontal slats and a hidden cable channel.",
-      assemblyTime: "45 min",
-      tags: ["furniture", "tv unit"],
-    },
-    "fu-6": {
-      slug: "parametric-reception-desk-atrium",
-      title: "Parametric Reception Desk — Atrium",
-      shortDescription: "A customisable reception desk for commercial projects.",
+      slug: "parametric-side-table-nova",
+      title: "Parametric Side Table — Nova",
+      shortDescription: "A side table with an interlocking sculptural base.",
       description:
-        "A large reception desk with a parametric front, designed for commercial projects. Size and logo integration are tailored to each project.",
-      personalizationOptions: ["Logo and brand integration", "Custom size"],
-      assemblyTime: "Installed on site",
-      tags: ["furniture", "reception", "commercial", "custom project"],
+        "A sculptural side table with an interlocking base inspired by a starburst. A compact size for beside a sofa or bed; ships flat-packed.",
+      assemblyTime: "10 min",
+      tags: ["small furniture", "side table"],
     },
-    "fu-7": {
-      slug: "parametric-bench-duna",
-      title: "Parametric Bench — Duna",
-      shortDescription: "A versatile bench with a wave-shaped top.",
-      description: "A bench with a rippled top inspired by sand dunes, for sitting on or displaying things.",
-      tags: ["furniture", "bench", "seating"],
+    "fu-8": {
+      slug: "parametric-wall-shelf-honeycomb",
+      title: "Parametric Wall Shelf — Honeycomb",
+      shortDescription: "A modular honeycomb wall shelf.",
+      description:
+        "A modular wall shelf of honeycomb cells, used on its own or side by side to grow. For plants, books and small objects; comes with a hidden hanging bracket.",
+      assemblyTime: "10 min",
+      tags: ["small furniture", "shelf", "modular"],
     },
     "cl-1": {
       slug: "geometric-wall-clock-radial",
@@ -431,11 +447,11 @@ export const enDefaults: ContentTranslations = {
       tags: ["clock", "minimal"],
     },
     "cl-3": {
-      slug: "oversized-parametric-wall-clock-orbit",
-      title: "Oversized Parametric Wall Clock — Orbit",
-      shortDescription: "A multilayer oversized wall clock.",
-      description: "A layered oversized wall clock inspired by orbital rings — a focal point for large walls.",
-      tags: ["clock", "oversized", "orbit"],
+      slug: "layered-parametric-wall-clock-orbit",
+      title: "Layered Parametric Wall Clock — Orbit",
+      shortDescription: "A multilayer 50 cm wall clock.",
+      description: "A layered wall clock inspired by orbital rings — at 50 cm across, a focal point for living-room walls.",
+      tags: ["clock", "multilayer", "orbit"],
     },
     "cl-4": {
       slug: "personalised-name-wall-clock-family",
@@ -444,6 +460,132 @@ export const enDefaults: ContentTranslations = {
       description: "A personalised design with family names or a special date worked into the clock face.",
       personalizationOptions: ["Name", "Date"],
       tags: ["clock", "personalised", "gift"],
+    },
+    "bc-1": {
+      slug: "personalised-baby-door-sign-cloud",
+      title: "Personalised Baby Door Sign — Cloud",
+      shortTitle: "Cloud Door Sign",
+      shortDescription: "A layered cloud door sign with your baby's name.",
+      description:
+        "A cloud-shaped door sign with your baby's name in layered letters. It welcomes visitors at the hospital door, then stays on the nursery door as a keepsake. Comes with a ribbon hanger.",
+      personalizationOptions: ["Baby's name", "Colour"],
+      tags: ["baby", "door sign", "personalised", "hospital"],
+    },
+    "bc-2": {
+      slug: "personalised-baby-door-sign-moon-and-stars",
+      title: "Personalised Baby Door Sign — Moon & Stars",
+      shortTitle: "Moon & Stars Door Sign",
+      shortDescription: "A round door sign with moon, stars and your baby's name.",
+      description:
+        "A round door sign with your baby's name, framed by a crescent moon and stars. The parametric star pattern casts a gentle play of shadow in the light.",
+      personalizationOptions: ["Baby's name", "Colour"],
+      tags: ["baby", "door sign", "personalised", "moon and stars"],
+    },
+    "bc-3": {
+      slug: "birth-keepsake-board",
+      title: "Birth Keepsake Board",
+      shortDescription: "A wooden keepsake engraved with the birth details.",
+      description:
+        "A keepsake board engraved with your baby's name, date and time of birth, weight and length. A record of the first day to keep on the nursery wall or shelf for years.",
+      personalizationOptions: ["Baby's name", "Date and time of birth", "Weight and length"],
+      tags: ["baby", "birth", "keepsake", "gift"],
+    },
+    "bc-4": {
+      slug: "layered-name-board-woodland-animals",
+      title: "Layered Name Board — Woodland Animals",
+      shortDescription: "A 3-layer woodland name board.",
+      description:
+        "A wall board where a fox, a bear and a rabbit meet in a three-layer woodland scene, with your child's name in front.",
+      personalizationOptions: ["Child's name"],
+      tags: ["kids' room", "name board", "multilayer", "woodland"],
+    },
+    "bc-5": {
+      slug: "kids-room-wall-clock-cloud",
+      title: "Kids' Room Wall Clock — Cloud",
+      shortDescription: "A cloud-shaped kids' clock with a silent movement.",
+      description:
+        "A cloud-shaped kids' room clock with large, easy-to-read numbers that help with learning to tell the time. Silent movement; a name can be added.",
+      personalizationOptions: ["Child's name (optional)"],
+      tags: ["kids' room", "clock", "cloud"],
+    },
+    "ko-1": {
+      slug: "home-door-name-plate-family",
+      title: "Home Door Name Plate — Family",
+      shortDescription: "A leaf-motif door name plate with your surname.",
+      description:
+        "A home door name plate with your family surname and, if you like, your house number, set in a parametric leaf motif. Varnished against the weather, with hidden screw fixing.",
+      personalizationOptions: ["Surname", "House number (optional)"],
+      tags: ["name plate", "home", "personalised"],
+    },
+    "ko-2": {
+      slug: "office-door-sign-with-logo",
+      title: "Office Door Sign — With Logo",
+      shortDescription: "A layered door sign with logo, name and title.",
+      description:
+        "An office or clinic door sign with your company logo, name and title. The layered build makes the logo stand out from the surface.",
+      personalizationOptions: ["Logo", "Name and title"],
+      tags: ["door sign", "office", "logo", "corporate"],
+    },
+    "ko-3": {
+      slug: "map-coordinates-keepsake-plaque",
+      title: "Map Coordinates Keepsake Plaque",
+      shortDescription: "A plaque with a special place's map, coordinates and date.",
+      description:
+        "A keepsake plaque with the map outline, coordinates and date of the place you met, married or found your first home. Designed as an anniversary or engagement gift.",
+      personalizationOptions: ["Location", "Date", "Short note"],
+      tags: ["keepsake", "map", "anniversary", "gift"],
+    },
+    "ko-4": {
+      slug: "personalised-parametric-monogram-art",
+      title: "Personalised Parametric Art — Monogram",
+      shortDescription: "Parametric monogram art with your initials.",
+      description:
+        "Square wall art in which your initials rise in relief from a background of rippling parametric lines. A two-letter monogram option is available for couples.",
+      personalizationOptions: ["One or two initials"],
+      tags: ["monogram", "personalised", "wall art", "gift"],
+    },
+    "ko-5": {
+      slug: "logo-desk-plaque",
+      title: "Logo Desk Plaque",
+      shortDescription: "A logo desk plaque for corporate gifts.",
+      description:
+        "A free-standing desk plaque with your company logo and a short message. Suited to bulk orders for staff awards, client gifts and events.",
+      personalizationOptions: ["Logo", "Message"],
+      tags: ["corporate", "plaque", "logo", "bulk order"],
+    },
+    "ay-1": {
+      slug: "parametric-table-lamp-wave",
+      title: "Parametric Table Lamp — Wave",
+      shortDescription: "A layered wooden table lamp with a wave pattern.",
+      description:
+        "A table lamp built from stacked horizontal layers with a wave pattern. Light filters between the layers and casts a rhythmic pattern on the wall and table.",
+      assemblyTime: "10 min",
+      tags: ["lighting", "table lamp", "multilayer"],
+    },
+    "ay-2": {
+      slug: "layered-night-light-forest",
+      title: "Layered Night Light — Forest",
+      shortDescription: "A backlit 3-layer forest night light.",
+      description:
+        "A bedside lamp whose backlit three-layer forest silhouette gives a soft night light. For kids' rooms and bedrooms.",
+      tags: ["lighting", "night light", "kids' room", "multilayer"],
+    },
+    "ay-3": {
+      slug: "personalised-night-light-moon",
+      title: "Personalised Night Light — Moon",
+      shortDescription: "A crescent night light with your child's name.",
+      description:
+        "A crescent-moon night light in which your child's name appears in light. Often chosen with a door sign as a birth or first-birthday gift.",
+      personalizationOptions: ["Child's name"],
+      tags: ["lighting", "night light", "personalised", "gift"],
+    },
+    "de-3": {
+      slug: "parametric-lampshade-lumin",
+      title: "Parametric Lampshade — Lumin",
+      shortDescription: "A wooden lampshade that casts patterned light.",
+      description: "A wooden lampshade that fits your existing bulb or light fitting and casts light in a pattern.",
+      assemblyTime: "5 min",
+      tags: ["lighting", "lampshade"],
     },
     "de-1": {
       slug: "parametric-table-sculpture-flow",
@@ -459,14 +601,6 @@ export const enDefaults: ContentTranslations = {
       description: "A minimal decorative object of interlocking pieces, inspired by cell structures.",
       tags: ["decor", "small object"],
     },
-    "de-3": {
-      slug: "parametric-lampshade-lumin",
-      title: "Parametric Lampshade — Lumin",
-      shortDescription: "A lampshade that casts patterned light.",
-      description: "A wooden lampshade that fits your existing bulb or light fitting and casts light in a pattern.",
-      assemblyTime: "5 min",
-      tags: ["decor", "lighting", "lampshade"],
-    },
     "de-4": {
       slug: "decorative-wall-panel-mesh",
       title: "Decorative Wall Panel — Mesh",
@@ -481,6 +615,22 @@ export const enDefaults: ContentTranslations = {
       description: "A set of three mini sculptures in different heights, designed for styling a shelf.",
       tags: ["decor", "sculpture", "set"],
     },
+    "de-6": {
+      slug: "parametric-pen-holder-voronoi",
+      title: "Parametric Pen Holder — Voronoi",
+      shortDescription: "A layered pen holder with a Voronoi pattern.",
+      description: "A desk organiser for pens and brushes, made from stacked layers cut with a Voronoi cell pattern.",
+      tags: ["decor", "pen holder", "desk", "gift"],
+    },
+    "de-7": {
+      slug: "parametric-jewellery-stand-branch",
+      title: "Parametric Jewellery Stand — Branch",
+      shortDescription: "A slot-together branch jewellery stand.",
+      description:
+        "A slot-together wooden jewellery stand in the shape of a branching tree that keeps necklaces, bracelets and earrings tidy. No screws or glue needed.",
+      assemblyTime: "2 min",
+      tags: ["decor", "jewellery stand", "gift"],
+    },
   },
 
   optionLabels: {
@@ -492,11 +642,13 @@ export const enDefaults: ContentTranslations = {
     Gri: "Grey",
     "Mavi Tonlu Lake": "Blue-Tinted Lacquer",
     "Karışık Tonlar": "Mixed Tones",
-    "Doğal Vernik": "Natural Varnish",
-    "Mat Siyah": "Matte Black",
     "Doğal Yağ": "Natural Oil",
     "Ceviz Kaplama": "Walnut Veneer",
     "Beyaz Lake": "White Lacquer",
+    "Pastel Pembe": "Pastel Pink",
+    "Pastel Mavi": "Pastel Blue",
+    "Pastel Tonlar": "Pastel Tones",
+    Lacivert: "Navy",
     Çerçevesiz: "No Frame",
     "Ahşap Çerçeve": "Wooden Frame",
     "Metal Çerçeve": "Metal Frame",
@@ -505,6 +657,5 @@ export const enDefaults: ContentTranslations = {
     "Masif Ceviz": "Solid Walnut",
     "Masif Meşe": "Solid Oak",
     "MDF Lam": "Laminated MDF",
-    "MDF Lam + Metal İskelet": "Laminated MDF + Metal Frame",
   },
 };

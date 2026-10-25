@@ -3,12 +3,12 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, describe, it, expect, vi } from "vitest";
 import { ProductImageImport } from "@/pages/admin/products/ProductImageImport";
 import { ProductsTab } from "@/pages/admin/tabs/ProductsTab";
-import { request } from "@/lib/adminApi";
+import { adminApi, request } from "@/lib/adminApi";
 import { defaultProducts } from "@/data/products/defaults";
 vi.mock("@/lib/adminApi", () => ({
   request: vi.fn(),
   errorMessage: (e: Error) => e.message,
-  adminApi: { saveProducts: vi.fn() },
+  adminApi: { saveProducts: vi.fn(), listProducts: vi.fn() },
 }));
 const product = defaultProducts[0]!;
 const state = {
@@ -57,14 +57,16 @@ function setup(images = product.images) {
   return attached;
 }
 describe("product-row image import", () => {
-  it("shows one import action per product for admins but not editors", () => {
+  it("shows one import action per product for admins but not editors", async () => {
+    vi.mocked(adminApi.listProducts).mockResolvedValue(defaultProducts);
     const { unmount } = render(<ProductsTab canImport />);
     expect(
-      screen.getAllByRole("button", { name: "Etsy / Galeriden görsel ekle" })
+      (await screen.findAllByRole("button", { name: "Etsy / Galeriden görsel ekle" }))
         .length,
     ).toBe(defaultProducts.length);
     unmount();
     render(<ProductsTab canImport={false} />);
+    await screen.findAllByRole("button", { name: "Düzenle" });
     expect(
       screen.queryByRole("button", { name: "Etsy / Galeriden görsel ekle" }),
     ).not.toBeInTheDocument();

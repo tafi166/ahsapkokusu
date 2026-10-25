@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Navigate, useParams, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Section } from "@/components/ui/Section";
 import { Button } from "@/components/ui/Button";
@@ -17,18 +17,36 @@ import {
 import { categories } from "@/data/categories";
 import { getProductsByCategory } from "@/data/products";
 import { staggerContainer, fadeUp } from "@/lib/motion";
+import { isQuoteOnly } from "@/lib/price";
 import { useSeo, breadcrumbJsonLd } from "@/lib/seo";
 import { ProductMedia } from "@/lib/placeholder";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import type { Category, Product } from "@/types";
 import { useI18n } from "@/i18n/I18nProvider";
-import { categoryBySegment, categoryPath } from "@/i18n/paths";
+import { categoryBySegment, categoryPath, localePath } from "@/i18n/paths";
 
 const PAGE_SIZE = 8;
+
+/**
+ * Category addresses retired when the range was narrowed to shippable sizes
+ * (Turkish and English segments), sent on to where their products now live.
+ */
+const RETIRED_CATEGORIES: Record<string, string> = {
+  "parametrik-duvar-tablolari": "/duvar-tablolari",
+  "parametric-wall-art": "/duvar-tablolari",
+  "katmanli-multilayer-tablolar": "/duvar-tablolari?alt=katmanli-tablolar",
+  "multilayer-wall-art": "/duvar-tablolari?alt=katmanli-tablolar",
+  "parametrik-mobilyalar": "/dekor-objeleri?alt=kucuk-mobilya",
+  "parametric-furniture": "/dekor-objeleri?alt=kucuk-mobilya",
+  dekorlar: "/dekor-objeleri",
+  decor: "/dekor-objeleri",
+};
 
 function matchesFilters(product: Product, filters: CollectionFilters): boolean {
   if (filters.availability.length > 0 && !filters.availability.includes(product.availability)) return false;
   if (filters.price.length > 0) {
+    // A quote-only product has no public price to filter on.
+    if (isQuoteOnly(product)) return false;
     const bucket = product.price < 500 ? "under-500" : product.price <= 2000 ? "500-2000" : "over-2000";
     if (!filters.price.includes(bucket)) return false;
   }
@@ -44,10 +62,11 @@ function matchesFilters(product: Product, filters: CollectionFilters): boolean {
 function sortProducts(products: Product[], sort: SortOption): Product[] {
   const copy = [...products];
   switch (sort) {
+    // Quote-only products have no public price, so they go last either way.
     case "price-asc":
-      return copy.sort((a, b) => a.price - b.price);
+      return copy.sort((a, b) => Number(isQuoteOnly(a)) - Number(isQuoteOnly(b)) || a.price - b.price);
     case "price-desc":
-      return copy.sort((a, b) => b.price - a.price);
+      return copy.sort((a, b) => Number(isQuoteOnly(a)) - Number(isQuoteOnly(b)) || b.price - a.price);
     case "newest":
       return copy.sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
     case "best-selling":
@@ -63,8 +82,8 @@ function sortProducts(products: Product[], sort: SortOption): Product[] {
  * Thin wrapper: reads the route param + `?alt=` query param and remounts
  * `CategoryPageView` (via `key`) whenever either changes.
  *
- * This matters because `/parametrik-duvar-tablolari` and
- * `/parametrik-duvar-tablolari?alt=hayvan-figurleri` — or two different
+ * This matters because `/duvar-tablolari` and
+ * `/duvar-tablolari?alt=hayvan-figurleri` — or two different
  * category slugs — match the *same* route element, so React Router
  * re-renders the existing CategoryPageView instance instead of mounting a
  * new one. Without the key, its filter/sort/pagination state (seeded once
@@ -75,6 +94,8 @@ function sortProducts(products: Product[], sort: SortOption): Product[] {
 export function CategoryPage() {
   const { categorySlug = "" } = useParams<{ categorySlug: string }>();
   const [searchParams] = useSearchParams();
+  const retired = RETIRED_CATEGORIES[categorySlug];
+  if (retired) return <Navigate to={localePath(retired)} replace />;
   return <CategoryPageView key={`${categorySlug}?${searchParams.get("alt") ?? ""}`} categorySlug={categorySlug} />;
 }
 
@@ -83,10 +104,12 @@ function CategoryPageView({ categorySlug }: { categorySlug: string }) {
   const [searchParams] = useSearchParams();
   const category = categoryBySegment(categorySlug);
 
-  const [filters, setFilters] = useState<CollectionFilters>(() => {
-    const alt = searchParams.get("alt");
-    return alt ? { ...emptyFilters, subcategory: [alt] } : emptyFilters;
-  });
+  const alt = searchParams.get("alt");
+  const subcategory = alt ? category?.subcategories.find((s) => s.slug === alt) : undefined;
+
+  const [filters, setFilters] = useState<CollectionFilters>(() =>
+    alt ? { ...emptyFilters, subcategory: [alt] } : emptyFilters,
+  );
   const [sort, setSort] = useState<SortOption>("featured");
   const [filterOpen, setFilterOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
@@ -109,6 +132,24 @@ function CategoryPageView({ categorySlug }: { categorySlug: string }) {
     () => sortProducts(baseProducts.filter((p) => matchesFilters(p, filters)), sort),
     [baseProducts, filters, sort],
   );
+
+  // Opening a subcategory (`?alt=`) would otherwise leave its products below the
+  // category banner, so nothing visibly changes: bring them into view and move focus
+  // there. Deferred a frame so it runs after Layout's scroll-to-top on route change.
+  const resultsRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (!subcategory) return;
+    const frame = requestAnimationFrame(() => {
+      const results = resultsRef.current;
+      if (!results) return;
+      const headerHeight = document.querySelector("header")?.getBoundingClientRect().height ?? 0;
+      const top = results.getBoundingClientRect().top + window.scrollY - headerHeight - 16;
+      const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+      window.scrollTo({ top: Math.max(0, top), behavior: reduceMotion ? "auto" : "smooth" });
+      results.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [subcategory]);
 
   const seoTitle = category?.seoTitle ?? category?.title ?? t.catalog.fallbackTitle;
   const seoDescription = category?.seoDescription ?? category?.description;
@@ -162,54 +203,61 @@ function CategoryPageView({ categorySlug }: { categorySlug: string }) {
           <p className="text-sm text-body/70">{category.description}</p>
         </div>
 
-        <FilterSortBar
-          count={filtered.length}
-          sort={sort}
-          onSortChange={handleSortChange}
-          onOpenFilters={() => setFilterOpen(true)}
-          activeFilterCount={activeFilterCount}
-        />
-        <FilterDrawer
-          open={filterOpen}
-          onClose={() => setFilterOpen(false)}
-          facets={category.facets}
-          availableValues={availableValues}
-          filters={filters}
-          onChange={handleFiltersChange}
-        />
+        <section
+          ref={resultsRef}
+          tabIndex={-1}
+          aria-label={subcategory ? t.catalog.subcategoryProducts(subcategory.title) : undefined}
+          className="outline-none"
+        >
+          <FilterSortBar
+            count={filtered.length}
+            sort={sort}
+            onSortChange={handleSortChange}
+            onOpenFilters={() => setFilterOpen(true)}
+            activeFilterCount={activeFilterCount}
+          />
+          <FilterDrawer
+            open={filterOpen}
+            onClose={() => setFilterOpen(false)}
+            facets={category.facets}
+            availableValues={availableValues}
+            filters={filters}
+            onChange={handleFiltersChange}
+          />
 
-        {filtered.length === 0 ? (
-          <div className="py-16 text-center">
-            <p className="text-body/60">{t.catalog.noMatch}</p>
-            <Button variant="outline" className="mt-4" onClick={() => handleFiltersChange(emptyFilters)}>
-              {t.catalog.clearFilters}
-            </Button>
-          </div>
-        ) : (
-          <>
-            <motion.ul
-              key={`${category.slug}-${sort}-${activeFilterCount}`}
-              initial="hidden"
-              animate="visible"
-              variants={staggerContainer(0.06)}
-              className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 lg:grid-cols-4"
-            >
-              {visible.map((product) => (
-                <motion.li key={product.id} variants={fadeUp}>
-                  <ProductCard product={product} />
-                </motion.li>
-              ))}
-            </motion.ul>
+          {filtered.length === 0 ? (
+            <div className="py-16 text-center">
+              <p className="text-body/60">{t.catalog.noMatch}</p>
+              <Button variant="outline" className="mt-4" onClick={() => handleFiltersChange(emptyFilters)}>
+                {t.catalog.clearFilters}
+              </Button>
+            </div>
+          ) : (
+            <>
+              <motion.ul
+                key={`${category.slug}-${sort}-${activeFilterCount}`}
+                initial="hidden"
+                animate="visible"
+                variants={staggerContainer(0.06)}
+                className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 lg:grid-cols-4"
+              >
+                {visible.map((product) => (
+                  <motion.li key={product.id} variants={fadeUp}>
+                    <ProductCard product={product} />
+                  </motion.li>
+                ))}
+              </motion.ul>
 
-            {visibleCount < filtered.length ? (
-              <div className="mt-10 text-center">
-                <Button variant="outline" onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}>
-                  {t.catalog.showMore}
-                </Button>
-              </div>
-            ) : null}
-          </>
-        )}
+              {visibleCount < filtered.length ? (
+                <div className="mt-10 text-center">
+                  <Button variant="outline" onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}>
+                    {t.catalog.showMore}
+                  </Button>
+                </div>
+              ) : null}
+            </>
+          )}
+        </section>
 
         {category.faq.length > 0 ? (
           <div className="mx-auto mt-20 max-w-2xl border-t border-line pt-14">

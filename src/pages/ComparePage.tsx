@@ -59,7 +59,7 @@ export function ComparePage() {
       {products.length === 0 ? (
         <div className="py-16 text-center">
           <p className="text-body/60">{t.compare.empty}</p>
-          <Button href={localePath("/parametrik-mobilyalar")} className="mt-4">
+          <Button href={localePath("/dekor-objeleri?alt=kucuk-mobilya")} className="mt-4">
             {t.compare.browse}
           </Button>
         </div>

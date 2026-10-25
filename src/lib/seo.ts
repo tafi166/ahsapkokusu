@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { brand } from "@/config/brand";
 import { absoluteUrl, alternatePath, productPath } from "@/i18n/paths";
 import { contentLocale, LOCALE_PREFIX, type Locale } from "@/i18n/locale";
+import type { PriceDisplay } from "@/types";
 
 /**
  * Lightweight client-side SEO helper for this Vite SPA.
@@ -115,6 +116,7 @@ export function productJsonLd(product: {
   description: string;
   price: number;
   currency: string;
+  priceDisplay?: PriceDisplay;
   availability: string;
   rating?: number;
   reviewCount?: number;
@@ -128,13 +130,18 @@ export function productJsonLd(product: {
     "@type": "Product",
     name: product.title,
     description: product.description,
-    offers: {
-      "@type": "Offer",
-      price: product.price,
-      priceCurrency: product.currency,
-      availability: schemaAvailability,
-      url: absoluteUrl(productPath(product)),
-    },
+    // A quote-only price isn't public; a starting price is the lowest standard offer.
+    ...(product.priceDisplay !== "quote"
+      ? {
+          offers: {
+            "@type": "Offer",
+            price: product.price,
+            priceCurrency: product.currency,
+            availability: schemaAvailability,
+            url: absoluteUrl(productPath(product)),
+          },
+        }
+      : {}),
     ...(product.rating
       ? {
           aggregateRating: {

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useI18n } from "@/i18n/I18nProvider";
-import { motion, AnimatePresence } from "framer-motion";
+import { ImageCarousel } from "@/components/product/ImageCarousel";
 import { ProductMedia } from "@/lib/placeholder";
 import { cn } from "@/lib/cn";
 
@@ -10,22 +10,18 @@ export function Gallery({ images, title }: { images: string[]; title: string }) 
 
   return (
     <div>
-      <div className="overflow-hidden rounded-card">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={active}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-          >
-            <ProductMedia src={images[active]} ratio="square" label={t.gallery.image(title, active + 1)} />
-          </motion.div>
-        </AnimatePresence>
-      </div>
+      <ImageCarousel
+        images={images}
+        index={active}
+        onIndexChange={setActive}
+        label={(n) => t.gallery.image(title, n)}
+        variant="gallery"
+        eager
+        className="rounded-card"
+      />
 
       {images.length > 1 ? (
-        <div className="mt-3 flex gap-3" role="tablist" aria-label={t.gallery.thumbnails(title)}>
+        <div className="mt-3 flex flex-wrap gap-3" role="tablist" aria-label={t.gallery.thumbnails(title)}>
           {images.map((image, i) => (
             <button
               key={i}
@@ -34,8 +30,8 @@ export function Gallery({ images, title }: { images: string[]; title: string }) 
               aria-label={t.gallery.show(i + 1)}
               onClick={() => setActive(i)}
               className={cn(
-                "h-16 w-16 shrink-0 overflow-hidden rounded-input border-2 transition-colors",
-                i === active ? "border-ink" : "border-transparent",
+                "h-16 w-16 shrink-0 overflow-hidden rounded-input border-2 transition-all duration-300",
+                i === active ? "border-ink" : "border-transparent opacity-70 hover:opacity-100",
               )}
             >
               <ProductMedia src={image} ratio="square" />

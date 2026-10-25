@@ -64,17 +64,25 @@ function toView(order: Order & { lines: OrderLine[] }): OrderView {
 /** Customer-facing errors of an order. */
 const MESSAGES: Record<
   Lang,
-  { unavailable: (id: string) => string; soldOut: (title: string) => string; mixedCurrencies: string; addressRequired: string }
+  {
+    unavailable: (id: string) => string;
+    soldOut: (title: string) => string;
+    quoteOnly: (title: string) => string;
+    mixedCurrencies: string;
+    addressRequired: string;
+  }
 > = {
   tr: {
     unavailable: (id) => `Sepetteki bir ürün artık satışta değil (${id}).`,
     soldOut: (title) => `${title} tükendi.`,
+    quoteOnly: (title) => `${title} teklif ile satılıyor; sipariş yerine teklif isteyin.`,
     mixedCurrencies: 'Farklı para birimindeki ürünler aynı siparişte olamaz.',
     addressRequired: 'Teslimat adresi gerekli.',
   },
   en: {
     unavailable: (id) => `An item in your basket is no longer available (${id}).`,
     soldOut: (title) => `${title} is sold out.`,
+    quoteOnly: (title) => `${title} is sold on quotation; please request a quote instead.`,
     mixedCurrencies: "Items in different currencies can't be in the same order.",
     addressRequired: 'A delivery address is required.',
   },
@@ -92,7 +100,7 @@ export class OrdersService {
   async place(input: OrderInput, lang: Lang = 'tr'): Promise<OrderView> {
     const ids = [...new Set(input.lines.map((l) => l.productId))];
     const [rows, en] = await Promise.all([
-      this.prisma.product.findMany({ where: { id: { in: ids } } }),
+      this.prisma.product.findMany({ where: { id: { in: ids }, isHidden: false } }),
       lang === 'en' ? this.content.translations('en') : undefined,
     ]);
     const products = new Map(rows.map((r) => [r.id, rowToProduct(r)]));
@@ -103,6 +111,7 @@ export class OrdersService {
       const product = products.get(line.productId);
       if (!product) throw new BadRequestException({ message: m.unavailable(line.productId) });
       if (product.availability === 'sold-out') throw new BadRequestException({ message: m.soldOut(name(product)) });
+      if (product.priceDisplay === 'quote') throw new BadRequestException({ message: m.quoteOnly(name(product)) });
       const { options, errors } = validateSelection(product, line.selection, lang);
       if (errors.length > 0) throw new BadRequestException({ message: `${name(product)}: ${errors.join(' ')}` });
       const price = unitPrice(product, options);

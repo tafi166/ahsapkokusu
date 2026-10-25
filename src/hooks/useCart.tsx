@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { ConfiguredOptions, Product } from "@/types";
-import { calculatePrice, pickOptions, sameConfiguration, validateSelection } from "@/lib/price";
+import { calculatePrice, isQuoteOnly, pickOptions, sameConfiguration, validateSelection } from "@/lib/price";
 import { allProducts } from "@/data/products";
 import { contentLocale } from "@/i18n/locale";
 import { en, tr } from "@/i18n/messages";
@@ -64,6 +64,7 @@ export function loadStoredCart(raw: string | null): CartLine[] {
     if (!entry || typeof entry !== "object") continue;
     const { product, quantity, selection } = entry as Partial<CartLine>;
     if (!product || typeof product.id !== "string" || typeof product.price !== "number") continue;
+    if (isQuoteOnly(product)) continue;
     if (!isPositiveInt(quantity)) continue;
     const options = pickOptions(selection as Record<string, unknown> | undefined);
     lines.push(options ? { product, quantity, selection: options } : { product, quantity });
@@ -106,7 +107,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     l.product.id === productId && sameConfiguration(l.selection, selection);
 
   const addItem: CartContextValue["addItem"] = (product, quantity = 1, selection) => {
-    if (!isPositiveInt(quantity)) return { ok: false, errors: [(contentLocale() === "en" ? en : tr).selection.invalidQuantity] };
+    const messages = contentLocale() === "en" ? en : tr;
+    if (isQuoteOnly(product)) return { ok: false, errors: [messages.selection.quoteOnly] };
+    if (!isPositiveInt(quantity)) return { ok: false, errors: [messages.selection.invalidQuantity] };
     const { options, errors } = validateSelection(product, selection);
     if (errors.length > 0) return { ok: false, errors };
 

@@ -18,15 +18,15 @@ const defaultTestimonials: Testimonial[] = [
     id: "t2",
     authorInitial: "M. Y.",
     rating: 5,
-    role: "İç Mimar",
-    quote: "Üç farklı proje için parametrik mobilya sipariş ettim. Kalite tutarlı, özel ölçü talepleri sorunsuz karşılanıyor.",
+    role: "Anne, İzmir",
+    quote: "Kızımızın isimli kapı süsü hastanede herkesin ilgisini çekti, şimdi odasının kapısında duruyor. Önizlemeyi onaylamadan üretime başlamamaları çok iyiydi.",
   },
   {
     id: "t3",
     authorInitial: "S. D.",
     rating: 4,
     role: "Kafe İşletmecisi",
-    quote: "Resepsiyon masası müşterilerin ilk sorduğu şey oldu. Üretim süresi beklediğimden kısa sürdü.",
+    quote: "Kafemiz için logolu kapı tabelası ve iki duvar saati yaptırdık. Üretim süresi beklediğimden kısa sürdü.",
   },
   {
     id: "t4",
