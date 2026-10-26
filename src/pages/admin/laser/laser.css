@@ -1,0 +1,57 @@
+.laser-studio {
+  color: var(--color-ink);
+}
+.laser-card {
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  background: var(--color-paper);
+  padding: 1.25rem;
+}
+.laser-select {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--color-line);
+  border-radius: 6px;
+  background: white;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+}
+.laser-studio input:not([type="checkbox"]),
+.laser-studio button {
+  min-height: 44px;
+}
+.laser-studio button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+.laser-studio input:focus-visible,
+.laser-studio select:focus-visible,
+.laser-studio button:focus-visible,
+.laser-studio a:focus-visible {
+  outline: 2px solid var(--color-wood-deep);
+  outline-offset: 2px;
+}
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .laser-print,
+  .laser-print * {
+    visibility: visible;
+  }
+  .laser-print {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 1cm;
+    background: white;
+  }
+  .laser-print .laser-no-print {
+    display: none;
+  }
+  .laser-print .laser-card {
+    border: 0;
+    break-inside: avoid;
+  }
+}

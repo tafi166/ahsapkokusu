@@ -1,3 +1,4 @@
+import { LaserStudio } from "@/pages/admin/laser/LaserStudio";
 import { ResearchStudio } from "@/pages/admin/research/ResearchStudio";
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -46,6 +47,7 @@ export function AdminPage() {
   const { session, login, logout } = useAdminSession();
   const location = useLocation();
   const navigate = useNavigate();
+  const laser = location.pathname.startsWith("/admin/laser");
   const research = location.pathname.startsWith("/admin/research");
   const [tab, setTab] = useState<TabId>("brand");
 
@@ -81,15 +83,16 @@ export function AdminPage() {
         </div>
       </header>
 
-      <div className="mx-auto flex max-w-[1400px] flex-col gap-6 px-4 py-6 md:flex-row md:px-6">
+      <div className={`mx-auto flex ${laser ? "max-w-[1800px]" : "max-w-[1400px]"} flex-col gap-6 px-4 py-6 md:flex-row md:px-6`}>
         <nav aria-label="Yönetim Paneli Bölümleri" className="flex shrink-0 flex-row gap-2 overflow-x-auto md:w-56 md:flex-col">
+          {session.user.role === "ADMIN" && <Link to="/admin/laser" className="min-h-11 rounded-md bg-warm px-3 py-3 text-sm text-wood-deep" aria-current={laser ? "page" : undefined}>Üretim · LaserCut Studio</Link>}
           {session.user.role === "ADMIN" && <Link to="/admin/research" className="min-h-11 rounded-md bg-warm px-3 py-3 text-sm text-wood-deep" aria-current={research ? "page" : undefined}>Araştırma Stüdyosu</Link>}
           {TABS.filter((t) => !("adminOnly" in t) || session.user.role === "ADMIN").map((t) => (
             <button
               key={t.id}
               onClick={() => { setTab(t.id); navigate("/admin"); }}
               className={
-                !research && t.id === tab
+                !research && !laser && t.id === tab
                   ? "whitespace-nowrap rounded-md bg-black px-3 py-2 text-left text-sm font-medium text-white"
                   : "whitespace-nowrap rounded-md px-3 py-2 text-left text-sm font-medium text-black/70 hover:bg-black/5"
               }
@@ -100,7 +103,7 @@ export function AdminPage() {
         </nav>
 
         <main className="min-w-0 flex-1">
-          {research ? (session.user.role === "ADMIN" ? <ResearchStudio /> : <p role="alert">Bu alan yalnızca yöneticilere açıktır.</p>) : <>
+          {laser ? (session.user.role === "ADMIN" ? <LaserStudio /> : <p role="alert">Bu alan yalnızca yöneticilere açıktır.</p>) : research ? (session.user.role === "ADMIN" ? <ResearchStudio /> : <p role="alert">Bu alan yalnızca yöneticilere açıktır.</p>) : <>
           {tab === "brand" ? <BrandTab /> : null}
           {tab === "home" ? <HomeContentTab /> : null}
           {tab === "categories" ? <CategoriesTab /> : null}

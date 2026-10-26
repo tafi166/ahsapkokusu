@@ -250,3 +250,12 @@ After changing `src/config/brandDefaults.ts`, `contentDefaults.ts` or `cncQuote.
 The seed reads the same `src/data` files the storefront uses, and the
 integration tests check that every product and category comes back from the
 API unchanged.
+
+## LaserCut Pricing Studio
+
+ADMIN-only production quoting at `/admin/laser`: private SVG/DXF analysis, configurable
+CO₂ profiles and material presets, motion estimates, decimal manufacturing costs,
+saved immutable quotations and actual-time records. It works without a laser connection.
+See [operator/setup guide](docs/LASERCUT_STUDIO.md) and
+[repository assessment](docs/LASERCUT_DISCOVERY.md). No validated production settings
+or supplier prices are seeded; configure them through the browser before quoting.

@@ -1,3 +1,5 @@
+import { LaserController } from './laser/laser.controller';
+import { LaserService } from './laser/laser.service';
 import { ProductImagesService } from './research/images/product-images.service';
 import { ResearchImagesController } from './research/images/images.controller';
 import { ResearchImagesService } from './research/images/images.service';
@@ -50,6 +52,7 @@ export function createAppModule(config: AppConfig) {
       ]),
     ],
     controllers: [
+      LaserController,
       ResearchImagesController,
       ResearchController,
       HealthController,
@@ -71,6 +74,7 @@ export function createAppModule(config: AppConfig) {
       ProductImagesService,
       ResearchImagesService,
       ResearchService,
+      LaserService,
       AuditService,
       AuthService,
       CatalogService,
