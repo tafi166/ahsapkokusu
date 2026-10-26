@@ -2,7 +2,7 @@ import { brand } from "@/config/brand";
 import { announcementMessages, homeContent } from "@/config/content";
 import { cncQuoteConfig } from "@/config/cncQuote";
 import { blogPosts } from "@/data/blog";
-import { categories } from "@/data/categories";
+import { allCategories as categories } from "@/data/categories";
 import { productFaq } from "@/data/faq";
 import { allProducts } from "@/data/products";
 import { testimonials } from "@/data/testimonials";

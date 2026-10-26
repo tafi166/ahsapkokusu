@@ -92,6 +92,8 @@ export interface Category {
   seoTitle: string;
   seoDescription: string;
   faq: FaqItem[];
+  /** Passive: hidden from the storefront (menus, its page, its products) but kept in the admin panel. */
+  hidden?: boolean;
 }
 
 // ---------------------------------------------------------------------------

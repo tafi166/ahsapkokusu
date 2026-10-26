@@ -44,6 +44,8 @@ model Category {
   content   Json
   /// True for the hand-written demo catalog.
   isSample  Boolean  @default(false)
+  /// Passive: left out of the storefront (menus, pages, its products); still edited in the admin panel.
+  isHidden  Boolean  @default(false)
   products  Product[]
   createdAt DateTime @default(now()) @db.Timestamptz(3)
   updatedAt DateTime @updatedAt @db.Timestamptz(3)

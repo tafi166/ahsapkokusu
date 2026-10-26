@@ -152,6 +152,7 @@ export const categorySchema: z.ZodType<Category> = z
     seoTitle: text(200),
     seoDescription: text(500),
     faq: z.array(faqItemSchema).max(30),
+    hidden: z.boolean().optional(),
   })
   .strict();
 

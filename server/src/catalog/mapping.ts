@@ -137,6 +137,9 @@ export function rowToProduct(row: ProductRow): Product {
   };
 }
 
+/** A product visitors may see: not a draft itself, and not in a passive category. */
+export const PUBLISHED_PRODUCT = { isHidden: false, category: { isHidden: false } } satisfies Prisma.ProductWhereInput;
+
 /** Product fields stored as columns rather than in `details`. */
 type ProductCore = Pick<
   Product,
@@ -163,8 +166,8 @@ type ProductCore = Pick<
 >;
 
 export function categoryToRow(c: Category, sortOrder: number, isSample: boolean): Prisma.CategoryCreateManyInput {
-  const { slug, title, ...content } = c;
-  return { slug, title, sortOrder, content: toJson(content), isSample };
+  const { slug, title, hidden, ...content } = c;
+  return { slug, title, sortOrder, content: toJson(content), isSample, isHidden: hidden ?? false };
 }
 
 export function rowToCategory(row: CategoryRow): Category {
@@ -172,5 +175,6 @@ export function rowToCategory(row: CategoryRow): Category {
     ...fromJsonObject<Omit<Category, 'slug' | 'title'>>(row.content, `category ${row.slug} content`),
     slug: row.slug as CategorySlug,
     title: row.title,
+    ...(row.isHidden && { hidden: true }),
   };
 }

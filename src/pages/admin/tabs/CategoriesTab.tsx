@@ -1,11 +1,21 @@
 import { useState } from "react";
-import { categories as currentCategories } from "@/data/categories";
+import { allCategories as currentCategories } from "@/data/categories";
 import { adminApi } from "@/lib/adminApi";
 import { runSave } from "@/pages/admin/saving";
 import type { Category } from "@/types";
-import { AdminButton, ColorInput, Field, ImageGalleryField, SavedBanner, SectionCard, TextArea, TextInput } from "@/pages/admin/controls";
+import { AdminButton, Checkbox, ColorInput, Field, ImageGalleryField, SavedBanner, SectionCard, TextArea, TextInput } from "@/pages/admin/controls";
+
+/** Passive categories carry `hidden: true`; active ones leave the field out. */
+function withHidden(category: Category, hidden: boolean): Category {
+  const { hidden: _previous, ...rest } = category;
+  return hidden ? { ...rest, hidden: true } : rest;
+}
 
 /**
+ * A category can be made passive (and active again) here: it leaves the
+ * menus, footer and homepage, its page and products stop being shown, and
+ * everything stays saved for when it comes back.
+ *
  * Category *text* is fully editable here (title, descriptions, SEO copy,
  * banner photo and fallback colour, subcategory titles, FAQ). Adding/removing whole categories or
  * subcategory slugs is intentionally out of scope for this panel — those
@@ -27,6 +37,11 @@ export function CategoriesTab() {
     setSaved(false);
   }
 
+  function setActiveHidden(hidden: boolean) {
+    setForm((prev) => prev.map((c, i) => (i === activeIndex ? withHidden(c, hidden) : c)));
+    setSaved(false);
+  }
+
   function handleSave() {
     void runSave(() => adminApi.saveCategories(form), setSaved, setSaveError);
   }
@@ -37,7 +52,10 @@ export function CategoriesTab() {
     <div className="max-w-2xl space-y-6">
       <div>
         <h2 className="text-lg font-semibold">Kategoriler</h2>
-        <p className="text-sm text-black/55">Kategori metinleri, SEO açıklamaları, alt kategori başlıkları ve SSS.</p>
+        <p className="text-sm text-black/55">
+          Kategori metinleri, SEO açıklamaları, alt kategori başlıkları ve SSS. Pasif bir kategori üst menüde ve sitede görünmez; ürünleri
+          silinmez, yeniden aktif ettiğinizde geri gelir.
+        </p>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -48,13 +66,31 @@ export function CategoriesTab() {
             className={
               c.slug === activeSlug
                 ? "rounded-full bg-black px-3 py-1.5 text-xs font-medium text-white"
-                : "rounded-full border border-black/15 bg-white px-3 py-1.5 text-xs font-medium hover:bg-black/5"
+                : c.hidden
+                  ? "rounded-full border border-dashed border-black/25 bg-white px-3 py-1.5 text-xs font-medium text-black/45 hover:bg-black/5"
+                  : "rounded-full border border-black/15 bg-white px-3 py-1.5 text-xs font-medium hover:bg-black/5"
             }
           >
             {c.title}
+            {c.hidden ? " · pasif" : ""}
           </button>
         ))}
       </div>
+
+      <SectionCard
+        title="Yayın Durumu"
+        description={
+          active.hidden
+            ? "Bu kategori pasif: üst menüde, alt bilgide ve ana sayfada görünmüyor; sayfası ve ürünleri ziyaretçilere kapalı."
+            : "Kategori yayında. Pasif yaptığınızda menüden ve siteden kalkar; kategori ve ürünleri panelde kalır."
+        }
+      >
+        <Checkbox
+          label="Pasif — üst menüde ve sitede gösterme"
+          checked={!!active.hidden}
+          onChange={setActiveHidden}
+        />
+      </SectionCard>
 
       <SectionCard title="Genel">
         <Field label="Başlık">

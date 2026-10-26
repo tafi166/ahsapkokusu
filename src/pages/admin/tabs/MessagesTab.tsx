@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { categories } from "@/data/categories";
+import { allCategories as categories } from "@/data/categories";
 import { adminApi, errorMessage, type ContactMessage, type MessageStatus } from "@/lib/adminApi";
 import { AdminButton } from "@/pages/admin/controls";
 

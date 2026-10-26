@@ -2,7 +2,7 @@ import { BadRequestException, Inject, Injectable, NotFoundException } from '@nes
 import { randomBytes } from 'node:crypto';
 import type { ConfiguredOptions, Product } from '@/types';
 import { AuditService } from '../audit/audit.service';
-import { rowToProduct } from '../catalog/mapping';
+import { PUBLISHED_PRODUCT, rowToProduct } from '../catalog/mapping';
 import type { Lang } from '../common/decorators';
 import { isUniqueConflict } from '../common/errors';
 import { ContentService } from '../content/content.service';
@@ -100,7 +100,7 @@ export class OrdersService {
   async place(input: OrderInput, lang: Lang = 'tr'): Promise<OrderView> {
     const ids = [...new Set(input.lines.map((l) => l.productId))];
     const [rows, en] = await Promise.all([
-      this.prisma.product.findMany({ where: { id: { in: ids }, isHidden: false } }),
+      this.prisma.product.findMany({ where: { id: { in: ids }, ...PUBLISHED_PRODUCT } }),
       lang === 'en' ? this.content.translations('en') : undefined,
     ]);
     const products = new Map(rows.map((r) => [r.id, rowToProduct(r)]));

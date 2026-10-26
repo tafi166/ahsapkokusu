@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, Inject, Injectable } from '@nestjs/common';
 import type { Category, Product } from '@/types';
 import { AuditService } from '../audit/audit.service';
-import { categoryToRow, productToRow, rowToCategory, rowToProduct } from '../catalog/mapping';
+import { PUBLISHED_PRODUCT, categoryToRow, productToRow, rowToCategory, rowToProduct } from '../catalog/mapping';
 import { Prisma } from '../generated/prisma/client';
 import { APP_CONFIG, type AppConfig } from '../config';
 import { PRISMA, type PrismaClient } from '../prisma/prisma';
@@ -33,8 +33,9 @@ export class ContentService {
 
   async snapshot(): Promise<SiteSnapshot> {
     const [categories, products, blocks] = await Promise.all([
+      // Passive categories stay in (flagged `hidden`) so the admin panel can edit them; the storefront filters them out.
       this.prisma.category.findMany({ orderBy: { sortOrder: 'asc' } }),
-      this.prisma.product.findMany({ where: { isHidden: false }, orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }] }),
+      this.prisma.product.findMany({ where: PUBLISHED_PRODUCT, orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }] }),
       this.prisma.siteContent.findMany(),
     ]);
     const site: SiteSnapshot = {
@@ -153,7 +154,7 @@ export class ContentService {
     }
   }
 
-  /** Updates the text of the existing categories; the set of categories itself is fixed. */
+  /** Updates the text and passive flag of the existing categories; the set of categories itself is fixed. */
   async replaceCategories(actorId: string, categories: Category[]) {
     const existing = await this.prisma.category.findMany({ select: { slug: true } });
     const known = new Set(existing.map((c) => c.slug));
