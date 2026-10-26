@@ -23,14 +23,14 @@ export function Footer() {
             <Link to={localePath("/")} className="brand-home-link inline-block rounded-sm">
               <BrandLogo inverse className="w-[220px]" />
             </Link>
-            <p className="mt-4 max-w-xs text-sm text-footer-link">{brand.description}</p>
+            <p className="mt-6 max-w-xs text-sm leading-relaxed text-footer-link">{brand.description}</p>
             <div className="mt-5 flex gap-3">
               {socialLinks.map((social) => (
                 <a
                   key={social.label}
                   href={social.href}
                   aria-label={social.label}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-footer-border text-[11px] tracking-wide transition-colors hover:border-footer-ink"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-footer-border text-[11px] tracking-wide transition-colors duration-500 hover:border-footer-ink hover:bg-footer-ink hover:text-footer-bg"
                 >
                   {social.short}
                 </a>
@@ -40,7 +40,7 @@ export function Footer() {
 
           {footerColumns(t).map((column) => (
             <nav key={column.title} aria-label={column.title}>
-              <h3 className="mb-4 text-sm font-medium uppercase tracking-wide text-footer-ink">
+              <h3 className="mb-5 font-body text-[11px] font-medium uppercase tracking-[0.24em] text-brass">
                 {column.title}
               </h3>
               <ul className="space-y-2.5">
@@ -48,7 +48,7 @@ export function Footer() {
                   <li key={link.href}>
                     <Link
                       to={link.href}
-                      className="text-sm text-footer-link transition-colors hover:text-footer-link-hover"
+                      className="link-draw text-sm text-footer-link transition-colors duration-300 hover:text-footer-link-hover"
                     >
                       {link.label}
                     </Link>

@@ -14,12 +14,10 @@ interface SectionHeadProps {
  */
 export function SectionHead({ eyebrow, title, subtitle, className }: SectionHeadProps) {
   return (
-    <div className={cn("max-w-lg", className)}>
-      {eyebrow ? (
-        <p className="mb-2 text-xs uppercase tracking-[0.2em] text-body/50">{eyebrow}</p>
-      ) : null}
-      <h2 className="mb-3 text-2xl font-heading text-ink tracking-tight sm:text-3xl">{title}</h2>
-      {subtitle ? <p className="text-body/70">{subtitle}</p> : null}
+    <div className={cn("max-w-xl", className)}>
+      {eyebrow ? <p className="eyebrow mb-4 text-body/60">{eyebrow}</p> : null}
+      <h2 className="text-ink">{title}</h2>
+      {subtitle ? <p className="mt-4 text-body/70">{subtitle}</p> : null}
     </div>
   );
 }

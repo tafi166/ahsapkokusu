@@ -1,5 +1,6 @@
 import { Outlet, useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import { useAnimate, useReducedMotion } from "framer-motion";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CartDrawer } from "@/components/layout/CartDrawer";
@@ -13,10 +14,18 @@ export function Layout() {
   const { pathname } = useLocation();
   const { t } = useI18n();
 
-  // Reset scroll position on route change (SPA navigation doesn't do this by default).
+  const [pageRef, animate] = useAnimate<HTMLElement>();
+  const reduceMotion = useReducedMotion();
+
+  // Reset scroll position on route change (SPA navigation doesn't do this by default),
+  // and let the new page fade in rather than appear at once. Opacity only: a transform
+  // on <main> would turn it into the containing block for fixed and sticky children.
   useEffect(() => {
     window.scrollTo({ top: 0 });
-  }, [pathname]);
+    if (!reduceMotion && pageRef.current) {
+      void animate(pageRef.current, { opacity: [0, 1] }, { duration: 0.7, ease: [0.16, 1, 0.3, 1] });
+    }
+  }, [pathname, animate, pageRef, reduceMotion]);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -27,7 +36,7 @@ export function Layout() {
         {t.common.skipToContent}
       </a>
       <Header />
-      <main id="icerik" tabIndex={-1} className="flex-1 outline-none">
+      <main ref={pageRef} id="icerik" tabIndex={-1} className="flex-1 outline-none">
         <Outlet />
       </main>
       <Footer />

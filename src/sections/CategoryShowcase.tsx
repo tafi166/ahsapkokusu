@@ -15,9 +15,9 @@ export function CategoryShowcase() {
   const { t } = useI18n();
   return (
     <Section>
-      <div className="mb-10 max-w-lg">
+      <div className="mb-12 max-w-lg">
         <h2>{categoryShowcase.title}</h2>
-        <p className="mt-3 text-body/70">{categoryShowcase.subtitle}</p>
+        <p className="mt-4 text-body/70">{categoryShowcase.subtitle}</p>
       </div>
 
       <motion.ul
@@ -35,14 +35,15 @@ export function CategoryShowcase() {
                   src={category.heroImage ?? category.heroSwatch}
                   label={category.title}
                   ratio="landscape"
-                  className="transition-transform duration-500 ease-out group-hover:scale-105"
+                  className="transition-transform duration-[1400ms] ease-[var(--ease-premium)] group-hover:scale-[1.06]"
                 />
               </div>
-              <div className="mt-4">
-                <h3 className="text-lg">{category.title}</h3>
-                <p className="mt-1 text-sm text-body/60">{category.shortDescription}</p>
-                <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-ink">
-                  {t.common.explore} <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
+              <div className="mt-5">
+                <h3 className="text-[1.75rem] leading-tight">{category.title}</h3>
+                <p className="mt-1.5 text-sm text-body/60">{category.shortDescription}</p>
+                <span className="mt-4 inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.2em] text-ink">
+                  <span className="link-draw">{t.common.explore}</span>
+                  <ArrowRight size={14} className="transition-transform duration-500 ease-[var(--ease-premium)] group-hover:translate-x-1.5" />
                 </span>
               </div>
             </Link>

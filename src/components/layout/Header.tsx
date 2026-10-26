@@ -41,7 +41,7 @@ function LanguageSwitcher() {
 }
 
 // No display class here: callers add `inline-flex`, or `hidden sm:inline-flex` (cn doesn't resolve conflicting classes).
-const iconButton = "relative h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-paper-soft";
+const iconButton = "relative h-10 w-10 items-center justify-center rounded-full text-ink transition-colors duration-300 hover:bg-paper-soft hover:text-accent-deep";
 
 function CountBadge({ count }: { count: number }) {
   if (count <= 0) return null;
@@ -80,11 +80,11 @@ export function Header() {
         <div
           className={cn(
             // Opaque: a see-through bar let the page scrolling underneath show as faint text.
-            "w-full border-b border-line bg-paper transition-shadow duration-300",
-            isScrolled && "shadow-sm",
+            "w-full border-b border-line bg-paper transition-shadow duration-500",
+            isScrolled && "shadow-[0_12px_32px_-18px_rgba(30,25,21,0.35)]",
           )}
         >
-          <div className="mx-auto grid h-[112px] max-w-[1760px] grid-cols-[1fr_auto_1fr] items-center px-4 md:h-[136px] md:px-8">
+          <div className="mx-auto grid h-[72px] max-w-[1760px] grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 md:h-[88px] md:px-8">
             <div className="flex items-center">
               <button className={cn(iconButton, "-ml-2 mr-1 inline-flex xl:hidden")} aria-label={t.header.openMenu} onClick={() => setMobileOpen(true)}>
                 <Menu size={22} />
@@ -93,7 +93,7 @@ export function Header() {
             </div>
 
             <Link to={localePath("/")} className="brand-home-link rounded-sm p-1">
-              <BrandLogo className="w-[132px] sm:w-[148px] md:w-[176px]" />
+              <BrandLogo horizontal className="w-[168px] sm:w-[230px] md:w-[290px]" />
             </Link>
 
             <div className="flex items-center justify-end gap-0.5">
@@ -134,7 +134,7 @@ export function Header() {
                     <Link
                       to={item.href}
                       className={cn(
-                        "group relative flex items-center gap-1 whitespace-nowrap px-3 py-3 text-[14px] tracking-[0.02em] transition-colors hover:text-ink",
+                        "group relative flex items-center gap-1 whitespace-nowrap px-3 py-3.5 text-[15px] tracking-[0.03em] transition-colors duration-300 hover:text-ink",
                         active ? "text-ink" : "text-body/80",
                       )}
                       aria-current={active ? "page" : undefined}
@@ -143,12 +143,12 @@ export function Header() {
                     >
                       {item.label}
                       {item.children && item.children.length > 0 ? (
-                        <ChevronDown size={13} aria-hidden="true" className="opacity-50 transition-transform group-hover:rotate-180" />
+                        <ChevronDown size={13} aria-hidden="true" className="opacity-50 transition-transform duration-500 ease-[var(--ease-premium)] group-hover:rotate-180" />
                       ) : null}
                       <span
                         aria-hidden="true"
                         className={cn(
-                          "absolute inset-x-3 bottom-2 h-px origin-left bg-ink transition-transform duration-300",
+                          "absolute inset-x-3 bottom-2.5 h-px origin-left bg-brass transition-transform duration-500 ease-[var(--ease-premium)]",
                           active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100",
                         )}
                       />

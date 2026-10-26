@@ -31,7 +31,7 @@ export function ProductGridSection({
 
   return (
     <Section scheme={scheme}>
-      <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
+      <div className="mb-12 flex flex-wrap items-end justify-between gap-6">
         <SectionHead title={title} subtitle={subtitle} />
         {ctaLabel && ctaHref ? (
           <Button href={localePath(ctaHref)} variant="outline">
@@ -45,7 +45,7 @@ export function ProductGridSection({
         whileInView="visible"
         viewport={viewportOnce}
         variants={staggerContainer(0.1)}
-        className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4"
+        className="grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 md:gap-x-6 lg:grid-cols-4 lg:gap-x-8 lg:gap-y-14"
       >
         {products.slice(0, 8).map((product) => (
           <motion.li key={product.id} variants={fadeUp}>
