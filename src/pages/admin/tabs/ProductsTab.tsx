@@ -1,6 +1,6 @@
 import { ProductImageImport, type ProductImageState } from "@/pages/admin/products/ProductImageImport";
 import { useEffect, useMemo, useState } from "react";
-import { categories } from "@/data/categories";
+import { allCategories as categories } from "@/data/categories";
 import { adminApi } from "@/lib/adminApi";
 import { runSave } from "@/pages/admin/saving";
 import { ProductMedia } from "@/lib/placeholder";
@@ -232,7 +232,17 @@ export function ProductsTab({ canImport = false }: { canImport?: boolean }) {
                         <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">Taslak</span>
                       ) : null}
                     </td>
-                    <td className="px-3 py-2 text-black/60">{p.category}</td>
+                    <td className="px-3 py-2 text-black/60">
+                      {p.category}
+                      {categories.find((c) => c.slug === p.category)?.hidden ? (
+                        <span
+                          className="ml-2 rounded-full bg-black/5 px-2 py-0.5 text-xs font-medium text-black/55"
+                          title="Kategori pasif olduğu için bu ürün sitede görünmüyor."
+                        >
+                          Kategori pasif
+                        </span>
+                      ) : null}
+                    </td>
                     <td className="px-3 py-2">
                       {p.priceDisplay === "quote" ? (
                         <span className="text-black/60">Teklif ile</span>
@@ -319,6 +329,7 @@ export function ProductsTab({ canImport = false }: { canImport?: boolean }) {
                 {categories.map((c) => (
                   <option key={c.slug} value={c.slug}>
                     {c.title}
+                    {c.hidden ? " (pasif)" : ""}
                   </option>
                 ))}
               </select>

@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, useReducedMotion, type PanInfo } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { useState } from "react";
 import { homeContent } from "@/config/content";
 import { Container } from "@/components/ui/Container";
@@ -23,13 +23,29 @@ const slides = Array.isArray(hero.images) && hero.images.length > 0 ? hero.image
 
 /** How far (px) a drag has to travel before it counts as a slide change. */
 const DRAG_THRESHOLD = 80;
+/** With several photos the hero moves on by itself, slowly enough to read the headline. */
+const AUTOPLAY_MS = 7000;
+const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
+
+/** Each headline line rises out of its own mask, one after another. */
+const lineReveal = {
+  hidden: { y: "110%" },
+  visible: { y: "0%", transition: { duration: 1.1, ease: EASE } },
+};
 
 export function Hero() {
   const { t } = useI18n();
   const prefersReducedMotion = useReducedMotion();
-  const { index, goTo, next, prev } = useCarousel({ itemCount: slides.length });
+  const [isPaused, setIsPaused] = useState(false);
+  const { index, goTo, next, prev } = useCarousel({
+    itemCount: slides.length,
+    autoplayMs: prefersReducedMotion ? undefined : AUTOPLAY_MS,
+    paused: isPaused,
+  });
   const [direction, setDirection] = useState<1 | -1>(1);
   const canDrag = slides.length > 1;
+  // Blank lines (a trailing newline saved from the admin panel) would become empty, invisible rows.
+  const titleLines = hero.title.split("\n").filter((line) => line.trim() !== "");
 
   function handleNext() {
     setDirection(1);
@@ -49,7 +65,11 @@ export function Hero() {
   }
 
   return (
-    <section className="relative flex min-h-[80vh] items-center overflow-hidden md:min-h-[88vh]">
+    <section
+      className="relative flex min-h-[78vh] items-center overflow-hidden bg-ink md:min-h-[86vh]"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
       <div className="absolute inset-0 h-full w-full overflow-hidden">
         <AnimatePresence initial={false}>
           <motion.div
@@ -59,23 +79,36 @@ export function Hero() {
             dragConstraints={{ left: 0, right: 0 }}
             dragMomentum={false}
             onDragEnd={handleDragEnd}
-            initial={prefersReducedMotion ? { opacity: 0 } : { x: direction === 1 ? "100%" : "-100%" }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={prefersReducedMotion ? { opacity: 0 } : { x: direction === 1 ? "-100%" : "100%" }}
-            transition={{ duration: prefersReducedMotion ? 0.2 : 0.5, ease: [0.455, 0.03, 0.515, 0.955] }}
+            // Cross-fade, drifting slightly in the direction of travel.
+            initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, x: `${direction * 3}%` }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, x: `${direction * -2}%` }}
+            transition={{ duration: prefersReducedMotion ? 0.2 : 1.4, ease: EASE }}
             className={cn("absolute inset-0 h-full w-full", canDrag && "cursor-grab touch-pan-y active:cursor-grabbing")}
           >
-            <ProductMedia
-              src={slides[index]}
-              ratio="wide"
-              label={t.a11y.heroImage}
-              className="pointer-events-none absolute inset-0 h-full w-full"
-            />
+            {/* Slow push-in on the photo while it is shown. */}
+            <motion.div
+              className="absolute inset-0"
+              initial={prefersReducedMotion ? false : { scale: 1.12 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 9, ease: "easeOut" }}
+            >
+              <ProductMedia
+                src={slides[index]}
+                ratio="wide"
+                label={t.a11y.heroImage}
+                eager
+                className="pointer-events-none absolute inset-0 h-full w-full"
+              />
+            </motion.div>
           </motion.div>
         </AnimatePresence>
       </div>
-      {/* Left-to-right gradient (not a flat tint) keeps the photo's own detail visible on the right while the text stays legible on the left. */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/25 to-transparent" aria-hidden="true" />
+      {/* Left-to-right espresso gradient (not a flat tint) keeps the photo's own detail visible on the right while the text stays legible on the left; a second one grounds the bottom edge. */}
+      <div className="absolute inset-0 bg-gradient-to-r from-[#1A1511]/80 via-[#1A1511]/35 to-transparent" aria-hidden="true" />
+      <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#1A1511]/50 to-transparent" aria-hidden="true" />
+      {/* On phones the text spans the whole photo, so it needs an even tint too. */}
+      <div className="absolute inset-0 bg-[#1A1511]/40 md:hidden" aria-hidden="true" />
 
       {(!Array.isArray(hero.images) || hero.images.length === 0) ? (
         <img src="/brand/monogram.svg" alt="" aria-hidden="true" width="685" height="500"
@@ -86,50 +119,71 @@ export function Hero() {
         <motion.div
           initial="hidden"
           animate="visible"
-          variants={staggerContainer(0.15)}
-          className="max-w-xl text-white"
+          variants={staggerContainer(0.14)}
+          className="max-w-2xl text-white"
         >
-          <motion.p variants={fadeUp} className="mb-4 text-sm uppercase tracking-[0.2em] text-white/80">
+          <motion.p variants={fadeUp} className="eyebrow mb-6 text-white/80">
             {hero.eyebrow}
           </motion.p>
-          <motion.h1 variants={fadeUp} className="whitespace-pre-line text-white">
-            {hero.title}
-          </motion.h1>
-          <motion.p variants={fadeUp} className="mt-5 max-w-md text-base text-white/85">
+          <h1 className="text-white">
+            {titleLines.map((line, i) => (
+              <span key={i} className="block overflow-hidden pb-[0.08em]">
+                <motion.span
+                  variants={prefersReducedMotion ? fadeUp : lineReveal}
+                  // The closing line is set in italic brass — the brand's signature flourish.
+                  className={cn("block", i > 0 && i === titleLines.length - 1 && "italic text-[#E3C99F]")}
+                >
+                  {line}
+                </motion.span>
+                {i < titleLines.length - 1 ? " " : null}
+              </span>
+            ))}
+          </h1>
+          <motion.p variants={fadeUp} className="mt-7 max-w-md text-lg font-light leading-relaxed text-white/85">
             {hero.subtitle}
           </motion.p>
-          <motion.div variants={fadeUp} className="mt-8 flex flex-wrap items-center gap-4">
+          <motion.div variants={fadeUp} className="mt-10 flex flex-wrap items-center gap-4">
             <Button href={localePath(hero.primaryCtaHref)} variant="secondary" size="lg">
               {hero.primaryCtaLabel}
             </Button>
-            <Button href={localePath(hero.secondaryCtaHref)} variant="outline" size="lg" className="border-white text-white hover:bg-white/10">
+            <Button href={localePath(hero.secondaryCtaHref)} variant="outline" size="lg" className="border-white/60 text-white">
               {hero.secondaryCtaLabel}
             </Button>
           </motion.div>
-          <motion.p variants={fadeUp} className="mt-6 text-sm text-white/70">
-            {hero.trustBadge} ⭐⭐⭐⭐⭐
+          <motion.p variants={fadeUp} className="mt-8 flex items-center gap-3 text-sm tracking-wide text-white/70">
+            <span className="flex gap-0.5" aria-hidden="true">
+              {Array.from({ length: 5 }, (_, i) => (
+                <Star key={i} size={14} className="fill-brass text-brass" />
+              ))}
+            </span>
+            {hero.trustBadge}
           </motion.p>
         </motion.div>
       </Container>
+
+      {/* Scroll cue: a hairline with a bead travelling down it. */}
+      <div aria-hidden="true" className="pointer-events-none absolute bottom-6 left-1/2 z-10 hidden h-14 w-px -translate-x-1/2 overflow-hidden bg-white/25 md:block">
+        <span className="hero-scroll-cue absolute left-0 top-0 h-5 w-px bg-white" />
+      </div>
 
       {canDrag ? (
         <>
           <button
             onClick={handlePrev}
             aria-label={t.a11y.previousImage}
-            className="absolute left-4 top-1/2 z-20 hidden -translate-y-1/2 rounded-full bg-white/15 p-2 text-white backdrop-blur-sm transition-colors hover:bg-white/25 md:block"
+            className="absolute left-4 top-1/2 z-20 hidden -translate-y-1/2 rounded-full border border-white/25 p-3 text-white backdrop-blur-sm transition-colors duration-500 hover:bg-white hover:text-ink md:block"
           >
-            <ChevronLeft size={20} />
+            <ChevronLeft size={18} />
           </button>
           <button
             onClick={handleNext}
             aria-label={t.a11y.nextImage}
-            className="absolute right-4 top-1/2 z-20 hidden -translate-y-1/2 rounded-full bg-white/15 p-2 text-white backdrop-blur-sm transition-colors hover:bg-white/25 md:block"
+            className="absolute right-4 top-1/2 z-20 hidden -translate-y-1/2 rounded-full border border-white/25 p-3 text-white backdrop-blur-sm transition-colors duration-500 hover:bg-white hover:text-ink md:block"
           >
-            <ChevronRight size={20} />
+            <ChevronRight size={18} />
           </button>
 
-          <div className="absolute right-5 top-1/2 z-20 flex -translate-y-1/2 flex-col gap-3" role="tablist" aria-label={t.a11y.heroSlides}>
+          <div className="absolute bottom-8 left-4 z-20 flex items-center gap-4 md:left-8" role="tablist" aria-label={t.a11y.heroSlides}>
             {slides.map((_, i) => (
               <button
                 key={i}
@@ -137,12 +191,19 @@ export function Hero() {
                 aria-selected={i === index}
                 aria-label={t.a11y.slide(i + 1)}
                 onClick={() => handleGoTo(i)}
-                className={cn(
-                  "flex h-8 w-8 items-center justify-center rounded-full border text-xs transition-colors",
-                  i === index ? "border-white bg-white text-ink" : "border-white/50 text-white/70 hover:border-white",
-                )}
+                className="group flex items-center gap-2 py-2 text-[11px] tracking-[0.2em] text-white/60 transition-colors hover:text-white aria-selected:text-white"
               >
-                {i + 1}
+                {String(i + 1).padStart(2, "0")}
+                <span className="relative h-px w-10 overflow-hidden bg-white/30">
+                  {/* Fills over the autoplay interval, so the next change is never a surprise. */}
+                  <span
+                    key={i === index ? `on-${index}` : "off"}
+                    className={cn(
+                      "absolute inset-0 origin-left bg-white",
+                      i === index ? (prefersReducedMotion || isPaused ? "scale-x-100" : "hero-progress") : "scale-x-0",
+                    )}
+                  />
+                </span>
               </button>
             ))}
           </div>

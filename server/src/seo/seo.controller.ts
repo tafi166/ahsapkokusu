@@ -3,6 +3,7 @@ import { Public } from '../common/decorators';
 import { APP_CONFIG, type AppConfig } from '../config';
 import { ContentService } from '../content/content.service';
 import { PAGE_SEGMENTS } from '../content/translations';
+import { PUBLISHED_PRODUCT } from '../catalog/mapping';
 import { PRISMA, type PrismaClient } from '../prisma/prisma';
 
 /** Storefront pages with real content (the /sayfa/* info pages are still placeholders), by their Turkish segment. */
@@ -30,8 +31,8 @@ export class SeoController {
   @Header('Cache-Control', 'public, max-age=3600')
   async sitemap(): Promise<string> {
     const [categories, products, en] = await Promise.all([
-      this.prisma.category.findMany({ orderBy: { sortOrder: 'asc' }, select: { slug: true, updatedAt: true } }),
-      this.prisma.product.findMany({ where: { isHidden: false }, orderBy: { sortOrder: 'asc' }, select: { id: true, slug: true, contentUpdatedAt: true } }),
+      this.prisma.category.findMany({ where: { isHidden: false }, orderBy: { sortOrder: 'asc' }, select: { slug: true, updatedAt: true } }),
+      this.prisma.product.findMany({ where: PUBLISHED_PRODUCT, orderBy: { sortOrder: 'asc' }, select: { id: true, slug: true, contentUpdatedAt: true } }),
       this.content.translations('en'),
     ]);
     // Each page in both languages; English addresses use the translated slug when there is one.

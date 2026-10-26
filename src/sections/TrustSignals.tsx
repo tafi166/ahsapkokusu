@@ -16,7 +16,7 @@ const iconMap: Record<TrustSignal["icon"], typeof Hammer> = {
 export function TrustSignals() {
   return (
     <Section>
-      <h2 className="mb-10 text-center">{homeContent.trustSignals.title}</h2>
+      <h2 className="mb-14 text-center">{homeContent.trustSignals.title}</h2>
       <motion.ul
         initial="hidden"
         whileInView="visible"
@@ -27,11 +27,11 @@ export function TrustSignals() {
         {trustSignals.map((signal) => {
           const Icon = iconMap[signal.icon];
           return (
-            <motion.li key={signal.id} variants={fadeUp} className="text-center">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-line">
-                <Icon size={22} aria-hidden="true" />
+            <motion.li key={signal.id} variants={fadeUp} className="group text-center">
+              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-line text-accent-deep transition-colors duration-500 group-hover:border-accent-deep group-hover:bg-accent-deep group-hover:text-white">
+                <Icon size={22} strokeWidth={1.4} aria-hidden="true" />
               </div>
-              <h3 className="text-base">{signal.title}</h3>
+              <h3 className="text-2xl">{signal.title}</h3>
               <p className="mt-2 text-sm text-body/70">{signal.description}</p>
             </motion.li>
           );

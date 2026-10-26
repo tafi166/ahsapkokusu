@@ -4,9 +4,9 @@ import type { BadgeKind } from "@/lib/productBadge";
 
 const badgeClass: Record<BadgeKind, string> = {
   sale: "bg-danger text-white",
-  new: "bg-black text-white",
-  bestSeller: "bg-accent text-ink",
-  custom: "bg-badge-custom text-white",
+  new: "bg-ink text-paper",
+  bestSeller: "bg-brass text-ink",
+  custom: "bg-paper text-accent-deep",
 };
 
 export function Badge({ kind, className }: { kind: BadgeKind; className?: string }) {
@@ -14,7 +14,7 @@ export function Badge({ kind, className }: { kind: BadgeKind; className?: string
   return (
     <span
       className={cn(
-        "absolute left-3 top-3 rounded-full px-3 py-1 text-xs font-medium uppercase tracking-wide",
+        "absolute left-3 top-3 z-10 rounded-full px-3 py-1 text-[10px] font-medium uppercase tracking-[0.18em] shadow-sm",
         badgeClass[kind],
         className,
       )}

@@ -17,10 +17,10 @@ export function CustomDesignSection() {
           <PlaceholderMedia swatch="#8a6a4b" ratio="landscape" label={t.a11y.customDesignImage} className="rounded-card" />
         </RevealOnScroll>
         <RevealOnScroll delay={0.1}>
-          <p className="mb-3 text-sm uppercase tracking-[0.2em] text-body/60">{customDesign.eyebrow}</p>
+          <p className="eyebrow mb-5 text-body/60">{customDesign.eyebrow}</p>
           <h2>{customDesign.title}</h2>
-          <p className="mt-4 max-w-md text-body/80">{customDesign.body}</p>
-          <Button href={localePath(customDesign.ctaHref)} className="mt-7">
+          <p className="mt-6 max-w-md text-body/80">{customDesign.body}</p>
+          <Button href={localePath(customDesign.ctaHref)} className="mt-9">
             {customDesign.ctaLabel}
           </Button>
         </RevealOnScroll>

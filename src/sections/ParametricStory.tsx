@@ -17,10 +17,10 @@ export function ParametricStory() {
           <PlaceholderMedia swatch="#3c3c3c" ratio="landscape" label={t.a11y.parametricImage} className="rounded-card" />
         </RevealOnScroll>
         <RevealOnScroll delay={0.1}>
-          <p className="mb-3 text-sm uppercase tracking-[0.2em] text-body/60">{parametricStory.eyebrow}</p>
+          <p className="eyebrow mb-5 text-body/60">{parametricStory.eyebrow}</p>
           <h2>{parametricStory.title}</h2>
-          <p className="mt-4 max-w-md text-body/80">{parametricStory.body}</p>
-          <Button href={localePath(parametricStory.ctaHref)} className="mt-7">
+          <p className="mt-6 max-w-md text-body/80">{parametricStory.body}</p>
+          <Button href={localePath(parametricStory.ctaHref)} className="mt-9">
             {parametricStory.ctaLabel}
           </Button>
         </RevealOnScroll>

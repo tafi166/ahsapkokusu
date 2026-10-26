@@ -3,38 +3,39 @@
 /* Ahşap Kokusu identity. Color values mirror config/tokens.ts. */
 @theme {
   /* Fonts */
-  --font-heading: "Belleza", ui-sans-serif, system-ui, sans-serif;
-  --font-body: "Work Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Cormorant Garamond", "Cormorant", Georgia, ui-serif, serif;
+  --font-body: "Jost", ui-sans-serif, system-ui, sans-serif;
 
   /* Colors — canonical values live in src/config/tokens.ts (single source of truth). Keep this block in sync with tokens.ts. */
-  --color-paper: #FFFCF7;
-  --color-paper-soft: #F6F2EA;
-  --color-ink: #24231F;
-  --color-body: #49443C;
-  --color-line: #E5DDD0;
-  --color-divider: #A69A8A;
-  --color-mist: #EDE5D9;
+  --color-paper: #FAF7F1;
+  --color-paper-soft: #F2ECE2;
+  --color-ink: #1E1915;
+  --color-body: #4A4139;
+  --color-line: #E4DACB;
+  --color-divider: #A5978A;
+  --color-mist: #EAE2D5;
 
-  --color-accent: #BC8658;
+  --color-accent: #B07B4A;
   --color-accent-deep: #5A341D;
 
   /* Warm-neutral & wood-inspired tones (editorial, subtle) */
-  --color-warm: #F6F2EA;
-  --color-warm-soft: #EAE1D3;
+  --color-warm: #F2ECE2;
+  --color-warm-soft: #E7DCCB;
   --color-wood-light: #D8B38A;
-  --color-wood: #BC8658;
+  --color-wood: #B07B4A;
   --color-wood-deep: #5A341D;
+  --color-brass: #C29A62;
 
   --color-btn-bg: #5A341D;
   --color-btn-text: #FFFFFF;
-  --color-btn-bg-hover: #434C2C;
+  --color-btn-bg-hover: #1E1915;
   --color-btn-text-hover: #FFFFFF;
 
-  --color-footer-bg: #24231F;
-  --color-footer-ink: #F6F2EA;
-  --color-footer-link: #D9CEBE;
+  --color-footer-bg: #1A1511;
+  --color-footer-ink: #F2ECE2;
+  --color-footer-link: #CDBFAE;
   --color-footer-link-hover: #FFFFFF;
-  --color-footer-border: #504B40;
+  --color-footer-border: #3A3029;
 
   --color-success: #626C41;
   --color-danger: #AF3838;
@@ -42,7 +43,7 @@
 
   /* Radii */
   --radius-box: 0px;
-  --radius-card: 10px;
+  --radius-card: 6px;
   --radius-input: 0px;
   --radius-pill: 100px;
 
@@ -57,8 +58,9 @@
   --breakpoint-3xl: 90rem; /* 1440px */
   --breakpoint-4xl: 106.25rem; /* 1700px */
 
-  /* Reveal-on-scroll easing extracted from the theme's animation stylesheet */
-  --ease-reveal: cubic-bezier(0.455, 0.03, 0.515, 0.955);
+  /* Long, soft expo-out: things arrive quickly and settle slowly (mirrors tokens.motion.easeReveal). */
+  --ease-reveal: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @layer base {
@@ -72,28 +74,36 @@
 
   body {
     background-color: var(--color-paper);
+    background-image: url("/textures/grain.svg");
     color: var(--color-body);
     font-family: var(--font-body);
     font-weight: 400;
-    letter-spacing: 0.5px;
-    line-height: 1.5;
+    font-size: 1.0625rem;
+    letter-spacing: 0.01em;
+    line-height: 1.6;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
+  /* Cormorant has a small x-height, so the scale runs larger than a sans would need. */
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
-    font-weight: 400;
-    line-height: 1.1;
-    letter-spacing: 0px;
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
     color: var(--color-ink);
+    text-wrap: balance;
   }
 
-  h1 { font-size: clamp(2.5rem, 1.9rem + 2.4vw, 5.5rem); }
-  h2 { font-size: clamp(1.75rem, 1.4rem + 1.4vw, 3.125rem); }
-  h3 { font-size: clamp(1.375rem, 1.2rem + 0.7vw, 1.875rem); }
-  h4 { font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.5rem); }
-  h5 { font-size: 1.125rem; }
-  h6 { font-size: 1rem; }
+  h1 { font-size: clamp(2.9rem, 2rem + 3.4vw, 6.25rem); font-weight: 400; letter-spacing: -0.02em; }
+  h2 { font-size: clamp(2.1rem, 1.6rem + 1.9vw, 3.75rem); }
+  h3 { font-size: clamp(1.5rem, 1.3rem + 0.8vw, 2.125rem); }
+  h4 { font-size: clamp(1.375rem, 1.2rem + 0.6vw, 1.75rem); }
+  h5 { font-size: 1.25rem; }
+  h6 { font-size: 1.125rem; }
+
+  p { text-wrap: pretty; }
 
   a {
     color: inherit;
@@ -103,6 +113,12 @@
     display: block;
     max-width: 100%;
   }
+
+  /* Thin, warm scrollbar instead of the grey system one. */
+  html { scrollbar-color: var(--color-divider) var(--color-paper-soft); scrollbar-width: thin; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: var(--color-paper-soft); }
+  ::-webkit-scrollbar-thumb { background: var(--color-divider); border: 3px solid var(--color-paper-soft); border-radius: 10px; }
 
   /* Respect reduced-motion preference across the whole app */
   @media (prefers-reduced-motion: reduce) {
@@ -122,7 +138,50 @@
 
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { scrollbar-width: none; }
+
+  /* Fine paper grain over flat sections; the texture is a tiny tiled SVG served from /public. */
+  .grain { background-image: url("/textures/grain.svg"); }
+
+  /* Small uppercase label above a heading, led by a brass hairline. */
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.875rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 2.25rem;
+    height: 1px;
+    background: var(--color-brass);
+  }
+
+  /* Underline that draws in from the left on hover/focus. */
+  .link-draw {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.6s var(--ease-premium);
+  }
+  .link-draw:hover, .link-draw:focus-visible, .group:hover .link-draw { background-size: 100% 1px; }
 }
+
+/* Hero: the bead sliding down the scroll cue, and the active slide's progress line (its duration matches AUTOPLAY_MS in Hero.tsx). */
+@keyframes hero-scroll-cue {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(300%); }
+}
+.hero-scroll-cue { animation: hero-scroll-cue 2.4s var(--ease-premium) infinite; }
+
+@keyframes hero-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+.hero-progress { animation: hero-progress 7s linear forwards; }
 
 /* Partner logo marquee. Here rather than in a <style> element: the Content-Security-Policy blocks inline styles. */
 @keyframes marquee {
@@ -135,6 +194,6 @@
 }
 
 /* A restrained botanical accent and visible keyboard focus across the identity. */
-::selection { background: #BC865840; color: #24231F; }
-.brand-home-link:focus-visible { outline: 2px solid #626C41; outline-offset: 6px; }
+::selection { background: #C29A6255; color: #1E1915; }
+.brand-home-link:focus-visible { outline: 2px solid #5A341D; outline-offset: 6px; }
 .brand-hero-mark { filter: drop-shadow(0 24px 48px #00000030); }

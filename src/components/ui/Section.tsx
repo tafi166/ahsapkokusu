@@ -14,8 +14,8 @@ interface SectionProps {
 }
 
 const schemeClass = {
-  primary: "bg-paper text-body",
-  secondary: "bg-paper-soft text-body",
+  primary: "grain bg-paper text-body",
+  secondary: "grain bg-paper-soft text-body",
   tertiary: "bg-ink text-white",
 } as const;
 
@@ -23,7 +23,7 @@ export function Section({ children, className, containerSize = "lg", scheme = "p
   return (
     <section
       id={id}
-      className={cn(pageTop ? "pb-14 pt-6 md:pb-20 md:pt-8 lg:pb-24" : "py-14 md:py-20 lg:py-24", schemeClass[scheme], className)}
+      className={cn(pageTop ? "pb-16 pt-6 md:pb-24 md:pt-8 lg:pb-28" : "py-16 md:py-24 lg:py-28", schemeClass[scheme], className)}
     >
       <Container size={containerSize}>{children}</Container>
     </section>

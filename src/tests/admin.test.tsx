@@ -218,6 +218,25 @@ describe("categories tab", () => {
     expect(saved[0]?.heroImage).toBe("/api/media/00000000-0000-4000-8000-000000000001.jpg");
     expect(saved[1]?.heroImage).toBeUndefined();
   }, 30000);
+
+  it("makes a category passive and active again", async () => {
+    const user = userEvent.setup();
+    const nav = await signIn(user);
+    await user.click(within(nav).getByText("Kategoriler"));
+    await user.click(await screen.findByRole("button", { name: "Duvar Saatleri" }));
+
+    await user.click(screen.getByRole("checkbox", { name: /pasif/i }));
+    expect(screen.getByRole("button", { name: "Duvar Saatleri · pasif" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Kaydet" }));
+    expect(await screen.findByRole("status")).toHaveTextContent("Kaydedildi");
+    const saved = () => api.state.content.categories as { slug: string; hidden?: boolean }[];
+    expect(saved().find((c) => c.slug === "duvar-saatleri")?.hidden).toBe(true);
+    expect(saved().filter((c) => c.hidden)).toHaveLength(1);
+
+    await user.click(screen.getByRole("checkbox", { name: /pasif/i }));
+    await user.click(screen.getByRole("button", { name: "Kaydet" }));
+    await waitFor(() => expect(saved().find((c) => c.slug === "duvar-saatleri")).not.toHaveProperty("hidden"));
+  }, 30000);
 });
 
 describe("English tab", () => {

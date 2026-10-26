@@ -3,6 +3,7 @@ import { AuditService } from '../audit/audit.service';
 import type { Lang } from '../common/decorators';
 import { APP_CONFIG, type AppConfig } from '../config';
 import type { ContactMessage, MessageStatus } from '../generated/prisma/client';
+import { PUBLISHED_PRODUCT } from '../catalog/mapping';
 import { PRISMA, type PrismaClient } from '../prisma/prisma';
 import type { MessageInput } from './messages.schemas';
 
@@ -57,7 +58,7 @@ export class MessagesService {
     }
     // The product title is copied (from the catalog, never from the client) so the message stays readable if the product goes.
     const product = input.productId
-      ? await this.prisma.product.findFirst({ where: { id: input.productId, isHidden: false }, select: { id: true, title: true } })
+      ? await this.prisma.product.findFirst({ where: { id: input.productId, ...PUBLISHED_PRODUCT }, select: { id: true, title: true } })
       : null;
     const categorySlug = input.categorySlug
       ? (await this.prisma.category.findUnique({ where: { slug: input.categorySlug }, select: { slug: true } }))?.slug

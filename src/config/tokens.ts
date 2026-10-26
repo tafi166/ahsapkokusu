@@ -5,37 +5,39 @@ export const tokens = {
   // ---------------------------------------------------------------------------
   color: {
     // Foundation
-    paper: "#FFFCF7",
-    paperSoft: "#F6F2EA",
-    ink: "#24231F",
-    body: "#49443C",
-    line: "#E5DDD0",
-    divider: "#A69A8A",
-    mist: "#EDE5D9",
+    paper: "#FAF7F1",
+    paperSoft: "#F2ECE2",
+    ink: "#1E1915",
+    body: "#4A4139",
+    line: "#E4DACB",
+    divider: "#A5978A",
+    mist: "#EAE2D5",
 
     // Brand accent
-    accent: "#BC8658",
+    accent: "#B07B4A",
     accentDeep: "#5A341D",
 
     // Warm-neutral & wood-inspired tones (subtle, editorial)
-    warm: "#F6F2EA",
-    warmSoft: "#EAE1D3",
+    warm: "#F2ECE2",
+    warmSoft: "#E7DCCB",
     woodLight: "#D8B38A",
-    wood: "#BC8658",
+    wood: "#B07B4A",
     woodDeep: "#5A341D",
+    // Brass highlight for hairlines, eyebrows and ratings
+    brass: "#C29A62",
 
     // Buttons
     btnBg: "#5A341D",
     btnText: "#FFFFFF",
-    btnBgHover: "#434C2C",
+    btnBgHover: "#1E1915",
     btnTextHover: "#FFFFFF",
 
     // Footer
-    footerBg: "#24231F",
-    footerInk: "#F6F2EA",
-    footerLink: "#D9CEBE",
+    footerBg: "#1A1511",
+    footerInk: "#F2ECE2",
+    footerLink: "#CDBFAE",
     footerLinkHover: "#FFFFFF",
-    footerBorder: "#504B40",
+    footerBorder: "#3A3029",
 
     // Semantic
     success: "#626C41",
@@ -48,7 +50,7 @@ export const tokens = {
   // ---------------------------------------------------------------------------
   radius: {
     box: "0px",
-    card: "10px",
+    card: "6px",
     input: "0px",
     pill: "100px",
   },
@@ -81,11 +83,11 @@ export const tokens = {
   // Motion
   // ---------------------------------------------------------------------------
   motion: {
-    easeReveal: [0.455, 0.03, 0.515, 0.955] as [number, number, number, number],
+    easeReveal: [0.16, 1, 0.3, 1] as [number, number, number, number],
     durationFast: 0.2,
-    durationBase: 0.4,
-    durationSlow: 0.7,
-    revealDistance: 32,
+    durationBase: 0.6,
+    durationSlow: 1,
+    revealDistance: 28,
   },
 } as const;
 

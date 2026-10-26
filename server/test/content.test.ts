@@ -294,6 +294,37 @@ describe('content API', () => {
       }
     });
 
+    it('takes a passive category and its products off the storefront, keeping both for the panel', async () => {
+      const { put, agent } = await editor();
+      const list = defaultCategories.map((c) => ({ ...c }));
+      const passive = { ...list[1]!, hidden: true };
+      list[1] = passive;
+      await put('/api/admin/categories', { categories: list }).expect(204);
+      const inCategory = defaultProducts.filter((p) => p.category === passive.slug);
+      expect(inCategory.length).toBeGreaterThan(0);
+
+      // The snapshot keeps it, flagged, so the panel's next full-list save keeps it too; its products go.
+      const snapshot = await site();
+      expect(snapshot.categories).toEqual(list);
+      expect(snapshot.products.some((p: Product) => p.category === passive.slug)).toBe(false);
+      const adminList = (await agent.get('/api/admin/products').expect(200)).body as Product[];
+      expect(adminList.filter((p) => p.category === passive.slug)).toHaveLength(inCategory.length);
+
+      const pub = request(app.getHttpServer());
+      expect(((await pub.get('/api/categories').expect(200)).body as { slug: string }[]).map((c) => c.slug)).not.toContain(passive.slug);
+      await pub.get(`/api/categories/${passive.slug}`).expect(404);
+      expect((await pub.get(`/api/products?category=${passive.slug}`).expect(200)).body).toEqual([]);
+      await pub.get(`/api/products/${inCategory[0]!.slug}`).expect(404);
+      const sitemap = (await pub.get('/api/sitemap.xml').expect(200)).text;
+      expect(sitemap).not.toContain(`/${passive.slug}<`);
+      expect(sitemap).not.toContain(inCategory[0]!.slug);
+
+      // Active again: everything comes back.
+      await put('/api/admin/categories', { categories: defaultCategories }).expect(204);
+      await pub.get(`/api/categories/${passive.slug}`).expect(200);
+      await pub.get(`/api/products/${inCategory[0]!.slug}`).expect(200);
+    });
+
     it('cannot add or remove categories', async () => {
       const { put } = await editor();
       await put('/api/admin/categories', { categories: defaultCategories.slice(1) }).expect(409);
