@@ -103,6 +103,12 @@ model User {
   isActive          Boolean   @default(true)
   passwordChangedAt DateTime  @default(now()) @db.Timestamptz(3)
   sessions          Session[]
+  laserMachines LaserMachineProfile[]
+  laserMaterials LaserMaterial[]
+  laserPresets LaserCutPreset[]
+  laserDesigns LaserDesignFile[]
+  laserQuotes LaserQuote[]
+  laserRuns LaserProductionRun[]
   createdAt         DateTime  @default(now()) @db.Timestamptz(3)
   updatedAt         DateTime  @updatedAt @db.Timestamptz(3)
 }
@@ -393,4 +399,92 @@ model ResearchProductImageGrant {
   createdAt      DateTime @default(now()) @db.Timestamptz(3)
   @@index([productId])
   @@index([mediaId])
+}
+
+// Private production studio: no relation to public media or catalog snapshots.
+model LaserMachineProfile {
+  id String @id @default(uuid()) @db.Uuid
+  version Int @default(1)
+  data Json
+  createdById String @db.Uuid
+  createdBy User @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  presets LaserCutPreset[]
+  quotes LaserQuote[]
+}
+model LaserMaterial {
+  id String @id @default(uuid()) @db.Uuid
+  version Int @default(1)
+  data Json
+  createdById String @db.Uuid
+  createdBy User @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  presets LaserCutPreset[]
+  quotes LaserQuote[]
+}
+model LaserCutPreset {
+  id String @id @default(uuid()) @db.Uuid
+  version Int @default(1)
+  machineId String @db.Uuid
+  materialId String @db.Uuid
+  machine LaserMachineProfile @relation(fields: [machineId], references: [id], onDelete: Restrict)
+  material LaserMaterial @relation(fields: [materialId], references: [id], onDelete: Restrict)
+  data Json
+  createdById String @db.Uuid
+  createdBy User @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  @@index([machineId, materialId])
+}
+model LaserDesignFile {
+  id String @id @default(uuid()) @db.Uuid
+  name String
+  sha256 String
+  /// Private source text. Not served from /api/media or /api/site.
+  content String @db.Text
+  analysis Json
+  createdById String @db.Uuid
+  createdBy User @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  quotes LaserQuote[]
+}
+model LaserQuote {
+  id String @id @default(uuid()) @db.Uuid
+  name String
+  status String @default("DRAFT")
+  /// Revision/duplicate ancestry; every calculation snapshot remains immutable.
+  parentId String? @db.Uuid
+  parent LaserQuote? @relation("LaserQuoteRevision", fields: [parentId], references: [id], onDelete: Restrict)
+  revisions LaserQuote[] @relation("LaserQuoteRevision")
+  designId String @db.Uuid
+  design LaserDesignFile @relation(fields: [designId], references: [id], onDelete: Restrict)
+  machineId String @db.Uuid
+  machine LaserMachineProfile @relation(fields: [machineId], references: [id], onDelete: Restrict)
+  materialId String @db.Uuid
+  material LaserMaterial @relation(fields: [materialId], references: [id], onDelete: Restrict)
+  snapshot Json
+  engineVersion String
+  createdById String @db.Uuid
+  createdBy User @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  runs LaserProductionRun[]
+  @@index([createdAt, id])
+}
+model LaserProductionRun {
+  id String @id @default(uuid()) @db.Uuid
+  quoteId String @db.Uuid
+  quote LaserQuote @relation(fields: [quoteId], references: [id], onDelete: Restrict)
+  actualS Float
+  previewS Float?
+  estimatedS Float
+  quantity Int
+  notes String
+  quality String
+  producedAt DateTime @db.Timestamptz(3)
+  createdById String @db.Uuid
+  createdBy User @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  @@index([quoteId, producedAt])
 }
